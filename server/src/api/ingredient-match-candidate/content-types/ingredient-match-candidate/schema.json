@@ -1,0 +1,54 @@
+{
+  "kind": "collectionType",
+  "collectionName": "ingredient_match_candidates",
+  "info": {
+    "singularName": "ingredient-match-candidate",
+    "pluralName": "ingredient-match-candidates",
+    "displayName": "IngredientMatchCandidate",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginsOptions": {},
+  "attributes": {
+    "ingredientName": {
+      "type": "string",
+      "required": true
+    },
+    "recipe": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::recipe.recipe",
+      "required": true
+    },
+    "normalizedText": {
+      "type": "string",
+      "required": true
+    },
+    "suggestedIngredient": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::ingredient-catalog-item.ingredient-catalog-item"
+    },
+    "selectedIngredient": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::ingredient-catalog-item.ingredient-catalog-item"
+    },
+    "matchType": {
+      "type": "enumeration",
+      "enum": ["canonical", "variant", "none"],
+      "required": true
+    },
+    "reviewStatus": {
+      "type": "enumeration",
+      "enum": ["pending", "approved", "rejected"],
+      "default": "pending",
+      "required": true
+    },
+    "adminNotes": {
+      "type": "text"
+    }
+  }
+}

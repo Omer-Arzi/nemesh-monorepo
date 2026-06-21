@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_recipe_recipe_tips",
+  "info": {
+    "displayName": "RecipeTip",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "text": {
+      "type": "text",
+      "required": true
+    }
+  }
+}

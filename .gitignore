@@ -1,0 +1,34 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Build outputs ─────────────────────────────────────────────────────────────
+.next/
+out/
+dist/
+build/
+
+# ── Strapi ────────────────────────────────────────────────────────────────────
+server/.tmp/
+server/.cache/
+server/exports/
+
+# ── Environment files ─────────────────────────────────────────────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Keep examples
+!.env.example
+!.env.local.example
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

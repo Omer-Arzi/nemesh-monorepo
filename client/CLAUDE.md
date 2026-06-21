@@ -1,0 +1,233 @@
+# Nemesh Frontend Conventions
+
+## Component Structure
+
+Each reusable component must live in its own directory.
+
+Structure:
+
+```text
+ComponentName/
+├── ComponentName.tsx
+├── ComponentName.style.ts
+└── index.ts
+```
+
+Example:
+
+```text
+RecipeCard/
+├── RecipeCard.tsx
+├── RecipeCard.style.ts
+└── index.ts
+```
+
+## Component Styling
+
+All UI component styles must be colocated with the component.
+
+The style file must export a single style object named after the component.
+
+Example:
+
+```ts
+export const RecipeCardStyle = {
+  root: {},
+  image: {},
+  title: {},
+  content: {},
+};
+```
+
+Usage:
+
+```tsx
+<Box sx={RecipeCardStyle.root}>
+```
+
+Rules:
+
+* Prefer MUI `sx`.
+* Do not use CSS Modules.
+* Do not use styled-components.
+* Do not create shared component style directories.
+* Do not place large style objects inline inside components.
+* Keep styles colocated with their component.
+* Use semantic style names:
+
+  * root
+  * image
+  * title
+  * content
+  * actions
+  * metadata
+  * etc.
+* Use theme-aware values whenever possible.
+* Each component directory must include an `index.ts`.
+
+## Design System
+
+* Use Material UI.
+* Use the existing theme.
+* Do not hardcode brand colors.
+* Use theme tokens whenever possible.
+* Prefer consistency over custom styling.
+* Theme changes should be implemented through the theme system, not component-level overrides.
+
+## RTL
+
+* Hebrew is the primary language.
+* All layouts and components must be RTL-compatible.
+* Do not make LTR-only assumptions.
+* Test spacing and alignment with Hebrew content.
+
+## Architecture
+
+### Domain Types
+
+Domain entities belong in:
+
+```text
+src/types/domain.ts
+```
+
+Examples:
+
+* Recipe
+* Category
+* RecipeIngredient
+* PreparationStep
+
+### API Types
+
+Wire/API types belong in:
+
+```text
+src/types/api.ts
+```
+
+Examples:
+
+* Strapi response types
+* Pagination types
+* API DTOs
+
+### Component Boundaries
+
+* Components should consume domain types.
+* Components should not depend directly on Strapi response shapes.
+* Mapping from API types to domain types should happen in services or adapters.
+
+### Services
+
+Services are responsible for API communication.
+
+Examples:
+
+```text
+src/lib/api/services/
+```
+
+* recipeService
+* categoryService
+* searchService
+
+## Data Fetching
+
+* Use TanStack Query.
+* Keep query keys centralized.
+* Keep page components thin.
+* Prefer custom hooks over duplicating query logic.
+
+## Repository Structure
+
+```text
+nemesh/
+├── client/
+└── server/
+```
+
+## Working Rules
+
+For frontend tasks:
+
+* Primary working directory: `client/`
+* You may inspect files inside `server/`
+* Use `server/` as the source of truth for:
+
+  * Strapi content types
+  * API contracts
+  * Route definitions
+  * Field names
+  * Enums
+  * Validation rules
+
+## Modification Rules
+
+Allowed:
+
+* Create files inside `client/`
+* Edit files inside `client/`
+* Move files inside `client/`
+* Delete files inside `client/`
+
+Not allowed:
+
+* Modify files inside `server/`
+* Rename files inside `server/`
+* Reformat files inside `server/`
+
+If a frontend task requires a backend change:
+
+1. Stop.
+2. Explain the required backend change.
+3. Wait for confirmation.
+4. Do not implement the backend change automatically.
+
+## Frontend Data Modeling
+
+Before creating frontend types, services, or integrations:
+
+1. Inspect the relevant Strapi schema in `server/`.
+2. Reuse the real field names.
+3. Do not invent fields.
+4. Do not assume endpoint behavior.
+5. Prefer existing backend contracts over assumptions.
+
+## Before Making Changes
+
+Always:
+
+1. Inspect the existing implementation.
+2. Follow established project conventions.
+3. Reuse existing patterns.
+4. Avoid introducing alternative patterns unless explicitly requested.
+5. Explain the implementation plan before making large structural changes.
+
+## Code Quality
+
+* Prefer readability over cleverness.
+* Prefer explicit naming.
+* Avoid unnecessary abstractions.
+* Keep components focused on a single responsibility.
+* Keep files reasonably small.
+* Reuse existing patterns before introducing new ones.
+
+## Theme Philosophy
+
+Nemesh should feel:
+
+* Warm
+* Human
+* Welcoming
+* Handmade
+* Editorial
+* Premium but approachable
+
+Avoid:
+
+* Cold corporate aesthetics
+* Startup blue design language
+* Neon colors
+* Overly saturated palettes
+* Excessive visual noise

@@ -1,0 +1,43 @@
+/**
+ * Centralised TanStack Query cache key registry.
+ *
+ * Why here: co-locating all keys prevents accidental collisions across features,
+ * and makes cache invalidation predictable — callers invalidate by importing a
+ * key factory rather than reconstructing strings manually.
+ *
+ * Convention: each namespace has an `all` root key (for bulk invalidation) plus
+ * specific factory functions for filtered or parameterised queries.
+ *
+ * What belongs here: every query key in the application.
+ * What does NOT belong here: fetcher functions or query option objects — those
+ * live in feature hook files.
+ */
+import type { PaginationParams } from "@/types/api";
+
+export const queryKeys = {
+  recipes: {
+    /** Invalidate to clear all recipe queries at once. */
+    all: () => ["recipes"] as const,
+    /** Paginated list with optional params (page, pageSize). */
+    list: (params?: PaginationParams) => ["recipes", "list", params] as const,
+    /** Single recipe by slug. */
+    detail: (slug: string) => ["recipes", "detail", slug] as const,
+    /** Full-text search results for a query string. */
+    search: (q: string) => ["recipes", "search", q] as const,
+    /** Related recipes for a given slug (server-scored, deterministic). */
+    related: (slug: string) => ["recipes", "related", slug] as const,
+    /**
+     * Infinite scroll listing (Results page).
+     * Kept separate from list() — infinite queries accumulate pages across the
+     * whole session and must not share a cache entry with one-shot paginated calls.
+     */
+    infinite: () => ["recipes", "infinite"] as const,
+  },
+
+  categories: {
+    /** Invalidate to clear all category queries at once. */
+    all: () => ["categories"] as const,
+    /** Full list (categories are typically fetched all at once). */
+    list: () => ["categories", "list"] as const,
+  },
+} as const;

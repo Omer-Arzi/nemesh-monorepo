@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: nemesh-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nemesh-data
+      POSTGRES_USER: omerarzi
+      POSTGRES_PASSWORD: lindabELCHER235
+    ports:
+      - "5432:5432"
+    volumes:
+      - nemesh-db-data:/var/lib/postgresql/data
+
+volumes:
+  nemesh-db-data:
