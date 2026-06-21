@@ -213,6 +213,35 @@ Always:
 * Keep files reasonably small.
 * Reuse existing patterns before introducing new ones.
 
+## Image and Asset Conventions
+
+### Directory structure
+
+```text
+client/
+├── public/
+│   └── images/
+│       ├── placeholders/   # fallback images (recipe, category, tag)
+│       ├── branding/       # logo, Open Graph, static identity images
+│       └── categories/     # optional static category hero images
+└── src/
+    └── assets/
+        ├── icons/          # SVG icons imported into components
+        └── illustrations/  # decorative illustrations imported into code
+```
+
+### Rules
+
+* Use `public/images/placeholders/` for fallback and placeholder images.
+* Use `public/images/branding/` for brand, logo, and static identity images.
+* Use `public/images/categories/` for category-related static fallback images.
+* Use `src/assets/icons/` for SVG icons imported directly into components.
+* Use `src/assets/illustrations/` for imported decorative illustrations.
+* Do not place large image assets directly inside component directories.
+* Do not hard-code external image URLs for local assets.
+* Prefer `public/` when the image should be referenced by URL (e.g. `<img src="/images/placeholders/recipe.jpg">`).
+* Prefer `src/assets/` when the asset is imported into code (e.g. `import Logo from "@/assets/icons/logo.svg"`).
+
 ## Theme Philosophy
 
 Nemesh should feel:
