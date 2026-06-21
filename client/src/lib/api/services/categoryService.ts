@@ -10,6 +10,7 @@ import { mapImage, type StrapiMediaRaw } from "../mappers";
 
 type StrapiCategoryAttrs = {
   name: string;
+  menuName: string | null;
   slug: string;
   description: string | null;
   image: StrapiMediaRaw | null;
@@ -21,6 +22,7 @@ function mapCategory(raw: StrapiData<StrapiCategoryAttrs>): Category {
   return {
     id: raw.documentId,
     name: raw.name,
+    menuName: raw.menuName ?? null,
     slug: raw.slug,
     description: raw.description ?? null,
     image: mapImage(raw.image),

@@ -1,9 +1,21 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { getRecipes } from "@/lib/api/services/recipeService";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { getRecipes, searchRecipes } from "@/lib/api/services/recipeService";
 import { queryKeys } from "@/lib/query/keys";
 import { PAGINATION } from "@/constants";
 
 const PAGE_SIZE = PAGINATION.DEFAULT_PAGE_SIZE; // 20
+
+/**
+ * Fetches search results for a trimmed, non-empty query string.
+ * Disabled automatically when `q` is empty.
+ */
+export function useSearch(q: string) {
+  return useQuery({
+    queryKey: queryKeys.recipes.search(q),
+    queryFn: () => searchRecipes(q),
+    enabled: q.trim().length > 0,
+  });
+}
 
 /**
  * Fetches all published recipes with infinite scroll support.

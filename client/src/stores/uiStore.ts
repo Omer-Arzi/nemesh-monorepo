@@ -21,6 +21,8 @@ type ColorMode = "light" | "dark";
 type UiState = {
   colorMode: ColorMode;
   toggleColorMode: () => void;
+  navRailOpen: boolean;
+  toggleNavRail: () => void;
 };
 
 export const useUiStore = createStore<UiState>("ui", (set) => ({
@@ -29,4 +31,6 @@ export const useUiStore = createStore<UiState>("ui", (set) => ({
     set((state) => ({
       colorMode: state.colorMode === "light" ? "dark" : "light",
     })),
+  navRailOpen: true,
+  toggleNavRail: () => set((state) => ({ navRailOpen: !state.navRailOpen })),
 }));

@@ -19,6 +19,10 @@ export const ROUTES = {
   CATEGORIES: "/categories",
   /** Call as a function: `ROUTES.CATEGORY(slug)` → "/categories/italian" */
   CATEGORY: (slug: string) => `/categories/${slug}`,
+  TAGS: "/tags",
+  /** Call as a function: `ROUTES.TAG(slug)` → "/tags/quick" */
+  TAG: (slug: string) => `/tags/${slug}`,
+  SURPRISE_ME: "/surprise-me",
 } as const;
 
 export const PAGINATION = {

@@ -30,6 +30,8 @@ export const queryKeys = {
     byCategory: (slug: string) => ["recipes", "byCategory", slug] as const,
     /** Recipes filtered by tag slug. */
     byTag: (slug: string) => ["recipes", "byTag", slug] as const,
+    /** Latest recipes sorted by createdAt descending (homepage section). */
+    latest: () => ["recipes", "latest"] as const,
     /**
      * Infinite scroll listing (Results page).
      * Kept separate from list() — infinite queries accumulate pages across the
