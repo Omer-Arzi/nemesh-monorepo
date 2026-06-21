@@ -47,11 +47,20 @@ export type RecipeTip = {
 
 // ─── Collection types ─────────────────────────────────────────────────────
 
-/** Content category for grouping recipes. */
+/** Content category for primary recipe navigation. */
 export type Category = BaseEntity & {
   name: string;
   slug: string;
   description: string | null;
+  image: Image | null;
+};
+
+/** Secondary descriptor tag — context, collection, or dietary attribute. */
+export type Tag = BaseEntity & {
+  name: string;
+  slug: string;
+  description: string | null;
+  image: Image | null;
 };
 
 /**
@@ -63,6 +72,7 @@ export type Recipe = BaseEntity & {
   slug: string;
   image: Image | null;
   categories: Category[];
+  tags: Tag[];
   servings: number | null;
   prepTime: number | null;
   difficulty: Difficulty | null;
@@ -80,7 +90,7 @@ export type Recipe = BaseEntity & {
  */
 export type RecipeSummary = Pick<
   Recipe,
-  "id" | "title" | "slug" | "image" | "categories" | "difficulty" | "prepTime" | "servings"
+  "id" | "title" | "slug" | "image" | "categories" | "tags" | "difficulty" | "prepTime" | "servings"
 >;
 
 /**

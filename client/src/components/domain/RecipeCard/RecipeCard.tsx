@@ -19,7 +19,16 @@ type Props = {
   small?: boolean;
 };
 
+const MAX_VISIBLE_CATEGORIES = 3;
+const MAX_VISIBLE_TAGS = 3;
+
 export default function RecipeCard({ recipe, small = false }: Props) {
+  const visibleCategories = recipe.categories.slice(0, MAX_VISIBLE_CATEGORIES);
+  const hiddenCount = recipe.categories.length - visibleCategories.length;
+
+  const visibleTags = recipe.tags.slice(0, MAX_VISIBLE_TAGS);
+  const hiddenTagCount = recipe.tags.length - visibleTags.length;
+
   return (
     <Card sx={RecipeCardStyle.card}>
       <CardActionArea
@@ -55,6 +64,7 @@ export default function RecipeCard({ recipe, small = false }: Props) {
                 recipe.prepTime != null ? `${recipe.prepTime} דק'` : null,
                 recipe.difficulty != null ? DIFFICULTY_LABEL[recipe.difficulty] : null,
                 ...recipe.categories.map((c) => c.name),
+                ...recipe.tags.map((t) => t.name),
               ]
                 .filter(Boolean)
                 .join(" • ")}
@@ -68,11 +78,34 @@ export default function RecipeCard({ recipe, small = false }: Props) {
                 sx={{ justifyContent: "center" }}
               />
 
-              {recipe.categories.length > 0 && (
+              {visibleCategories.length > 0 && (
                 <Box sx={RecipeCardStyle.categoriesRow}>
-                  {recipe.categories.map((cat) => (
+                  {visibleCategories.map((cat) => (
                     <Chip key={cat.id} label={cat.name} size="small" variant="outlined" />
                   ))}
+                  {hiddenCount > 0 && (
+                    <Chip
+                      label={`+${hiddenCount}`}
+                      size="small"
+                      variant="outlined"
+                      sx={RecipeCardStyle.overflowChip}
+                    />
+                  )}
+                </Box>
+              )}
+
+              {visibleTags.length > 0 && (
+                <Box sx={RecipeCardStyle.tagsRow}>
+                  {visibleTags.map((tag) => (
+                    <Chip key={tag.id} label={tag.name} size="small" sx={RecipeCardStyle.tagChip} />
+                  ))}
+                  {hiddenTagCount > 0 && (
+                    <Chip
+                      label={`+${hiddenTagCount}`}
+                      size="small"
+                      sx={{ ...RecipeCardStyle.tagChip, ...RecipeCardStyle.overflowChip }}
+                    />
+                  )}
                 </Box>
               )}
             </>

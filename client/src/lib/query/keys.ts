@@ -26,6 +26,10 @@ export const queryKeys = {
     search: (q: string) => ["recipes", "search", q] as const,
     /** Related recipes for a given slug (server-scored, deterministic). */
     related: (slug: string) => ["recipes", "related", slug] as const,
+    /** Recipes filtered by category slug. */
+    byCategory: (slug: string) => ["recipes", "byCategory", slug] as const,
+    /** Recipes filtered by tag slug. */
+    byTag: (slug: string) => ["recipes", "byTag", slug] as const,
     /**
      * Infinite scroll listing (Results page).
      * Kept separate from list() — infinite queries accumulate pages across the
@@ -39,5 +43,16 @@ export const queryKeys = {
     all: () => ["categories"] as const,
     /** Full list (categories are typically fetched all at once). */
     list: () => ["categories", "list"] as const,
+    /** Single category by slug. */
+    detail: (slug: string) => ["categories", "detail", slug] as const,
+  },
+
+  tags: {
+    /** Invalidate to clear all tag queries at once. */
+    all: () => ["tags"] as const,
+    /** Full list. */
+    list: () => ["tags", "list"] as const,
+    /** Single tag by slug. */
+    detail: (slug: string) => ["tags", "detail", slug] as const,
   },
 } as const;

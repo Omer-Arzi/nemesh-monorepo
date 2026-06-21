@@ -56,6 +56,8 @@ export const RecipeCardStyle = {
     fontWeight: 700,
     textAlign: "center",
     lineHeight: 1.35,
+    // Reserve exactly 2 lines so all cards align their metadata at the same Y.
+    minHeight: "2.7em",
     display: "-webkit-box",
     WebkitLineClamp: 2,
     WebkitBoxOrient: "vertical",
@@ -66,6 +68,23 @@ export const RecipeCardStyle = {
     flexWrap: "wrap",
     gap: 0.75,
     justifyContent: "center",
+  },
+  overflowChip: {
+    color: "text.disabled",
+    borderColor: "divider",
+  },
+  tagsRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 0.5,
+    justifyContent: "center",
+  },
+  tagChip: {
+    fontSize: "0.7rem",
+    height: 20,
+    color: "text.secondary",
+    bgcolor: "action.hover",
+    border: "none",
   },
 
   // ── Small variant ────────────────────────────────────────────────────────

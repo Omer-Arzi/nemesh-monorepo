@@ -4,12 +4,13 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
   async related(ctx) {
     const { slug } = ctx.params as { slug: string };
 
-    // Load current recipe — need its categories and ingredients for scoring.
+    // Load current recipe — need its categories, tags, and ingredients for scoring.
     const [current] = await strapi.documents('api::recipe.recipe').findMany({
       filters: { slug: { $eq: slug } } as any,
       fields: ['documentId', 'updatedAt'],
       populate: {
         categories: { fields: ['documentId'] },
+        tags: { fields: ['documentId'] },
         ingredients: { fields: ['ingredientName'] },
       },
       status: 'published',
@@ -24,19 +25,23 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
     const currentCategoryIds = new Set<string>(
       (current as any).categories.map((c: any) => c.documentId)
     );
+    const currentTagIds = new Set<string>(
+      (current as any).tags.map((t: any) => t.documentId)
+    );
     const currentIngredientNames = new Set<string>(
       (current as any).ingredients
         .map((i: any) => i.ingredientName?.toLowerCase().trim())
         .filter(Boolean)
     );
 
-    // Load all other published recipes with categories and ingredients.
+    // Load all other published recipes with categories, tags, and ingredients.
     const all = await strapi.documents('api::recipe.recipe').findMany({
       filters: { documentId: { $ne: (current as any).documentId } } as any,
       fields: ['documentId', 'title', 'slug', 'difficulty', 'prepTime', 'servings', 'updatedAt'],
       populate: {
         image: { fields: ['url', 'alternativeText', 'width', 'height'] },
         categories: { fields: ['documentId', 'name', 'slug'] },
+        tags: { fields: ['documentId', 'name', 'slug'] },
         ingredients: { fields: ['ingredientName'] },
       },
       status: 'published',
@@ -49,9 +54,14 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
     );
 
     // Score each candidate.
+    // Weights: sharedCategories × 10, sharedTags × 3, sharedIngredients × 1
     const scored = candidates.map((r) => {
       const sharedCategories = r.categories.filter((c: any) =>
         currentCategoryIds.has(c.documentId)
+      ).length;
+
+      const sharedTags = r.tags.filter((t: any) =>
+        currentTagIds.has(t.documentId)
       ).length;
 
       const sharedIngredients = r.ingredients.filter((i: any) => {
@@ -61,8 +71,9 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
 
       return {
         r,
-        score: sharedCategories * 10 + sharedIngredients,
+        score: sharedCategories * 10 + sharedTags * 3 + sharedIngredients,
         sharedCategories,
+        sharedTags,
         sharedIngredients,
       };
     });
@@ -71,6 +82,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
     scored.sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       if (b.sharedCategories !== a.sharedCategories) return b.sharedCategories - a.sharedCategories;
+      if (b.sharedTags !== a.sharedTags) return b.sharedTags - a.sharedTags;
       if (b.sharedIngredients !== a.sharedIngredients) return b.sharedIngredients - a.sharedIngredients;
       const da = new Date(a.r.updatedAt).getTime();
       const db = new Date(b.r.updatedAt).getTime();
