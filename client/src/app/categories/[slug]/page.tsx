@@ -28,7 +28,7 @@ export default function CategoryPage() {
   return (
     <PageContainer>
       {/* ── Header ──────────────────────────────────────────────────── */}
-      <Box sx={{ mb: 4, textAlign: "center" }}>
+      <Box sx={{ mb: 3, textAlign: "center" }}>
         {category.image ? (
           <Box
             component="img"
@@ -53,7 +53,7 @@ export default function CategoryPage() {
           </Box>
         )}
 
-        <Typography variant="h4" component="h1" fontWeight={700}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
           {category.name}
         </Typography>
 
@@ -68,7 +68,7 @@ export default function CategoryPage() {
       {recipesLoading ? (
         <LoadingState label="טוען מתכונים..." minHeight={200} />
       ) : recipes.length === 0 ? (
-        <EmptyState description="אין מתכונים בקטגוריה זו עדיין." />
+        <EmptyState title="אין מתכונים" description="אין מתכונים בקטגוריה זו עדיין." />
       ) : (
         <>
           <SectionHeader title="מתכונים" sx={{ mb: 2 }} />

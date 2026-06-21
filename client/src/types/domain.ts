@@ -50,6 +50,7 @@ export type RecipeTip = {
 /** Content category for primary recipe navigation. */
 export type Category = BaseEntity & {
   name: string;
+  menuName: string | null;
   slug: string;
   description: string | null;
   image: Image | null;

@@ -53,7 +53,7 @@ export default function TagPage() {
           </Box>
         )}
 
-        <Typography variant="h4" component="h1" fontWeight={700}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
           {tag.name}
         </Typography>
 
@@ -68,7 +68,7 @@ export default function TagPage() {
       {recipesLoading ? (
         <LoadingState label="טוען מתכונים..." minHeight={200} />
       ) : recipes.length === 0 ? (
-        <EmptyState description="אין מתכונים עם תגית זו עדיין." />
+        <EmptyState title="אין מתכונים" description="אין מתכונים עם תגית זו עדיין." />
       ) : (
         <>
           <SectionHeader title="מתכונים" sx={{ mb: 2 }} />

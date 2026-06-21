@@ -93,6 +93,30 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
     ctx.body = { data: scored.slice(0, 4).map(({ r }) => r) };
   },
 
+  async random(ctx) {
+    const knex = strapi.db.connection;
+
+    // COUNT is cheap — avoids loading all recipes into memory.
+    const { rows: countRows } = await knex.raw<{ rows: [{ count: string }] }>(
+      `SELECT COUNT(*) AS count FROM recipes WHERE published_at IS NOT NULL`
+    );
+    const total = parseInt(countRows[0].count, 10);
+
+    if (total === 0) {
+      ctx.body = { data: null };
+      return;
+    }
+
+    const randomOffset = Math.floor(Math.random() * total);
+
+    const { rows } = await knex.raw<{ rows: { slug: string; title: string }[] }>(
+      `SELECT slug, title FROM recipes WHERE published_at IS NOT NULL LIMIT 1 OFFSET ?`,
+      [randomOffset]
+    );
+
+    ctx.body = { data: rows[0] ?? null };
+  },
+
   async search(ctx) {
     const { q } = ctx.query as { q?: string };
 
@@ -109,7 +133,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
       `
       SELECT document_id FROM recipes
       WHERE published_at IS NOT NULL
-        AND similarity(title, ?) > 0.3
+        AND word_similarity(?, title) > 0.4
 
       UNION
 
@@ -120,7 +144,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
       JOIN components_recipe_recipe_ingredients i
         ON i.id = rc.cmp_id
       WHERE r.published_at IS NOT NULL
-        AND similarity(i.ingredient_name, ?) > 0.3
+        AND word_similarity(?, i.ingredient_name) > 0.4
       `,
       [q, q]
     );

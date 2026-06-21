@@ -19,3 +19,4 @@ export { default as RecipeTipsSection } from "./RecipeTipsSection";
 export { default as RecipeDetailLayout } from "./RecipeDetailLayout";
 export { default as StickyIngredientsSidebar } from "./StickyIngredientsSidebar";
 export { default as RelatedRecipes } from "./RelatedRecipes";
+export { default as CollectionCard } from "./CollectionCard";

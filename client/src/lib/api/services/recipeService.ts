@@ -25,6 +25,7 @@ import { mapImage, type StrapiMediaRaw } from "../mappers";
 
 type StrapiCategoryAttrs = {
   name: string;
+  menuName: string | null;
   slug: string;
   description: string | null;
   image?: StrapiMediaRaw | null; // not fetched in recipe-list populate; always null there
@@ -92,6 +93,7 @@ function mapCategory(raw: StrapiData<StrapiCategoryAttrs>): Category {
   return {
     id: raw.documentId,
     name: raw.name,
+    menuName: raw.menuName ?? null,
     slug: raw.slug,
     description: raw.description ?? null,
     image: mapImage(raw.image ?? null),
@@ -230,6 +232,20 @@ export async function searchRecipes(q: string): Promise<RecipeSummary[]> {
 }
 
 /**
+ * Fetches the most recently published recipes sorted by createdAt descending.
+ * Returns a summary projection — no pagination needed for small fixed sets.
+ */
+export async function getLatestRecipes(limit = 4): Promise<RecipeSummary[]> {
+  const qs =
+    `${LIST_POPULATE}` +
+    `&sort[0]=createdAt:desc` +
+    `&pagination[pageSize]=${limit}` +
+    `&status=published`;
+  const raw = await apiClient.get<StrapiList<StrapiRecipeSummaryAttrs>>(`/recipes?${qs}`);
+  return raw.data.map(mapRecipeSummary);
+}
+
+/**
  * Returns up to 4 related recipes for a given slug.
  * Selection and scoring are handled server-side — results are stable across refreshes.
  */
@@ -258,6 +274,12 @@ export async function getRecipesByCategory(
     items: raw.data.map(mapRecipeSummary),
     pagination: raw.meta.pagination,
   };
+}
+
+/** Fetches one random published recipe. Returns null if no recipes exist. */
+export async function getRandomRecipe(): Promise<{ slug: string; title: string } | null> {
+  const raw = await apiClient.get<{ data: { slug: string; title: string } | null }>("/recipes/random");
+  return raw.data;
 }
 
 /**

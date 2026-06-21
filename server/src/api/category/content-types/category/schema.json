@@ -15,6 +15,9 @@
       "type": "string",
       "required": true
     },
+    "menuName": {
+      "type": "string"
+    },
     "slug": {
       "type": "uid",
       "targetField": "name",
