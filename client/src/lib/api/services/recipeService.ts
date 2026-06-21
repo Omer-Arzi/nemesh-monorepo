@@ -9,6 +9,7 @@ import type {
   Recipe,
   RecipeSummary,
   Category,
+  Tag,
   RecipeIngredient,
   PreparationStep,
   RecipeTip,
@@ -26,6 +27,14 @@ type StrapiCategoryAttrs = {
   name: string;
   slug: string;
   description: string | null;
+  image?: StrapiMediaRaw | null; // not fetched in recipe-list populate; always null there
+};
+
+type StrapiTagAttrs = {
+  name: string;
+  slug: string;
+  description: string | null;
+  image?: StrapiMediaRaw | null; // not fetched in recipe-list populate; always null there
 };
 
 type StrapiIngredientRaw = {
@@ -52,6 +61,7 @@ type StrapiRecipeAttrs = {
   slug: string;
   image: StrapiMediaRaw | null;
   categories: StrapiData<StrapiCategoryAttrs>[];
+  tags: StrapiData<StrapiTagAttrs>[];
   servings: number | null;
   prepTime: number | null;
   difficulty: Difficulty | null;
@@ -64,7 +74,7 @@ type StrapiRecipeAttrs = {
   publishedAt: string | null;
 };
 
-// Search endpoint returns a projection — only listing-relevant fields.
+// Search/related endpoints return a projection — only listing-relevant fields.
 type StrapiRecipeSummaryAttrs = {
   title: string;
   slug: string;
@@ -73,6 +83,7 @@ type StrapiRecipeSummaryAttrs = {
   servings: number | null;
   image: StrapiMediaRaw | null;
   categories: StrapiData<StrapiCategoryAttrs>[];
+  tags: StrapiData<StrapiTagAttrs>[];
 };
 
 // ─── Mappers ──────────────────────────────────────────────────────────────
@@ -83,6 +94,17 @@ function mapCategory(raw: StrapiData<StrapiCategoryAttrs>): Category {
     name: raw.name,
     slug: raw.slug,
     description: raw.description ?? null,
+    image: mapImage(raw.image ?? null),
+  };
+}
+
+function mapTag(raw: StrapiData<StrapiTagAttrs>): Tag {
+  return {
+    id: raw.documentId,
+    name: raw.name,
+    slug: raw.slug,
+    description: raw.description ?? null,
+    image: mapImage(raw.image ?? null),
   };
 }
 
@@ -113,6 +135,7 @@ function mapRecipe(raw: StrapiData<StrapiRecipeAttrs>): Recipe {
     slug: raw.slug,
     image: mapImage(raw.image),
     categories: (raw.categories ?? []).map(mapCategory),
+    tags: (raw.tags ?? []).map(mapTag),
     servings: raw.servings ?? null,
     prepTime: raw.prepTime ?? null,
     difficulty: raw.difficulty ?? null,
@@ -137,6 +160,7 @@ function mapRecipeSummary(
     servings: raw.servings ?? null,
     image: mapImage(raw.image),
     categories: (raw.categories ?? []).map(mapCategory),
+    tags: (raw.tags ?? []).map(mapTag),
   };
 }
 
@@ -147,12 +171,16 @@ function mapRecipeSummary(
 const LIST_POPULATE =
   "populate[image]=true" +
   "&populate[categories][fields][0]=name" +
-  "&populate[categories][fields][1]=slug";
+  "&populate[categories][fields][1]=slug" +
+  "&populate[tags][fields][0]=name" +
+  "&populate[tags][fields][1]=slug";
 
 const DETAIL_POPULATE =
   "populate[image]=true" +
   "&populate[categories][fields][0]=name" +
   "&populate[categories][fields][1]=slug" +
+  "&populate[tags][fields][0]=name" +
+  "&populate[tags][fields][1]=slug" +
   "&populate[ingredients]=true" +
   "&populate[steps][populate][image]=true" +
   "&populate[tips]=true";
@@ -210,4 +238,44 @@ export async function getRelatedRecipes(slug: string): Promise<RecipeSummary[]> 
     data: StrapiData<StrapiRecipeSummaryAttrs>[];
   }>(`/recipes/${encodeURIComponent(slug)}/related`);
   return (raw.data ?? []).map(mapRecipeSummary);
+}
+
+/**
+ * Fetches a paginated list of published recipes belonging to a given category slug.
+ */
+export async function getRecipesByCategory(
+  categorySlug: string,
+  params: PaginationParams = {}
+): Promise<PaginatedResult<RecipeSummary>> {
+  const { page = 1, pageSize = 20 } = params;
+  const qs =
+    `${LIST_POPULATE}` +
+    `&filters[categories][slug][$eq]=${encodeURIComponent(categorySlug)}` +
+    `&pagination[page]=${page}&pagination[pageSize]=${pageSize}` +
+    `&status=published`;
+  const raw = await apiClient.get<StrapiList<StrapiRecipeSummaryAttrs>>(`/recipes?${qs}`);
+  return {
+    items: raw.data.map(mapRecipeSummary),
+    pagination: raw.meta.pagination,
+  };
+}
+
+/**
+ * Fetches a paginated list of published recipes belonging to a given tag slug.
+ */
+export async function getRecipesByTag(
+  tagSlug: string,
+  params: PaginationParams = {}
+): Promise<PaginatedResult<RecipeSummary>> {
+  const { page = 1, pageSize = 20 } = params;
+  const qs =
+    `${LIST_POPULATE}` +
+    `&filters[tags][slug][$eq]=${encodeURIComponent(tagSlug)}` +
+    `&pagination[page]=${page}&pagination[pageSize]=${pageSize}` +
+    `&status=published`;
+  const raw = await apiClient.get<StrapiList<StrapiRecipeSummaryAttrs>>(`/recipes?${qs}`);
+  return {
+    items: raw.data.map(mapRecipeSummary),
+    pagination: raw.meta.pagination,
+  };
 }
