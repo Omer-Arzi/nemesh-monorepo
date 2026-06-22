@@ -7,7 +7,13 @@ export default {
   async afterCreate(event: { result: any }) {
     const { result } = event;
 
-    const ingredientLines: string[] = (result.ingredients ?? [])
+    // result.ingredients is not populated when created via REST API — re-fetch with populate.
+    const recipe = await strapi.documents('api::recipe.recipe').findOne({
+      documentId: result.documentId,
+      populate: { ingredients: { fields: ['ingredientName'] } },
+    });
+
+    const ingredientLines: string[] = ((recipe as any)?.ingredients ?? [])
       .map((ing: any) => ing.ingredientName as string | undefined)
       .filter((text: string | undefined): text is string => Boolean(text));
 

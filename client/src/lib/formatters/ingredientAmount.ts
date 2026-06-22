@@ -37,6 +37,12 @@
 // Tight enough that 0.34 does not match ⅓, wide enough that 0.333 does.
 const TOLERANCE = 0.005;
 
+// Unicode LTR isolate markers — prevent the bidi algorithm from reordering
+// digits and fraction glyphs (e.g. rendering "3½" as "½3") when this string
+// is embedded inside an RTL paragraph.
+const LTR_OPEN = "⁦";
+const LTR_CLOSE = "⁩";
+
 // Pairs of [exact decimal value, Unicode glyph], smallest to largest.
 const FRACTIONS: ReadonlyArray<readonly [number, string]> = [
   [1 / 8, "⅛"],
@@ -62,7 +68,7 @@ export function formatIngredientAmount(
 
   // Whole number (or negligible floating-point residue)
   if (fractionalPart < TOLERANCE) {
-    return String(whole);
+    return `${LTR_OPEN}${whole}${LTR_CLOSE}`;
   }
 
   // Try to match the fractional part to a known fraction
@@ -72,9 +78,10 @@ export function formatIngredientAmount(
 
   if (match) {
     const [, glyph] = match;
-    return whole === 0 ? glyph : `${whole}${glyph}`;
+    const formatted = whole === 0 ? glyph : `${whole}${glyph}`;
+    return `${LTR_OPEN}${formatted}${LTR_CLOSE}`;
   }
 
   // Unknown decimal — return the original value unchanged
-  return String(amount);
+  return `${LTR_OPEN}${amount}${LTR_CLOSE}`;
 }

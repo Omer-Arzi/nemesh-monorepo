@@ -38,9 +38,42 @@ function buildRequestBody(recipe: NormalizedRecipe) {
   };
 }
 
+async function processIngredientCandidates(
+  documentId: string,
+  title: string,
+  strapiUrl: string,
+  token: string
+): Promise<{ created: number; skipped: number } | null> {
+  try {
+    const res = await fetch(
+      `${strapiUrl}/api/recipes/${documentId}/process-ingredient-candidates`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn(
+        `[candidates] WARNING: "${title}" — candidate creation failed (HTTP ${res.status}): ${errText}`
+      );
+      return null;
+    }
+
+    const body = (await res.json()) as { data: { created: number; skipped: number } };
+    return body.data;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn(`[candidates] WARNING: "${title}" — candidate creation error: ${message}`);
+    return null;
+  }
+}
+
 /**
  * POST each recipe to Strapi via REST API.
  * Skips recipes whose slug already exists. Continues on individual failures.
+ * After each successful create, triggers ingredient candidate creation.
  * Returns a result record for every recipe.
  */
 export async function createRecipesInStrapi(
@@ -74,8 +107,35 @@ export async function createRecipesInStrapi(
         throw new Error(`HTTP ${res.status}: ${errText}`);
       }
 
+      const body = (await res.json()) as { data: { documentId: string } };
+      const documentId = body.data?.documentId;
+
       console.log(`[created] "${recipe.title}" (slug: ${recipe.slug})`);
-      results.push({ recipe, status: "created" });
+
+      const result: ImportResult = { recipe, status: "created", documentId };
+
+      if (documentId) {
+        const candidates = await processIngredientCandidates(
+          documentId,
+          recipe.title,
+          strapiUrl,
+          token
+        );
+        if (candidates) {
+          result.candidatesCreated = candidates.created;
+          result.candidatesSkipped = candidates.skipped;
+          console.log(
+            `[candidates] "${recipe.title}" — ${candidates.created} created, ${candidates.skipped} skipped`
+          );
+        } else {
+          result.candidateError = "candidate creation failed (see warnings above)";
+        }
+      } else {
+        console.warn(`[candidates] WARNING: "${recipe.title}" — no documentId in create response, skipping candidate creation`);
+        result.candidateError = "no documentId in create response";
+      }
+
+      results.push(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.error(`[failed]  "${recipe.title}": ${message}`);

@@ -55,4 +55,8 @@ export type ImportResult = {
   recipe: NormalizedRecipe;
   status: ImportStatus;
   error?: string;
+  documentId?: string;
+  candidatesCreated?: number;
+  candidatesSkipped?: number;
+  candidateError?: string;
 };

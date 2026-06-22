@@ -45,6 +45,16 @@ export type RecipeTip = {
   text: string;
 };
 
+/**
+ * A named preparation section containing its own ordered steps.
+ * Used when a recipe has multiple distinct preparation phases
+ * (e.g. "לקציפה", "לאספרגוס", "לרוטב").
+ */
+export type PreparationSection = {
+  title: string | null;
+  steps: PreparationStep[];
+};
+
 // ─── Collection types ─────────────────────────────────────────────────────
 
 /** Content category for primary recipe navigation. */
@@ -79,7 +89,10 @@ export type Recipe = BaseEntity & {
   difficulty: Difficulty | null;
   description: string | null;
   ingredients: RecipeIngredient[];
+  /** Legacy flat steps — populated for recipes created before preparationSections. */
   steps: PreparationStep[];
+  /** Grouped preparation sections — preferred over steps for new recipes. */
+  preparationSections: PreparationSection[];
   tips: RecipeTip[];
   createdAt: string; // ISO 8601
   updatedAt: string;

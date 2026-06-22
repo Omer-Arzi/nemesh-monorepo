@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
 import { Section, LoadingState, ErrorState } from "@/components/shared";
 import {
   RecipeHero,
@@ -16,6 +17,10 @@ export default function RecipePage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: recipe, isLoading, isError, refetch } = useRecipe(slug);
   const { data: relatedRecipes = [] } = useRelatedRecipes(slug);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
 
   if (isLoading) {
     return <LoadingState label="טוען מתכון..." minHeight={400} />;
@@ -55,7 +60,10 @@ export default function RecipePage() {
         }
       >
         <Section sx={{ px: { xs: 2, md: 4 } }}>
-          <PreparationStepsSection steps={recipe.steps} />
+          <PreparationStepsSection
+            steps={recipe.steps}
+            preparationSections={recipe.preparationSections}
+          />
           <RecipeTipsSection tips={recipe.tips} sx={{ mt: 4 }} />
         </Section>
       </RecipeDetailLayout>
