@@ -32,7 +32,7 @@ try {
 import { parseDocx } from "./parseDocx";
 import { createRecipesInStrapi } from "./createRecipesInStrapi";
 import { slugifyHebrew, ensureUniqueSlug } from "./slugifyHebrew";
-import type { LLMRecipeOutput, NormalizedRecipe, NormalizedPreparationSection } from "./types";
+import type { LLMRecipeOutput, NormalizedIngredient, NormalizedRecipe, NormalizedPreparationSection } from "./types";
 
 // ── Safety gate ───────────────────────────────────────────────────────────────
 
@@ -161,6 +161,19 @@ function validate(raw: unknown): { recipes: LLMRecipeOutput[]; errors: string[] 
  * - If only legacy steps is present, wrap them in a single unnamed section.
  * Also assigns slugs.
  */
+function extractIngredientNote(ing: NormalizedIngredient): NormalizedIngredient {
+  let firstNote: string | null = null;
+  const cleaned = ing.ingredientName
+    .replace(/\s*\(([^)]+)\)/g, (_, content: string) => {
+      if (firstNote === null) firstNote = content.trim();
+      return "";
+    })
+    .trim();
+
+  if (firstNote === null) return ing;
+  return { ...ing, ingredientName: cleaned, note: ing.note ?? firstNote };
+}
+
 function applySlugAndNormalize(recipes: LLMRecipeOutput[]): NormalizedRecipe[] {
   const usedSlugs = new Set<string>();
 
@@ -181,7 +194,12 @@ function applySlugAndNormalize(recipes: LLMRecipeOutput[]): NormalizedRecipe[] {
     }
 
     const { steps: _steps, preparationSections: _sections, ...rest } = recipe;
-    return { ...rest, slug, preparationSections };
+    return {
+      ...rest,
+      slug,
+      preparationSections,
+      ingredients: recipe.ingredients.map(extractIngredientNote),
+    };
   });
 }
 
