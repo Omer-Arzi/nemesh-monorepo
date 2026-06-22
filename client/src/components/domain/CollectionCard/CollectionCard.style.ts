@@ -5,9 +5,10 @@ export const CollectionCardStyle = {
     flexDirection: "column",
     borderRadius: 3,
     overflow: "hidden",
-    transition: "box-shadow 200ms ease",
+    transition: "box-shadow 200ms ease, transform 200ms ease",
     "&:hover": {
       boxShadow: 6,
+      transform: "translateY(-6px)",
     },
   },
   actionArea: {
@@ -57,10 +58,7 @@ export const CollectionCardStyle = {
     fontWeight: 700,
     textAlign: "center",
     lineHeight: 1.35,
-    minHeight: "2.7em",
-    display: "-webkit-box",
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: "vertical",
     overflow: "hidden",
+    width: "100%",
   },
 } as const;

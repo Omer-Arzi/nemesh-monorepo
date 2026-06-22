@@ -20,6 +20,8 @@ export const NavigationRailStyle = {
     width: open ? RAIL_WIDTH : RAIL_COLLAPSED_WIDTH,
     overflow: "visible",
     transition: "width 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+    // Without zIndex the main content (later in DOM) stacks on top, hiding the toggle button
+    zIndex: 10,
   }),
 
   // Visual surface: clips the content, provides background / border / shadow.

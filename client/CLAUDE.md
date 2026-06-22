@@ -53,6 +53,7 @@ Rules:
 * Do not create shared component style directories.
 * Do not place large style objects inline inside components.
 * Keep styles colocated with their component.
+* In sx objects, order properties so `display` comes first (if present), then `position` second (if present). Do not add either property just to satisfy the order — only order them correctly when they already exist.
 * Use semantic style names:
 
   * root

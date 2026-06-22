@@ -54,7 +54,7 @@ export default function CategoryPage() {
         )}
 
         <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-          {category.name}
+          {category.menuName ?? category.name}
         </Typography>
 
         {category.description && (

@@ -24,9 +24,11 @@ export default function FeaturedCategoriesCarousel() {
       </PageContainer>
 
       <Box sx={FeaturedCategoriesCarouselStyle.track}>
+        <Box aria-hidden sx={FeaturedCategoriesCarouselStyle.trackSpacer} />
         {featured.map((category) => (
           <FeaturedCategoryCard key={category.id} category={category} />
         ))}
+        <Box aria-hidden sx={FeaturedCategoriesCarouselStyle.trackSpacer} />
       </Box>
     </Box>
   );

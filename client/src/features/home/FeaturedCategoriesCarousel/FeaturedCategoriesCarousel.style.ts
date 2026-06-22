@@ -15,8 +15,6 @@ export const FeaturedCategoriesCarouselStyle = {
     overflowX: "auto" as const,
     scrollSnapType: "x proximity",
     scrollBehavior: "smooth" as const,
-    // Horizontal padding so first/last card aren't flush with the viewport edge
-    px: { xs: 2, sm: 3, md: 4 },
     // pt gives cards headroom so hover scale/translateY doesn't get clipped by
     // the track's implicit overflow-y boundary (overflow-x:auto forces it non-visible)
     pt: 1.5,
@@ -25,5 +23,12 @@ export const FeaturedCategoriesCarouselStyle = {
     scrollbarWidth: "none" as const,
     "&::-webkit-scrollbar": { display: "none" },
     msOverflowStyle: "none" as const,
+  },
+
+  // Padding via flex spacers — more reliable than container padding on scroll elements,
+  // which browsers handle inconsistently in RTL overflow containers.
+  trackSpacer: {
+    flexShrink: 0,
+    width: { xs: 16, sm: 24, md: 32 },
   },
 } as const;

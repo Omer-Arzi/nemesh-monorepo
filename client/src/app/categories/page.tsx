@@ -40,7 +40,7 @@ export default function CategoriesPage() {
       {totalCards === 0 ? (
         <EmptyState title="אין קטגוריות" description="אין קטגוריות עדיין." />
       ) : (
-        <Grid container spacing={2}>
+        <Grid container columnSpacing={2} rowSpacing={3}>
           {/* ── Special "האתגר של שיר" card first (only if tag exists in Strapi) ── */}
           {shirChallenge && (
             <Grid size={{ xs: 6, sm: 4, md: 3 }}>
