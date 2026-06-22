@@ -73,6 +73,11 @@
       "type": "component",
       "component": "recipe.preparation-step",
       "repeatable": true
+    },
+    "preparationSections": {
+      "type": "component",
+      "component": "recipe.preparation-section",
+      "repeatable": true
     }
   }
 }
