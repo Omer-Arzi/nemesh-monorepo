@@ -118,6 +118,13 @@ yarn-error.log
 coverage
 
 ############################
+# Local recipe files
+############################
+
+local-recipes/
+scripts/import-recipes/output/
+
+############################
 # Strapi
 ############################
 

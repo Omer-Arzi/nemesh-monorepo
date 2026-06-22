@@ -12,6 +12,7 @@ import type {
   Tag,
   RecipeIngredient,
   PreparationStep,
+  PreparationSection,
   RecipeTip,
   Difficulty,
 } from "@/types/domain";
@@ -52,6 +53,12 @@ type StrapiStepRaw = {
   image: StrapiMediaRaw | null;
 };
 
+type StrapiPreparationSectionRaw = {
+  id: number;
+  title: string | null;
+  steps: StrapiStepRaw[];
+};
+
 type StrapiTipRaw = {
   id: number;
   text: string;
@@ -69,6 +76,7 @@ type StrapiRecipeAttrs = {
   description: string | null;
   ingredients: StrapiIngredientRaw[];
   steps: StrapiStepRaw[];
+  preparationSections: StrapiPreparationSectionRaw[];
   tips: StrapiTipRaw[];
   createdAt: string;
   updatedAt: string;
@@ -126,6 +134,13 @@ function mapStep(raw: StrapiStepRaw): PreparationStep {
   };
 }
 
+function mapPreparationSection(raw: StrapiPreparationSectionRaw): PreparationSection {
+  return {
+    title: raw.title ?? null,
+    steps: (raw.steps ?? []).map(mapStep),
+  };
+}
+
 function mapTip(raw: StrapiTipRaw): RecipeTip {
   return { text: raw.text };
 }
@@ -144,6 +159,7 @@ function mapRecipe(raw: StrapiData<StrapiRecipeAttrs>): Recipe {
     description: raw.description ?? null,
     ingredients: (raw.ingredients ?? []).map(mapIngredient),
     steps: (raw.steps ?? []).map(mapStep),
+    preparationSections: (raw.preparationSections ?? []).map(mapPreparationSection),
     tips: (raw.tips ?? []).map(mapTip),
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
@@ -185,6 +201,7 @@ const DETAIL_POPULATE =
   "&populate[tags][fields][1]=slug" +
   "&populate[ingredients]=true" +
   "&populate[steps][populate][image]=true" +
+  "&populate[preparationSections][populate][steps][populate][image]=true" +
   "&populate[tips]=true";
 
 // ─── Public API ───────────────────────────────────────────────────────────

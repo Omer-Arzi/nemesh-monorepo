@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/strapi';
-import { handleCandidateApproval } from '../../services/approval-handler';
+import { handleCanonicalApproval, handleVariantApproval } from '../../services/approval-handler';
 
 declare const strapi: Core.Strapi;
 
@@ -23,39 +23,60 @@ export default {
   },
 
   /**
-   * If reviewStatus just transitioned to 'approved' and selectedIngredient is set,
-   * add normalizedText to that ingredient's variants.
+   * On approval, dispatch to the correct handler based on matchType:
+   *   canonical → create a new IngredientCatalogItem
+   *   variant   → add normalizedText to selectedIngredient.variants
    */
   async afterUpdate(event: { result: any; state: any }) {
     const { result, state } = event;
+
+    strapi.log.info(
+      `[candidate-lifecycle] afterUpdate fired — documentId=${result.documentId} reviewStatus=${result.reviewStatus} previousReviewStatus=${state.previousReviewStatus}`
+    );
 
     const justApproved =
       state.previousReviewStatus !== 'approved' &&
       result.reviewStatus === 'approved';
 
-    if (!justApproved) return;
-
-    // Re-fetch with both ingredient relations populated — relations are not
-    // populated on the lifecycle result by default.
-    const candidate = await strapi.documents(UID).findOne({
-      documentId: result.documentId,
-      populate: ['selectedIngredient', 'suggestedIngredient'],
-    });
-
-    const resolvedIngredient =
-      (candidate?.selectedIngredient as { documentId: string } | null) ??
-      (candidate?.suggestedIngredient as { documentId: string } | null);
-
-    if (!resolvedIngredient) {
-      strapi.log.warn(
-        `[candidate-lifecycle] Candidate ${result.documentId} approved without selectedIngredient or suggestedIngredient — variant update skipped`
-      );
+    if (!justApproved) {
+      strapi.log.info(`[candidate-lifecycle] Not a fresh approval — skipping`);
       return;
     }
 
-    await handleCandidateApproval(strapi, {
-      normalizedText: candidate!.normalizedText,
-      selectedIngredient: resolvedIngredient,
+    // Re-fetch with selectedIngredient populated — relations are not
+    // populated on the lifecycle result by default.
+    const candidate = await strapi.documents(UID).findOne({
+      documentId: result.documentId,
+      populate: ['selectedIngredient'],
     });
+
+    strapi.log.info(
+      `[candidate-lifecycle] Re-fetched candidate — matchType=${candidate?.matchType} normalizedText=${candidate?.normalizedText} selectedIngredient=${JSON.stringify(candidate?.selectedIngredient)}`
+    );
+
+    if (!candidate) return;
+
+    if (candidate.matchType === 'canonical') {
+      await handleCanonicalApproval(strapi, candidate.ingredientName);
+      return;
+    }
+
+    if (candidate.matchType === 'variant') {
+      const selectedIngredient = candidate.selectedIngredient as { documentId: string } | null;
+
+      if (!selectedIngredient) {
+        strapi.log.warn(
+          `[candidate-lifecycle] Candidate ${result.documentId} approved as variant without selectedIngredient — skipped`
+        );
+        return;
+      }
+
+      await handleVariantApproval(strapi, candidate.normalizedText, selectedIngredient);
+      return;
+    }
+
+    strapi.log.info(
+      `[candidate-lifecycle] Candidate ${result.documentId} approved with matchType "${candidate.matchType}" — no catalog action taken`
+    );
   },
 };

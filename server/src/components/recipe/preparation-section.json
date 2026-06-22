@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_recipe_preparation_sections",
+  "info": {
+    "displayName": "PreparationSection",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "steps": {
+      "type": "component",
+      "component": "recipe.preparation-step",
+      "repeatable": true
+    }
+  }
+}

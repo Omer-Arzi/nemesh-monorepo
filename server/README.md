@@ -1,3 +1,40 @@
+# Nemesh Server
+
+## Recipe Import Pipeline
+
+Import recipes from DOCX files into Strapi using the three-stage pipeline:
+
+```bash
+# Stage 1 — Extract text from DOCX
+ENABLE_RECIPE_IMPORT=true npm run import:recipes -- ./local-recipes/recipe.docx --extract
+
+# Stage 2 — Preview the normalized JSON (after Claude Code fills it)
+ENABLE_RECIPE_IMPORT=true npm run import:recipes -- ./scripts/import-recipes/output/<timestamp>/recipes.normalized.json --preview
+
+# Stage 3 — Commit to Strapi
+ENABLE_RECIPE_IMPORT=true npm run import:recipes -- ./scripts/import-recipes/output/<timestamp>/recipes.normalized.json --commit
+```
+
+`--commit` creates each recipe via the Strapi REST API and then calls
+`POST /api/recipes/:documentId/process-ingredient-candidates` to create
+`ingredientMatchCandidate` records for admin review. Existing candidates
+are skipped automatically so it is safe to re-run.
+
+## Ingredient Candidate Backfill
+
+To create missing ingredient match candidates for recipes that already exist in Strapi:
+
+```bash
+ENABLE_RECIPE_IMPORT=true \
+STRAPI_URL=http://localhost:1337 \
+STRAPI_IMPORT_TOKEN=<token> \
+npm run backfill:ingredient-candidates
+```
+
+See [docs/scripts.md](docs/scripts.md) for full documentation of all scripts.
+
+---
+
 # 🚀 Getting started with Strapi
 
 Strapi comes with a full featured [Command Line Interface](https://docs.strapi.io/dev-docs/cli) (CLI) which lets you scaffold and manage your project in seconds.

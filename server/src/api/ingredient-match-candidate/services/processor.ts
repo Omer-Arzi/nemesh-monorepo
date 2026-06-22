@@ -4,6 +4,8 @@ import { findMatch, findFuzzySuggestion } from './matcher';
 
 const CANDIDATE_UID = 'api::ingredient-match-candidate.ingredient-match-candidate' as const;
 
+export type ProcessResult = { created: number; skipped: number };
+
 /**
  * Processes ingredient lines from a recipe and creates IngredientMatchCandidate
  * records for admin review.
@@ -19,8 +21,10 @@ export async function processRecipeIngredients(
   strapi: Core.Strapi,
   recipeDocumentId: string,
   rawLines: string[]
-): Promise<void> {
+): Promise<ProcessResult> {
   const lines = rawLines.filter((l) => l.trim().length > 0);
+  let created = 0;
+  let skipped = 0;
 
   for (const rawText of lines) {
     const normalizedText = normalizeText(rawText);
@@ -30,6 +34,7 @@ export async function processRecipeIngredients(
       strapi.log.info(
         `[ingredient-processor] "${rawText}" already in catalog (${match.matchType}) — skipping candidate`
       );
+      skipped++;
       continue;
     }
 
@@ -41,6 +46,7 @@ export async function processRecipeIngredients(
       strapi.log.info(
         `[ingredient-processor] Candidate already exists for "${rawText}" — skipping duplicate`
       );
+      skipped++;
       continue;
     }
 
@@ -61,5 +67,8 @@ export async function processRecipeIngredients(
     });
 
     strapi.log.info(`[ingredient-processor] Created candidate for "${rawText}"`);
+    created++;
   }
+
+  return { created, skipped };
 }
