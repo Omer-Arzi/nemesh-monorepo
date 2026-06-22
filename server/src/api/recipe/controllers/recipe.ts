@@ -1,5 +1,5 @@
 import { factories } from '@strapi/strapi';
-import { processRecipeIngredients } from '../../ingredient-match-candidate/services/processor';
+import { processRecipeIngredientsByDocumentId } from '../../ingredient-match-candidate/services/processor';
 
 export default factories.createCoreController('api::recipe.recipe', ({ strapi }) => ({
   async related(ctx) {
@@ -172,22 +172,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
 
   async processIngredientCandidates(ctx) {
     const { documentId } = ctx.params as { documentId: string };
-
-    const recipe = await strapi.documents('api::recipe.recipe').findOne({
-      documentId,
-      populate: { ingredients: { fields: ['ingredientName'] } },
-    });
-
-    if (!recipe) {
-      return ctx.notFound(`Recipe not found: ${documentId}`);
-    }
-
-    const ingredientLines: string[] = ((recipe as any).ingredients ?? [])
-      .map((ing: any) => ing.ingredientName as string | undefined)
-      .filter((text: string | undefined): text is string => Boolean(text));
-
-    const result = await processRecipeIngredients(strapi, documentId, ingredientLines);
-
+    const result = await processRecipeIngredientsByDocumentId(strapi, documentId);
     ctx.body = { data: result };
   },
 }));

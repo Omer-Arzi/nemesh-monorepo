@@ -303,18 +303,11 @@ async function runCommit(jsonFile: string) {
   const skipped = results.filter((r) => r.status === "skipped").length;
   const failed  = results.filter((r) => r.status === "failed").length;
 
-  const candidatesCreated = results.reduce((sum, r) => sum + (r.candidatesCreated ?? 0), 0);
-  const candidatesSkipped = results.reduce((sum, r) => sum + (r.candidatesSkipped ?? 0), 0);
-  const candidateWarnings = results.filter((r) => r.candidateError).length;
-
   console.log(
     "\n── Import complete ───────────────────────────────────────────\n" +
-      `  Recipes created:          ${created}\n` +
-      `  Recipes skipped:          ${skipped}\n` +
-      `  Recipes failed:           ${failed}\n` +
-      `  Ingredient candidates created: ${candidatesCreated}\n` +
-      `  Ingredient candidates skipped: ${candidatesSkipped}\n` +
-      (candidateWarnings > 0 ? `  Candidate warnings:       ${candidateWarnings}\n` : "") +
+      `  Created: ${created}\n` +
+      `  Skipped: ${skipped}\n` +
+      `  Failed:  ${failed}\n` +
       "─────────────────────────────────────────────────────────────\n"
   );
 
