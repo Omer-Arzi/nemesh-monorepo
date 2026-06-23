@@ -3,17 +3,28 @@
 import { useRef, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { IngredientSection } from "@/types/domain";
+import type { CookingModeIngredientProps } from "@/features/cooking-mode";
 import IngredientSectionList from "../IngredientSectionList";
 import IngredientsBottomSheet from "../IngredientsBottomSheet";
 import { StickyIngredientsSidebarStyle } from "./styles/StickyIngredientsSidebarStyle";
 
+type CookingModeBase = Omit<CookingModeIngredientProps, "sectionIndex">;
+
 type Props = {
   ingredientSections?: IngredientSection[];
   sx?: SxProps<Theme>;
+  cookingMode?: CookingModeBase & {
+    toggleActive: () => void;
+    ingredientProgress: { checked: number; total: number };
+    reset: () => void;
+  };
 };
 
 function totalIngredientCount(ingredientSections: IngredientSection[] | undefined): number {
@@ -35,7 +46,7 @@ function totalIngredientCount(ingredientSections: IngredientSection[] | undefine
  * Both mobile and desktop UIs are always in the DOM; CSS `display` controls
  * which is visible. This avoids useMediaQuery and SSR hydration issues.
  */
-export default function StickyIngredientsSidebar({ ingredientSections, sx }: Props) {
+export default function StickyIngredientsSidebar({ ingredientSections, sx, cookingMode }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const [fadeOpacity, setFadeOpacity] = useState(0);
@@ -94,6 +105,24 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx }: Pro
   // inline trigger is still off screen).
   const isStickyVisible = showStickyBar && !sheetOpen;
 
+  const cookingModeForSheet = cookingMode
+    ? {
+        isActive: cookingMode.isActive,
+        checkedKeys: cookingMode.checkedKeys,
+        onToggle: cookingMode.onToggle,
+        toggleActive: cookingMode.toggleActive,
+        ingredientProgress: cookingMode.ingredientProgress,
+      }
+    : undefined;
+
+  const cookingModeForList = cookingMode
+    ? {
+        isActive: cookingMode.isActive,
+        checkedKeys: cookingMode.checkedKeys,
+        onToggle: cookingMode.onToggle,
+      }
+    : undefined;
+
   return (
     <>
       {/* ── Mobile: inline trigger + Bottom Sheet (xs / sm only) ── */}
@@ -127,6 +156,7 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx }: Pro
           onClose={() => setSheetOpen(false)}
           ingredientSections={ingredientSections ?? []}
           count={count}
+          cookingMode={cookingModeForSheet}
         />
       </Box>
 
@@ -135,16 +165,53 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx }: Pro
         <Box sx={StickyIngredientsSidebarStyle.stickyPanel}>
           <Box ref={scrollRef} sx={StickyIngredientsSidebarStyle.scrollArea}>
             <Box sx={StickyIngredientsSidebarStyle.header}>
-              <Typography variant="subtitle2" sx={StickyIngredientsSidebarStyle.headerTitle}>
-                מצרכים
-                {count > 0 && (
-                  <Box component="span" sx={StickyIngredientsSidebarStyle.count}>
-                    {` · ${count}`}
-                  </Box>
+              <Box>
+                <Typography variant="subtitle2" sx={StickyIngredientsSidebarStyle.headerTitle}>
+                  מצרכים
+                  {count > 0 && (
+                    <Box component="span" sx={StickyIngredientsSidebarStyle.count}>
+                      {` · ${count}`}
+                    </Box>
+                  )}
+                </Typography>
+                {cookingMode?.isActive && cookingMode.ingredientProgress.total > 0 && (
+                  <Chip
+                    label={`${cookingMode.ingredientProgress.checked} מתוך ${cookingMode.ingredientProgress.total} סומנו`}
+                    size="small"
+                    color="success"
+                    variant="outlined"
+                    sx={StickyIngredientsSidebarStyle.progressChip}
+                  />
                 )}
-              </Typography>
+              </Box>
+              <Box sx={StickyIngredientsSidebarStyle.headerActions}>
+                {cookingMode?.isActive && (
+                  <Button
+                    size="small"
+                    variant="text"
+                    color="inherit"
+                    onClick={cookingMode.reset}
+                    sx={StickyIngredientsSidebarStyle.resetButton}
+                  >
+                    איפוס
+                  </Button>
+                )}
+                <Button
+                  size="small"
+                  variant={cookingMode?.isActive ? "contained" : "outlined"}
+                  color="primary"
+                  startIcon={<PlayCircleOutlinedIcon />}
+                  onClick={cookingMode?.toggleActive}
+                  sx={StickyIngredientsSidebarStyle.cookingModeButton}
+                >
+                  מצב בישול
+                </Button>
+              </Box>
             </Box>
-            <IngredientSectionList sections={ingredientSections ?? []} />
+            <IngredientSectionList
+              sections={ingredientSections ?? []}
+              cookingMode={cookingModeForList}
+            />
           </Box>
 
           {fadeOpacity > 0 && (

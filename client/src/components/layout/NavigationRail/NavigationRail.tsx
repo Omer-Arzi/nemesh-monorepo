@@ -25,7 +25,7 @@ export default function NavigationRail({ open, onToggle }: Props) {
         <Box sx={NavigationRailStyle.navContent}>
           <Box component="nav" sx={NavigationRailStyle.nav}>
             {RAIL_NAV_ITEMS.map((item) => (
-              <NavigationItem
+              <NavigationItem 
                 key={item.href + item.label}
                 label={item.label}
                 href={item.href}
@@ -49,7 +49,7 @@ export default function NavigationRail({ open, onToggle }: Props) {
         size="small"
         sx={NavigationRailStyle.toggle}
       >
-        {open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+        {open ? <ChevronRightIcon /> : <ChevronLeftIcon  />}
       </IconButton>
     </Box>
   );

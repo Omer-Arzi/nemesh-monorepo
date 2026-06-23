@@ -12,6 +12,18 @@ export const PreparationStepsStyle = {
     borderColor: "divider",
     "&:last-child": { borderBottom: 0 },
   },
+  stepClickable: {
+    cursor: "pointer",
+    userSelect: "none" as const,
+    borderRadius: 2,
+    px: 0.5,
+    mx: -0.5,
+    transition: "background-color 0.12s ease",
+    "&:active": { bgcolor: "action.hover" },
+  },
+  stepChecked: {
+    bgcolor: "action.hover",
+  },
   stepNumber: {
     flexShrink: 0,
     width: 32,
@@ -23,12 +35,23 @@ export const PreparationStepsStyle = {
     alignItems: "center",
     justifyContent: "center",
     mt: 0.25,
+    transition: "background-color 0.2s ease",
+  },
+  stepNumberChecked: {
+    bgcolor: "success.main",
   },
   stepNumberText: {
     fontWeight: 700,
   },
+  stepCheckIcon: {
+    fontSize: "1rem",
+  },
   stepContent: {
     flexGrow: 1,
+    transition: "opacity 0.15s ease",
+  },
+  stepContentChecked: {
+    opacity: 0.5,
   },
   stepImage: {
     mt: 1.5,
