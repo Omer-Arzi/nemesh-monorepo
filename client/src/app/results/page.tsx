@@ -2,6 +2,7 @@
 
 import { Suspense, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import { ResultsPageText } from "./consts";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -35,7 +36,7 @@ function SearchResults({ q }: { q: string }) {
 
   if (isError) {
     return (
-      <ErrorState description="החיפוש נכשל. אנא בדוק את החיבור ונסה שוב." />
+      <ErrorState description={ResultsPageText.searchError} />
     );
   }
 
@@ -45,8 +46,8 @@ function SearchResults({ q }: { q: string }) {
       {recipes.length === 0 ? (
         <EmptyState
           icon={<MenuBookOutlinedIcon fontSize="inherit" />}
-          title="לא מצאנו מתכונים שמתאימים לחיפוש הזה"
-          description="אפשר לנסות פחות מרכיבים, מילה אחרת, או להציץ בקטגוריות."
+          title={ResultsPageText.searchEmptyTitle}
+          description={ResultsPageText.searchEmptyDescription}
           action={
             <Button
               component={NextLink}
@@ -54,7 +55,7 @@ function SearchResults({ q }: { q: string }) {
               variant="outlined"
               size="small"
             >
-              לקטגוריות
+              {ResultsPageText.searchEmptyAction}
             </Button>
           }
         />
@@ -95,7 +96,7 @@ function BrowseResults() {
   if (isLoading) {
     return (
       <PageContainer>
-        <SectionHeader title="מתכונים" sx={{ mb: 3 }} />
+        <SectionHeader title={ResultsPageText.sectionTitle} sx={{ mb: 3 }} />
         <RecipeGridSkeleton count={8} />
       </PageContainer>
     );
@@ -104,7 +105,7 @@ function BrowseResults() {
   if (isError) {
     return (
       <ErrorState
-        description="לא הצלחנו לטעון את המתכונים. אנא בדוק את החיבור ונסה שוב."
+        description={ResultsPageText.browseError}
         onRetry={() => refetch()}
       />
     );
@@ -112,13 +113,13 @@ function BrowseResults() {
 
   return (
     <PageContainer>
-      <SectionHeader title="מתכונים" sx={{ mb: 3 }} />
+      <SectionHeader title={ResultsPageText.sectionTitle} sx={{ mb: 3 }} />
 
       {recipes.length === 0 ? (
         <EmptyState
           icon={<MenuBookOutlinedIcon fontSize="inherit" />}
-          title="עוד לא פרסמנו מתכונים"
-          description="חוזרים בקרוב עם דברים טובים מהמטבח."
+          title={ResultsPageText.browseEmptyTitle}
+          description={ResultsPageText.browseEmptyDescription}
         />
       ) : (
         <Grid container spacing={2}>

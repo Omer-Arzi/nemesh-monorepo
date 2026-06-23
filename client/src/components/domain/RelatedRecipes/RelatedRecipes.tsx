@@ -6,6 +6,7 @@ import { SectionHeader } from "@/components/shared";
 import RecipeCard from "../RecipeCard";
 import type { RecipeSummary } from "@/types/domain";
 import { RelatedRecipesStyle } from "./RelatedRecipes.style";
+import { RelatedRecipesText } from "./RelatedRecipes.consts";
 
 type Props = {
   recipes: RecipeSummary[];
@@ -16,7 +17,7 @@ export default function RelatedRecipes({ recipes }: Props) {
 
   return (
     <Box component="section" sx={RelatedRecipesStyle.root}>
-      <SectionHeader title="מתכונים דומים" sx={RelatedRecipesStyle.header} />
+      <SectionHeader title={RelatedRecipesText.sectionTitle} sx={RelatedRecipesStyle.header} />
       <Grid container spacing={2}>
         {recipes.map((recipe) => (
           <Grid key={recipe.id} size={{ xs: 6, sm: 4, md: 3 }}>

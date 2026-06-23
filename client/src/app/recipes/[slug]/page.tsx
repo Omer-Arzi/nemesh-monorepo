@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
+import { RecipePageText } from "./consts";
 import { Section, LoadingState, ErrorState } from "@/components/shared";
 import {
   RecipeHero,
@@ -96,20 +97,20 @@ export default function RecipePage() {
   }, [slug]);
 
   if (isLoading) {
-    return <LoadingState label="טוען מתכון..." minHeight={400} />;
+    return <LoadingState label={RecipePageText.loading} minHeight={400} />;
   }
 
   if (isError) {
     return (
       <ErrorState
-        description="לא הצלחנו לטעון את המתכון. אנא בדוק את החיבור ונסה שוב."
+        description={RecipePageText.errorLoad}
         onRetry={() => refetch()}
       />
     );
   }
 
   if (!recipe) {
-    return <ErrorState title="המתכון לא נמצא" />;
+    return <ErrorState title={RecipePageText.errorNotFound} />;
   }
 
   return <RecipeContent recipe={recipe} relatedRecipes={relatedRecipes} />;

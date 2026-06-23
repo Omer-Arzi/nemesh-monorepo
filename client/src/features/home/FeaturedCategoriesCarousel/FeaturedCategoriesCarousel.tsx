@@ -9,6 +9,7 @@ import { PageContainer, SectionHeader, LoadingState, ErrorState } from "@/compon
 import { useCategories } from "@/features/category/hooks";
 import FeaturedCategoryCard from "../FeaturedCategoryCard";
 import { FeaturedCategoriesCarouselStyle } from "./FeaturedCategoriesCarousel.style";
+import { FeaturedCategoriesCarouselText } from "./FeaturedCategoriesCarousel.consts";
 
 const MAX_CATEGORIES = 10;
 const FADE_ZONE = 56;
@@ -109,7 +110,7 @@ export default function FeaturedCategoriesCarousel() {
   }, []);
 
   if (isLoading) return <LoadingState minHeight={320} />;
-  if (isError) return <ErrorState description="לא הצלחנו לטעון קטגוריות." />;
+  if (isError) return <ErrorState description={FeaturedCategoriesCarouselText.errorLoad} />;
   if (categories.length === 0) return null;
 
   const featured = categories.slice(0, MAX_CATEGORIES);
@@ -124,13 +125,13 @@ export default function FeaturedCategoriesCarousel() {
   return (
     <Box sx={FeaturedCategoriesCarouselStyle.root}>
       <PageContainer sx={{ py: 0, pb: 0 }}>
-        <SectionHeader title="קטגוריות מובילות" sx={{ pb: 3 }} />
+        <SectionHeader title={FeaturedCategoriesCarouselText.sectionTitle} sx={{ pb: 3 }} />
 
         <Box sx={FeaturedCategoriesCarouselStyle.trackWrapper}>
           {/* Left arrow — "previous" in RTL: scrolls content rightward toward start */}
           <IconButton
             onClick={scrollTowardStart}
-            aria-label="קטגוריות קודמות"
+            aria-label={FeaturedCategoriesCarouselText.prevAriaLabel}
             sx={[
               FeaturedCategoriesCarouselStyle.arrow,
               FeaturedCategoriesCarouselStyle.arrowLeft,
@@ -161,7 +162,7 @@ export default function FeaturedCategoriesCarousel() {
           {/* Right arrow — "next" in RTL: scrolls content leftward toward end */}
           <IconButton
             onClick={scrollTowardEnd}
-            aria-label="קטגוריות נוספות"
+            aria-label={FeaturedCategoriesCarouselText.nextAriaLabel}
             sx={[
               FeaturedCategoriesCarouselStyle.arrow,
               FeaturedCategoriesCarouselStyle.arrowRight,

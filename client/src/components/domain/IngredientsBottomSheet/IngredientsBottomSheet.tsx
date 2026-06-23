@@ -12,6 +12,7 @@ import type { IngredientSection } from "@/types/domain";
 import type { CookingModeIngredientProps } from "@/features/cooking-mode";
 import IngredientSectionList from "../IngredientSectionList";
 import { IngredientsBottomSheetStyle } from "./IngredientsBottomSheet.style";
+import { IngredientsBottomSheetText } from "./IngredientsBottomSheet.consts";
 
 type CookingModeBase = Omit<CookingModeIngredientProps, "sectionIndex">;
 
@@ -49,7 +50,7 @@ export default function IngredientsBottomSheet({
       <Box sx={IngredientsBottomSheetStyle.header}>
         <Box sx={IngredientsBottomSheetStyle.headerStart}>
           <Typography sx={IngredientsBottomSheetStyle.headerTitle}>
-            מצרכים
+            {IngredientsBottomSheetText.sectionTitle}
             {count > 0 && (
               <Box component="span" sx={IngredientsBottomSheetStyle.count}>
                 {` · ${count}`}
@@ -58,7 +59,7 @@ export default function IngredientsBottomSheet({
           </Typography>
           {cookingMode?.isActive && cookingMode.ingredientProgress.total > 0 && (
             <Chip
-              label={`${cookingMode.ingredientProgress.checked} מתוך ${cookingMode.ingredientProgress.total}`}
+              label={IngredientsBottomSheetText.progressLabel(cookingMode.ingredientProgress.checked, cookingMode.ingredientProgress.total)}
               size="small"
               color="success"
               variant="outlined"
@@ -76,9 +77,9 @@ export default function IngredientsBottomSheet({
             onClick={cookingMode?.toggleActive}
             sx={IngredientsBottomSheetStyle.cookingModeButton}
           >
-            מצב בישול
+            {IngredientsBottomSheetText.cookingModeButton}
           </Button>
-          <IconButton onClick={onClose} size="small" aria-label="סגור רשימת מצרכים">
+          <IconButton onClick={onClose} size="small" aria-label={IngredientsBottomSheetText.closeAriaLabel}>
             <CloseIcon />
           </IconButton>
         </Box>

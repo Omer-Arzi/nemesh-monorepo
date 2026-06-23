@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import Box from "@mui/material/Box";
+import { TagPageText } from "./consts";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
@@ -16,11 +17,11 @@ export default function TagPage() {
   const { data: recipesResult, isLoading: recipesLoading } = useRecipesByTag(slug);
 
   if (tagLoading) {
-    return <LoadingState label="טוען תגית..." minHeight={400} />;
+    return <LoadingState label={TagPageText.loading} minHeight={400} />;
   }
 
   if (tagError || !tag) {
-    return <ErrorState title="התגית לא נמצאה" />;
+    return <ErrorState title={TagPageText.errorNotFound} />;
   }
 
   const recipes = recipesResult?.items ?? [];
@@ -66,12 +67,12 @@ export default function TagPage() {
 
       {/* ── Recipe grid ─────────────────────────────────────────────── */}
       {recipesLoading ? (
-        <LoadingState label="טוען מתכונים..." minHeight={200} />
+        <LoadingState label={TagPageText.recipesLoading} minHeight={200} />
       ) : recipes.length === 0 ? (
-        <EmptyState title="אין מתכונים" description="אין מתכונים עם תגית זו עדיין." />
+        <EmptyState title={TagPageText.emptyTitle} description={TagPageText.emptyDescription} />
       ) : (
         <>
-          <SectionHeader title="מתכונים" sx={{ mb: 2 }} />
+          <SectionHeader title={TagPageText.recipeSectionTitle} sx={{ mb: 2 }} />
           <Grid container spacing={2}>
             {recipes.map((recipe) => (
               <Grid key={recipe.id} size={{ xs: 6, sm: 4, md: 3 }}>

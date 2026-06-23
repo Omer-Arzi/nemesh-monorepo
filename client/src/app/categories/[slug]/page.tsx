@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import Box from "@mui/material/Box";
+import { CategoryPageText } from "./consts";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
@@ -17,11 +18,11 @@ export default function CategoryPage() {
   const { data: recipesResult, isLoading: recipesLoading } = useRecipesByCategory(slug);
 
   if (categoryLoading) {
-    return <LoadingState label="טוען קטגוריה..." minHeight={400} />;
+    return <LoadingState label={CategoryPageText.loading} minHeight={400} />;
   }
 
   if (categoryError || !category) {
-    return <ErrorState title="הקטגוריה לא נמצאה" />;
+    return <ErrorState title={CategoryPageText.errorNotFound} />;
   }
 
   const recipes = recipesResult?.items ?? [];
@@ -71,12 +72,12 @@ export default function CategoryPage() {
       ) : recipes.length === 0 ? (
         <EmptyState
           icon={<MenuBookOutlinedIcon fontSize="inherit" />}
-          title="עוד אין כאן מתכונים"
-          description="הקטגוריה הזו מחכה למתכון הראשון שלה."
+          title={CategoryPageText.emptyTitle}
+          description={CategoryPageText.emptyDescription}
         />
       ) : (
         <>
-          <SectionHeader title="מתכונים" sx={{ mb: 2 }} />
+          <SectionHeader title={CategoryPageText.recipeSectionTitle} sx={{ mb: 2 }} />
           {/* xs:12 = single column on mobile, consistent with the results page grid */}
           <Grid container spacing={2}>
             {recipes.map((recipe) => (

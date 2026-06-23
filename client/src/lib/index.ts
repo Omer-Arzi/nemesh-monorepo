@@ -5,7 +5,6 @@
  */
 export * from "./api";
 export * from "./query";
-export * from "./validation";
 export * from "./i18n";
 // Theme is intentionally NOT re-exported here — it should only be consumed
 // by the ThemeProvider, not scattered across feature code.

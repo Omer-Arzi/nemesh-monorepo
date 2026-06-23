@@ -14,7 +14,6 @@ export { default as IngredientSectionList } from "./IngredientSectionList";
 export { default as PreparationSteps } from "./PreparationSteps";
 export { default as RecipeMeta } from "./RecipeMeta";
 export { default as RecipeHero } from "./RecipeHero";
-export { default as IngredientsSection } from "./IngredientsSection";
 export { default as PreparationStepsSection } from "./PreparationStepsSection";
 export { default as RecipeTipsSection } from "./RecipeTipsSection";
 export { default as RecipeDetailLayout } from "./RecipeDetailLayout";
