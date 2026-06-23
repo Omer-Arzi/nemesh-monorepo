@@ -5,6 +5,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import WhatshotIcon from "@mui/icons-material/Whatshot";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
+import { formatPrepTime } from "@/lib/formatters/prepTime";
 import type { Difficulty } from "@/types/domain";
 import { RecipeMetaStyle } from "./styles/RecipeMetaStyle";
 
@@ -38,7 +39,7 @@ export default function RecipeMeta({ prepTime, servings, difficulty, sx }: Props
   return (
     <Box sx={{ ...RecipeMetaStyle.root, ...sx }}>
       {prepTime != null && (
-        <StatItem icon={<AccessTimeIcon fontSize="inherit" />} label={`${prepTime} דק'`} />
+        <StatItem icon={<AccessTimeIcon fontSize="inherit" />} label={formatPrepTime(prepTime)} />
       )}
       {servings != null && (
         <StatItem icon={<PeopleIcon fontSize="inherit" />} label={`${servings} מנות`} />

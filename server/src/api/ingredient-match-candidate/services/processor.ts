@@ -83,11 +83,13 @@ export async function processRecipeIngredientsByDocumentId(
 ): Promise<ProcessResult> {
   const recipe = await strapi.documents('api::recipe.recipe').findOne({
     documentId: recipeDocumentId,
-    populate: { ingredients: { fields: ['ingredientName'] } },
+    populate: {
+      ingredientSections: { populate: { ingredients: { fields: ['ingredientName'] } } },
+    },
   });
 
-  const ingredientLines: string[] = ((recipe as any)?.ingredients ?? [])
-    .map((ing: any) => ing.ingredientName as string | undefined)
+  const ingredientLines: string[] = ((recipe as any)?.ingredientSections ?? [])
+    .flatMap((sec: any) => (sec.ingredients ?? []).map((ing: any) => ing.ingredientName as string | undefined))
     .filter((text: string | undefined): text is string => Boolean(text));
 
   return processRecipeIngredients(strapi, recipeDocumentId, ingredientLines);

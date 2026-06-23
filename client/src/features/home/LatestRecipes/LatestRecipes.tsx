@@ -35,7 +35,7 @@ export default function LatestRecipes() {
 
         <Grid container spacing={2}>
           {recipes.map((recipe) => (
-            <Grid key={recipe.id} size={{ xs: 6, sm: 4, md: 3 }}>
+            <Grid key={recipe.id} size={{ xs: 12, sm: 4, md: 3 }}>
               <RecipeCard recipe={recipe} />
             </Grid>
           ))}

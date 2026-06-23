@@ -574,7 +574,10 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
       }>;
     difficulty: Schema.Attribute.Enumeration<['easy', 'medium', 'hard']>;
     image: Schema.Attribute.Media<'images'>;
-    ingredients: Schema.Attribute.Component<'recipe.recipe-ingredient', true>;
+    ingredientSections: Schema.Attribute.Component<
+      'recipe.ingredient-section',
+      true
+    >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -589,7 +592,6 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     servings: Schema.Attribute.Integer;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
-    steps: Schema.Attribute.Component<'recipe.preparation-step', true>;
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>;
     tips: Schema.Attribute.Component<'recipe.recipe-tip', true>;
     title: Schema.Attribute.String & Schema.Attribute.Required;

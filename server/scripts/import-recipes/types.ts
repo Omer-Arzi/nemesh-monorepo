@@ -5,6 +5,11 @@ export type NormalizedIngredient = {
   note: string | null;
 };
 
+export type NormalizedIngredientSection = {
+  title: string | null;
+  ingredients: NormalizedIngredient[];
+};
+
 export type NormalizedStep = {
   description: string;
 };
@@ -23,9 +28,13 @@ export type Difficulty = "easy" | "medium" | "hard";
 /**
  * Shape produced by Claude Code normalization — no slug yet.
  *
- * `preparationSections` is the preferred field.
- * `steps` is accepted for backward compatibility with manually authored JSON;
- * the pipeline converts it to a single unnamed section before importing.
+ * Ingredient fields (in order of preference):
+ *   `ingredientSections` — grouped ingredient sections with optional titles.
+ *   `ingredients`        — legacy flat list; auto-converted to a single unnamed section.
+ *
+ * Preparation fields (in order of preference):
+ *   `preparationSections` — grouped preparation sections with optional titles.
+ *   `steps`               — legacy flat list; auto-converted to a single unnamed section.
  */
 export type LLMRecipeOutput = {
   title: string;
@@ -33,7 +42,10 @@ export type LLMRecipeOutput = {
   servings: number | null;
   prepTime: number | null;
   difficulty: Difficulty | null;
-  ingredients: NormalizedIngredient[];
+  /** Preferred — one or more named or unnamed ingredient sections. */
+  ingredientSections?: NormalizedIngredientSection[];
+  /** Legacy flat ingredient list — auto-converted to ingredientSections before import. */
+  ingredients?: NormalizedIngredient[];
   /** Legacy flat steps — accepted but converted to preparationSections before import. */
   steps?: NormalizedStep[];
   /** Preferred — one or more named or unnamed preparation sections. */
@@ -43,9 +55,13 @@ export type LLMRecipeOutput = {
   tags: [];
 };
 
-/** Fully normalized recipe with slug and resolved preparationSections — ready for Strapi. */
-export type NormalizedRecipe = Omit<LLMRecipeOutput, "steps" | "preparationSections"> & {
+/** Fully normalized recipe with slug, resolved ingredientSections and preparationSections — ready for Strapi. */
+export type NormalizedRecipe = Omit<
+  LLMRecipeOutput,
+  "steps" | "preparationSections" | "ingredients" | "ingredientSections"
+> & {
   slug: string;
+  ingredientSections: NormalizedIngredientSection[];
   preparationSections: NormalizedPreparationSection[];
 };
 

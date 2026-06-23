@@ -9,7 +9,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import NextLink from "next/link";
 import { useCallback, useState } from "react";
 import { ROUTES } from "@/constants";
-import { NAV_ITEMS } from "../navConfig";
+import { NAV_ITEMS, RAIL_NAV_ITEMS } from "../navConfig";
 import NavDrawer from "../NavDrawer";
 import NavLink from "../NavLink";
 import { HeaderStyle } from "./styles/HeaderStyle";
@@ -83,7 +83,7 @@ export default function Header() {
       <NavDrawer
         open={drawerOpen}
         onClose={closeDrawer}
-        items={NAV_ITEMS}
+        items={RAIL_NAV_ITEMS}
       />
     </>
   );

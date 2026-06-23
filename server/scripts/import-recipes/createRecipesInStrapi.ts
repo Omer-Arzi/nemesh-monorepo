@@ -23,11 +23,14 @@ function buildRequestBody(recipe: NormalizedRecipe) {
       servings: recipe.servings ?? undefined,
       prepTime: recipe.prepTime ?? undefined,
       difficulty: recipe.difficulty ?? undefined,
-      ingredients: recipe.ingredients.map((ing) => ({
-        ingredientName: ing.ingredientName,
-        amount: ing.amount ?? undefined,
-        unit: ing.unit ?? undefined,
-        note: ing.note ?? undefined,
+      ingredientSections: recipe.ingredientSections.map((section) => ({
+        title: section.title ?? undefined,
+        ingredients: section.ingredients.map((ing) => ({
+          ingredientName: ing.ingredientName,
+          amount: ing.amount ?? undefined,
+          unit: ing.unit ?? undefined,
+          note: ing.note ?? undefined,
+        })),
       })),
       preparationSections: recipe.preparationSections.map((section) => ({
         title: section.title ?? undefined,

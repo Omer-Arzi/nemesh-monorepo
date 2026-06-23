@@ -1,6 +1,6 @@
 export const RelatedRecipesStyle = {
   root: {
-    py: 6,
+    py: { xs: 4, md: 6 },
     px: { xs: 2, md: 4 },
   },
   header: {

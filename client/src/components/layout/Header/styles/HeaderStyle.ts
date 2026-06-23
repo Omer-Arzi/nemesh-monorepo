@@ -5,6 +5,10 @@ export const HeaderStyle = {
   },
   toolbar: {
     gap: 2,
+    // On mobile (xs), row-reverse in RTL cancels the RTL row direction, making
+    // items flow LTR: wordmark goes LEFT, spacer fills centre, hamburger goes RIGHT.
+    // On desktop (md+), normal RTL row is restored: wordmark RIGHT, nav centre.
+    flexDirection: { xs: "row-reverse", md: "row" } as const,
   },
   wordmark: {
     textDecoration: "none",
@@ -28,6 +32,7 @@ export const HeaderStyle = {
   },
   hamburger: {
     display: { md: "none" },
-    ml: "auto",
+    // ml:"auto" removed — it was flipped to mr:"auto" by stylis-plugin-rtl and
+    // fought the spacer in the row-reverse mobile layout. The spacer handles positioning.
   },
 } as const;

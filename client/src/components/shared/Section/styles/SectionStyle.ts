@@ -1,5 +1,5 @@
 export const SectionStyle = {
   root: {
-    py: { xs: 4, md: 6 },
+    py: { xs: 3, md: 6 },
   },
 } as const;

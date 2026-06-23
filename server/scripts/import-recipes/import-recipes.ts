@@ -32,7 +32,13 @@ try {
 import { parseDocx } from "./parseDocx";
 import { createRecipesInStrapi } from "./createRecipesInStrapi";
 import { slugifyHebrew, ensureUniqueSlug } from "./slugifyHebrew";
-import type { LLMRecipeOutput, NormalizedIngredient, NormalizedRecipe, NormalizedPreparationSection } from "./types";
+import type {
+  LLMRecipeOutput,
+  NormalizedIngredient,
+  NormalizedIngredientSection,
+  NormalizedRecipe,
+  NormalizedPreparationSection,
+} from "./types";
 
 // ── Safety gate ───────────────────────────────────────────────────────────────
 
@@ -135,8 +141,16 @@ function validate(raw: unknown): { recipes: LLMRecipeOutput[]; errors: string[] 
       );
     }
 
-    if (!Array.isArray(item.ingredients)) {
-      errors.push(`${label} "${item.title}": "ingredients" must be an array.`);
+    const hasIngredientSections =
+      Array.isArray(item.ingredientSections) &&
+      (item.ingredientSections as unknown[]).length > 0;
+    const hasLegacyIngredients =
+      Array.isArray(item.ingredients) && (item.ingredients as unknown[]).length > 0;
+
+    if (!hasIngredientSections && !hasLegacyIngredients) {
+      errors.push(
+        `${label} "${item.title}": no ingredients or ingredientSections found.`
+      );
     }
 
     const hasSections =
@@ -186,6 +200,22 @@ function applySlugAndNormalize(recipes: LLMRecipeOutput[]): NormalizedRecipe[] {
     const slug = ensureUniqueSlug(baseSlug, usedSlugs);
     usedSlugs.add(slug);
 
+    // ── Ingredient sections ───────────────────────────────────────────────
+    let ingredientSections: NormalizedIngredientSection[];
+    if (recipe.ingredientSections && recipe.ingredientSections.length > 0) {
+      // Apply parenthetical note extraction to ingredients inside each section.
+      ingredientSections = recipe.ingredientSections.map((sec) => ({
+        title: sec.title,
+        ingredients: sec.ingredients.map(extractIngredientNote),
+      }));
+    } else {
+      // Wrap legacy flat ingredients in a single unnamed section.
+      ingredientSections = [
+        { title: null, ingredients: (recipe.ingredients ?? []).map(extractIngredientNote) },
+      ];
+    }
+
+    // ── Preparation sections ──────────────────────────────────────────────
     let preparationSections: NormalizedPreparationSection[];
     if (recipe.preparationSections && recipe.preparationSections.length > 0) {
       preparationSections = recipe.preparationSections;
@@ -193,31 +223,38 @@ function applySlugAndNormalize(recipes: LLMRecipeOutput[]): NormalizedRecipe[] {
       preparationSections = [{ title: null, steps: recipe.steps ?? [] }];
     }
 
-    const { steps: _steps, preparationSections: _sections, ...rest } = recipe;
-    return {
-      ...rest,
-      slug,
-      preparationSections,
-      ingredients: recipe.ingredients.map(extractIngredientNote),
-    };
+    const {
+      steps: _steps,
+      preparationSections: _sections,
+      ingredients: _ingredients,
+      ingredientSections: _ingredientSections,
+      ...rest
+    } = recipe;
+
+    return { ...rest, slug, ingredientSections, preparationSections };
   });
 }
 
 function printSummary(recipes: NormalizedRecipe[]) {
   console.log("── Recipes ───────────────────────────────────────────────────");
   for (const r of recipes) {
+    const totalIngredients = r.ingredientSections.reduce((n, s) => n + s.ingredients.length, 0);
     const totalSteps = r.preparationSections.reduce((n, s) => n + s.steps.length, 0);
     const warnings: string[] = [];
-    if (!r.ingredients.length) warnings.push("no ingredients");
+    if (totalIngredients === 0) warnings.push("no ingredients");
     if (totalSteps === 0) warnings.push("no steps");
     const warn = warnings.length ? `  ⚠  ${warnings.join(", ")}` : "";
     console.log(`  ${r.title}`);
-    console.log(`    slug:        ${r.slug}`);
-    console.log(`    servings:    ${r.servings ?? "—"}`);
-    console.log(`    prepTime:    ${r.prepTime != null ? `${r.prepTime} min` : "—"}`);
-    console.log(`    difficulty:  ${r.difficulty ?? "—"}`);
-    console.log(`    ingredients: ${r.ingredients.length}`);
-    console.log(`    sections:    ${r.preparationSections.length}  (${totalSteps} steps total)${warn}`);
+    console.log(`    slug:         ${r.slug}`);
+    console.log(`    servings:     ${r.servings ?? "—"}`);
+    console.log(`    prepTime:     ${r.prepTime != null ? `${r.prepTime} min` : "—"}`);
+    console.log(`    difficulty:   ${r.difficulty ?? "—"}`);
+    console.log(`    ingredients:  ${totalIngredients} (${r.ingredientSections.length} section(s))`);
+    for (const sec of r.ingredientSections) {
+      const label = sec.title ?? "(ללא כותרת)";
+      console.log(`      • ${label}: ${sec.ingredients.length} ingredients`);
+    }
+    console.log(`    prep sections: ${r.preparationSections.length}  (${totalSteps} steps total)${warn}`);
     for (const sec of r.preparationSections) {
       const label = sec.title ?? "(ללא כותרת)";
       console.log(`      • ${label}: ${sec.steps.length} steps`);
@@ -367,13 +404,18 @@ Write a **JSON array** where each element matches this shape:
     "servings": 4,
     "prepTime": 30,
     "difficulty": "easy",
-    "ingredients": [
-      { "ingredientName": "<שם מרכיב>", "amount": 200, "unit": "<יחידה>", "note": null },
-      { "ingredientName": "<שם מרכיב>", "amount": null, "unit": null, "note": "<הערה אם יש>" }
+    "ingredientSections": [
+      {
+        "title": "<כותרת קבוצת מצרכים — למשל: לבצק, למלית, לציפוי — או null אם אין>",
+        "ingredients": [
+          { "ingredientName": "<שם מרכיב>", "amount": 200, "unit": "<יחידה>", "note": null },
+          { "ingredientName": "<שם מרכיב>", "amount": null, "unit": null, "note": "<הערה אם יש>" }
+        ]
+      }
     ],
     "preparationSections": [
       {
-        "title": "<כותרת סעיף — למשל: לרוטב, לבצק, להרכבה — או null אם אין>",
+        "title": "<כותרת סעיף הכנה — למשל: לרוטב, לבצק, להרכבה — או null אם אין>",
         "steps": [
           { "description": "<שלב הכנה ראשון>" },
           { "description": "<שלב הכנה שני>" }
@@ -385,6 +427,19 @@ Write a **JSON array** where each element matches this shape:
     ],
     "categories": [],
     "tags": []
+  }
+]
+\`\`\`
+
+If a recipe has **no ingredient groups** (single undivided list), use a single section with \`"title": null\`:
+
+\`\`\`json
+"ingredientSections": [
+  {
+    "title": null,
+    "ingredients": [
+      { "ingredientName": "קמח", "amount": 200, "unit": "גרם", "note": null }
+    ]
   }
 ]
 \`\`\`
@@ -402,6 +457,33 @@ If a recipe has **no preparation sections** (single undivided set of steps), use
   }
 ]
 \`\`\`
+
+---
+
+## How to identify ingredient sections
+
+Look for headings that group ingredients by recipe component. Common patterns:
+
+- **"לבצק:", "למלית:", "למלית הבוטנים:", "למלית השוקולד:", "לקרם:", "לקצפת:", "לציפוי:", "לרוטב:", "להרכבה:"** → each is a separate ingredient section title
+
+When ingredients are divided into named groups, place each group in its own \`ingredientSection\` with the appropriate title.
+
+When all ingredients belong to a single unnamed group, use a single section with \`"title": null\`.
+
+**Ingredient notes vs. section titles — critical distinction:**
+
+Use \`ingredientSection.title\` for:
+- לבצק, למלית, למלית הבוטנים, למלית השוקולד, לקצפת, לקרם, לציפוי, לרוטב, להרכבה, להגשה
+- Any label that groups multiple ingredients under a shared heading
+
+Use \`ingredient.note\` for:
+- אפשרות החלפה: "ניתן להחליף בשמנת"
+- אופציונליות: "לא חובה", "אופציונלי"
+- כמות משתנה: "לפי הטעם", "לטעום ולתקן"
+- הוראות עזר: "חתוך למקלות", "מושרה במים", "מומס", "קר"
+- הערות להגשה על מרכיב בודד: "לפיזור לפני הגשה"
+
+**Never put a section title inside ingredient.note.**
 
 ---
 
@@ -426,10 +508,11 @@ When in doubt, use a single section with \`"title": null\` rather than inventing
 | \`servings\` | number \\| null | Integer. null if not mentioned. |
 | \`prepTime\` | number \\| null | Total time in **minutes**. Convert hours. null if unknown. |
 | \`difficulty\` | "easy" \\| "medium" \\| "hard" \\| null | Only set if clearly inferrable. Otherwise null. |
+| \`ingredientSections[].title\` | string \\| null | Group heading in Hebrew, or null for a single unnamed group. |
 | \`ingredientName\` | string | Keep in Hebrew. |
 | \`amount\` | number \\| null | Numeric value only, no units here. null if unknown. |
 | \`unit\` | string \\| null | e.g. "גרם", "כפית", "כוס". null if not applicable. |
-| \`note\` | string \\| null | Clarification about the ingredient. null if none. |
+| \`note\` | string \\| null | True clarification about the ingredient only. null if none. Never a section title. |
 | \`preparationSections[].title\` | string \\| null | Section heading in Hebrew, or null for a single unnamed section. |
 | \`preparationSections[].steps[].description\` | string | Full text of the step. Keep in Hebrew. |
 | \`tips[].text\` | string | Only tips clearly separated from steps. |
@@ -446,6 +529,7 @@ When in doubt, use a single section with \`"title": null\` rather than inventing
 - If a field is missing from the source text, use \`null\` (for scalars) or \`[]\` (for arrays).
 - Do **not** add a \`slug\` field — slugs are generated automatically by the import script.
 - Do **not** add \`steps\` at the top level — use \`preparationSections\` only.
+- Do **not** add \`ingredients\` at the top level — use \`ingredientSections\` only.
 - If the document contains multiple recipes, include all of them in the array.
 - Keep all Hebrew text in Hebrew. Do not translate.
 `;

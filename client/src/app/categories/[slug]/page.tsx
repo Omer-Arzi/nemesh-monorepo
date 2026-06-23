@@ -4,9 +4,10 @@ import { useParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import { PageContainer, LoadingState, ErrorState, EmptyState, SectionHeader } from "@/components/shared";
-import { RecipeCard } from "@/components/domain";
+import { RecipeCard, RecipeGridSkeleton } from "@/components/domain";
 import { useCategory, useRecipesByCategory } from "@/features/category/hooks";
 
 export default function CategoryPage() {
@@ -27,7 +28,7 @@ export default function CategoryPage() {
 
   return (
     <PageContainer>
-      {/* ── Header ──────────────────────────────────────────────────── */}
+      {/* ── Category header ──────────────────────────────────────────── */}
       <Box sx={{ mb: 3, textAlign: "center" }}>
         {category.image ? (
           <Box
@@ -66,15 +67,20 @@ export default function CategoryPage() {
 
       {/* ── Recipe grid ─────────────────────────────────────────────── */}
       {recipesLoading ? (
-        <LoadingState label="טוען מתכונים..." minHeight={200} />
+        <RecipeGridSkeleton count={4} />
       ) : recipes.length === 0 ? (
-        <EmptyState title="אין מתכונים" description="אין מתכונים בקטגוריה זו עדיין." />
+        <EmptyState
+          icon={<MenuBookOutlinedIcon fontSize="inherit" />}
+          title="עוד אין כאן מתכונים"
+          description="הקטגוריה הזו מחכה למתכון הראשון שלה."
+        />
       ) : (
         <>
           <SectionHeader title="מתכונים" sx={{ mb: 2 }} />
+          {/* xs:12 = single column on mobile, consistent with the results page grid */}
           <Grid container spacing={2}>
             {recipes.map((recipe) => (
-              <Grid key={recipe.id} size={{ xs: 6, sm: 4, md: 3 }}>
+              <Grid key={recipe.id} size={{ xs: 12, sm: 4, md: 3 }}>
                 <RecipeCard recipe={recipe} />
               </Grid>
             ))}
