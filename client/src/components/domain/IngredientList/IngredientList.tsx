@@ -13,7 +13,7 @@ type Props = {
   sx?: SxProps<Theme>;
 };
 
-function formatIngredient(ingredient: RecipeIngredient): string {
+function formatIngredientLine(ingredient: RecipeIngredient): string {
   const parts: string[] = [];
 
   if (ingredient.amount != null) {
@@ -24,9 +24,6 @@ function formatIngredient(ingredient: RecipeIngredient): string {
   }
   if (ingredient.ingredientName) {
     parts.push(ingredient.ingredientName);
-  }
-  if (ingredient.note) {
-    parts.push(`(${ingredient.note})`);
   }
 
   return parts.join(" ");
@@ -45,7 +42,12 @@ export default function IngredientList({ ingredients, sx }: Props) {
     <List disablePadding sx={sx}>
       {ingredients.map((ingredient, index) => (
         <ListItem key={index} disablePadding sx={IngredientListStyle.listItem}>
-          <Typography variant="body2">{formatIngredient(ingredient)}</Typography>
+          <Typography variant="body2">{formatIngredientLine(ingredient)}</Typography>
+          {ingredient.note && (
+            <Typography variant="body2" sx={IngredientListStyle.note}>
+              {ingredient.note}
+            </Typography>
+          )}
         </ListItem>
       ))}
     </List>

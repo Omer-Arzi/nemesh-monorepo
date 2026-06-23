@@ -59,19 +59,14 @@
       "type": "richtext",
       "maxLength": 350
     },
-    "ingredients": {
+    "ingredientSections": {
       "type": "component",
-      "component": "recipe.recipe-ingredient",
+      "component": "recipe.ingredient-section",
       "repeatable": true
     },
     "tips": {
       "type": "component",
       "component": "recipe.recipe-tip",
-      "repeatable": true
-    },
-    "steps": {
-      "type": "component",
-      "component": "recipe.preparation-step",
       "repeatable": true
     },
     "preparationSections": {

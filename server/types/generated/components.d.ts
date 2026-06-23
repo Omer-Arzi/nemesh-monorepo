@@ -1,5 +1,17 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface RecipeIngredientSection extends Struct.ComponentSchema {
+  collectionName: 'components_recipe_ingredient_sections';
+  info: {
+    description: '';
+    displayName: 'IngredientSection';
+  };
+  attributes: {
+    ingredients: Schema.Attribute.Component<'recipe.recipe-ingredient', true>;
+    title: Schema.Attribute.String;
+  };
+}
+
 export interface RecipePreparationSection extends Struct.ComponentSchema {
   collectionName: 'components_recipe_preparation_sections';
   info: {
@@ -52,6 +64,7 @@ export interface RecipeRecipeTip extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'recipe.ingredient-section': RecipeIngredientSection;
       'recipe.preparation-section': RecipePreparationSection;
       'recipe.preparation-step': RecipePreparationStep;
       'recipe.recipe-ingredient': RecipeRecipeIngredient;

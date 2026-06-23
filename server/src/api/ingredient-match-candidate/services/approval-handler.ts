@@ -1,29 +1,7 @@
 import type { Core } from '@strapi/strapi';
+import { slugifyHebrew } from '../../../utils/slugifyHebrew';
 
 const CATALOG_UID = 'api::ingredient-catalog-item.ingredient-catalog-item' as const;
-
-const HEBREW_TO_LATIN: Record<string, string> = {
-  א: 'a',  ב: 'b',  ג: 'g',  ד: 'd',  ה: 'h',
-  ו: 'v',  ז: 'z',  ח: 'ch', ט: 't',  י: 'y',
-  כ: 'k',  ך: 'k',  ל: 'l',  מ: 'm',  ם: 'm',
-  נ: 'n',  ן: 'n',  ס: 's',  ע: 'a',  פ: 'p',
-  ף: 'f',  צ: 'ts', ץ: 'ts', ק: 'k',  ר: 'r',
-  ש: 'sh', ת: 't',
-};
-
-function slugifyIngredient(name: string): string {
-  let result = '';
-  for (const char of name) {
-    if (HEBREW_TO_LATIN[char]) {
-      result += HEBREW_TO_LATIN[char];
-    } else if (/[a-zA-Z0-9]/.test(char)) {
-      result += char.toLowerCase();
-    } else if (/[\s\-_]/.test(char)) {
-      result += '-';
-    }
-  }
-  return result.replace(/-+/g, '-').replace(/^-|-$/g, '') || 'ingredient';
-}
 
 /**
  * Called when a candidate is approved with matchType 'canonical'.
@@ -45,7 +23,7 @@ export async function handleCanonicalApproval(
     return;
   }
 
-  const slug = slugifyIngredient(ingredientName);
+  const slug = slugifyHebrew(ingredientName, 'ingredient');
 
   await strapi.documents(CATALOG_UID).create({
     data: {

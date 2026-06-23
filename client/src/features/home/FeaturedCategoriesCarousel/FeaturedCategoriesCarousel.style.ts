@@ -7,28 +7,24 @@ export const FeaturedCategoriesCarouselStyle = {
     pb: { xs: 4, sm: 5 },
   },
 
-  // Scrollable card track — lives outside PageContainer so it spans full width
+  // Scrollable card track — sits inside PageContainer so it inherits the same
+  // horizontal safe area as the section title. PageContainer's padding and
+  // max-width are the true boundaries; no spacer hacks needed.
+  // Edge fades are applied via maskImage in the component based on scroll position.
   track: {
     display: "flex",
     flexDirection: "row" as const,
-    gap: 1.5,
+    gap: 2,
     overflowX: "auto" as const,
     scrollSnapType: "x proximity",
     scrollBehavior: "smooth" as const,
-    // pt gives cards headroom so hover scale/translateY doesn't get clipped by
-    // the track's implicit overflow-y boundary (overflow-x:auto forces it non-visible)
-    pt: 1.5,
-    pb: 2,
+    // pt gives cards headroom so hover scale/translateY isn't clipped by the
+    // track's implicit overflow-y boundary (overflow-x:auto forces it non-visible)
+    pt: 2,
+    pb: 2.5,
     // Hide the scrollbar while keeping scroll functionality
     scrollbarWidth: "none" as const,
     "&::-webkit-scrollbar": { display: "none" },
     msOverflowStyle: "none" as const,
-  },
-
-  // Padding via flex spacers — more reliable than container padding on scroll elements,
-  // which browsers handle inconsistently in RTL overflow containers.
-  trackSpacer: {
-    flexShrink: 0,
-    width: { xs: 16, sm: 24, md: 32 },
   },
 } as const;

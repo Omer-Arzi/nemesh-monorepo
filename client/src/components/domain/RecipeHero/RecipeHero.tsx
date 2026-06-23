@@ -8,6 +8,7 @@ import RestaurantIcon from "@mui/icons-material/Restaurant";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { Recipe } from "@/types/domain";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
+import { formatPrepTime } from "@/lib/formatters/prepTime";
 import { RecipeHeroStyle } from "./styles/RecipeHeroStyle";
 
 // Descriptions longer than this are truncated until the user expands them.
@@ -123,7 +124,7 @@ export default function RecipeHero({
               <Divider sx={RecipeHeroStyle.divider} />
               <Box sx={RecipeHeroStyle.metaRow}>
                 {prepTime != null && (
-                  <HeroStat label="זמן הכנה" value={`${prepTime} דק'`} />
+                  <HeroStat label="זמן הכנה" value={formatPrepTime(prepTime)} />
                 )}
                 {difficulty != null && (
                   <HeroStat label="רמת קושי" value={DIFFICULTY_LABEL[difficulty]} />

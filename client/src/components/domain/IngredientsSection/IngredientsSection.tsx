@@ -1,17 +1,26 @@
 import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { RecipeIngredient } from "@/types/domain";
+import type { IngredientSection, RecipeIngredient } from "@/types/domain";
 import { SectionHeader } from "@/components/shared";
 import IngredientList from "../IngredientList";
+import IngredientSectionList from "../IngredientSectionList";
 import { IngredientsSectionStyle } from "./styles/IngredientsSectionStyle";
 
 type Props = {
-  ingredients: RecipeIngredient[];
+  ingredientSections?: IngredientSection[];
+  ingredients?: RecipeIngredient[];
   servings?: number | null;
   sx?: SxProps<Theme>;
 };
 
-export default function IngredientsSection({ ingredients, servings, sx }: Props) {
+export default function IngredientsSection({
+  ingredientSections,
+  ingredients = [],
+  servings,
+  sx,
+}: Props) {
+  const hasSections = ingredientSections && ingredientSections.length > 0;
+
   return (
     <section>
       <SectionHeader title="מצרכים" sx={sx} />
@@ -22,7 +31,11 @@ export default function IngredientsSection({ ingredients, servings, sx }: Props)
         </Typography>
       )}
 
-      <IngredientList ingredients={ingredients} />
+      {hasSections ? (
+        <IngredientSectionList sections={ingredientSections} />
+      ) : (
+        <IngredientList ingredients={ingredients} />
+      )}
     </section>
   );
 }

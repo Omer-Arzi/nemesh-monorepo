@@ -55,6 +55,16 @@ export type PreparationSection = {
   steps: PreparationStep[];
 };
 
+/**
+ * A named ingredient section containing its own ingredient list.
+ * Used when a recipe groups ingredients by component
+ * (e.g. "לבצק", "למלית", "לציפוי").
+ */
+export type IngredientSection = {
+  title: string | null;
+  ingredients: RecipeIngredient[];
+};
+
 // ─── Collection types ─────────────────────────────────────────────────────
 
 /** Content category for primary recipe navigation. */
@@ -88,10 +98,7 @@ export type Recipe = BaseEntity & {
   prepTime: number | null;
   difficulty: Difficulty | null;
   description: string | null;
-  ingredients: RecipeIngredient[];
-  /** Legacy flat steps — populated for recipes created before preparationSections. */
-  steps: PreparationStep[];
-  /** Grouped preparation sections — preferred over steps for new recipes. */
+  ingredientSections: IngredientSection[];
   preparationSections: PreparationSection[];
   tips: RecipeTip[];
   createdAt: string; // ISO 8601

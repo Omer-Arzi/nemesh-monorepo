@@ -11,6 +11,7 @@ import type {
   Category,
   Tag,
   RecipeIngredient,
+  IngredientSection,
   PreparationStep,
   PreparationSection,
   RecipeTip,
@@ -47,6 +48,12 @@ type StrapiIngredientRaw = {
   note: string | null;
 };
 
+type StrapiIngredientSectionRaw = {
+  id: number;
+  title: string | null;
+  ingredients: StrapiIngredientRaw[];
+};
+
 type StrapiStepRaw = {
   id: number;
   description: string;
@@ -74,8 +81,7 @@ type StrapiRecipeAttrs = {
   prepTime: number | null;
   difficulty: Difficulty | null;
   description: string | null;
-  ingredients: StrapiIngredientRaw[];
-  steps: StrapiStepRaw[];
+  ingredientSections: StrapiIngredientSectionRaw[];
   preparationSections: StrapiPreparationSectionRaw[];
   tips: StrapiTipRaw[];
   createdAt: string;
@@ -134,6 +140,13 @@ function mapStep(raw: StrapiStepRaw): PreparationStep {
   };
 }
 
+function mapIngredientSection(raw: StrapiIngredientSectionRaw): IngredientSection {
+  return {
+    title: raw.title ?? null,
+    ingredients: (raw.ingredients ?? []).map(mapIngredient),
+  };
+}
+
 function mapPreparationSection(raw: StrapiPreparationSectionRaw): PreparationSection {
   return {
     title: raw.title ?? null,
@@ -157,8 +170,7 @@ function mapRecipe(raw: StrapiData<StrapiRecipeAttrs>): Recipe {
     prepTime: raw.prepTime ?? null,
     difficulty: raw.difficulty ?? null,
     description: raw.description ?? null,
-    ingredients: (raw.ingredients ?? []).map(mapIngredient),
-    steps: (raw.steps ?? []).map(mapStep),
+    ingredientSections: (raw.ingredientSections ?? []).map(mapIngredientSection),
     preparationSections: (raw.preparationSections ?? []).map(mapPreparationSection),
     tips: (raw.tips ?? []).map(mapTip),
     createdAt: raw.createdAt,
@@ -199,8 +211,7 @@ const DETAIL_POPULATE =
   "&populate[categories][fields][1]=slug" +
   "&populate[tags][fields][0]=name" +
   "&populate[tags][fields][1]=slug" +
-  "&populate[ingredients]=true" +
-  "&populate[steps][populate][image]=true" +
+  "&populate[ingredientSections][populate][ingredients]=true" +
   "&populate[preparationSections][populate][steps][populate][image]=true" +
   "&populate[tips]=true";
 

@@ -72,3 +72,25 @@ export async function processRecipeIngredients(
 
   return { created, skipped };
 }
+
+/**
+ * Convenience wrapper: fetches a recipe's ingredients then calls processRecipeIngredients.
+ * Used by both the recipe afterCreate lifecycle and the processIngredientCandidates controller.
+ */
+export async function processRecipeIngredientsByDocumentId(
+  strapi: Core.Strapi,
+  recipeDocumentId: string
+): Promise<ProcessResult> {
+  const recipe = await strapi.documents('api::recipe.recipe').findOne({
+    documentId: recipeDocumentId,
+    populate: {
+      ingredientSections: { populate: { ingredients: { fields: ['ingredientName'] } } },
+    },
+  });
+
+  const ingredientLines: string[] = ((recipe as any)?.ingredientSections ?? [])
+    .flatMap((sec: any) => (sec.ingredients ?? []).map((ing: any) => ing.ingredientName as string | undefined))
+    .filter((text: string | undefined): text is string => Boolean(text));
+
+  return processRecipeIngredients(strapi, recipeDocumentId, ingredientLines);
+}

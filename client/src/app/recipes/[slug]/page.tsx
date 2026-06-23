@@ -51,20 +51,19 @@ export default function RecipePage() {
         difficulty={recipe.difficulty}
       />
 
+      <RecipeTipsSection tips={recipe.tips} />
+
       <RecipeDetailLayout
         sidebar={
           <StickyIngredientsSidebar
-            ingredients={recipe.ingredients}
-            servings={recipe.servings}
+            ingredientSections={recipe.ingredientSections}
           />
         }
       >
         <Section sx={{ px: { xs: 2, md: 4 } }}>
           <PreparationStepsSection
-            steps={recipe.steps}
             preparationSections={recipe.preparationSections}
           />
-          <RecipeTipsSection tips={recipe.tips} sx={{ mt: 4 }} />
         </Section>
       </RecipeDetailLayout>
 

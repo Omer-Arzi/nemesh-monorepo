@@ -3,25 +3,35 @@
 import { Suspense, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import NextLink from "next/link";
 import {
   EmptyState,
   ErrorState,
-  LoadingState,
   PageContainer,
   SectionHeader,
 } from "@/components/shared";
-import { RecipeCard } from "@/components/domain";
+import { RecipeCard, RecipeGridSkeleton } from "@/components/domain";
 import { useInfiniteRecipes, useSearch } from "@/features/results/hooks";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { ROUTES } from "@/constants";
 
 // ── Search results (finite list) ──────────────────────────────────────────────
 
 function SearchResults({ q }: { q: string }) {
   const { data: recipes = [], isLoading, isError } = useSearch(q);
 
-  if (isLoading) return <LoadingState label="מחפשים..." minHeight={400} />;
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <SectionHeader title={`תוצאות עבור "${q}"`} sx={{ mb: 3 }} />
+        <RecipeGridSkeleton count={8} />
+      </PageContainer>
+    );
+  }
 
   if (isError) {
     return (
@@ -34,13 +44,24 @@ function SearchResults({ q }: { q: string }) {
       <SectionHeader title={`תוצאות עבור "${q}"`} sx={{ mb: 3 }} />
       {recipes.length === 0 ? (
         <EmptyState
-          title="לא נמצאו מתכונים"
-          description="נסו מילת חיפוש אחרת."
+          icon={<MenuBookOutlinedIcon fontSize="inherit" />}
+          title="לא מצאנו מתכונים שמתאימים לחיפוש הזה"
+          description="אפשר לנסות פחות מרכיבים, מילה אחרת, או להציץ בקטגוריות."
+          action={
+            <Button
+              component={NextLink}
+              href={ROUTES.CATEGORIES}
+              variant="outlined"
+              size="small"
+            >
+              לקטגוריות
+            </Button>
+          }
         />
       ) : (
         <Grid container spacing={2}>
           {recipes.map((recipe) => (
-            <Grid key={recipe.id} size={{ xs: 6, sm: 4, md: 3 }}>
+            <Grid key={recipe.id} size={{ xs: 12, sm: 4, md: 3 }}>
               <RecipeCard recipe={recipe} />
             </Grid>
           ))}
@@ -71,7 +92,14 @@ function BrowseResults() {
 
   const recipes = data?.pages.flatMap((page) => page.items) ?? [];
 
-  if (isLoading) return <LoadingState label="טוען מתכונים..." minHeight={400} />;
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <SectionHeader title="מתכונים" sx={{ mb: 3 }} />
+        <RecipeGridSkeleton count={8} />
+      </PageContainer>
+    );
+  }
 
   if (isError) {
     return (
@@ -88,13 +116,14 @@ function BrowseResults() {
 
       {recipes.length === 0 ? (
         <EmptyState
-          title="לא נמצאו מתכונים"
-          description="אין מתכונים פורסמו עדיין."
+          icon={<MenuBookOutlinedIcon fontSize="inherit" />}
+          title="עוד לא פרסמנו מתכונים"
+          description="חוזרים בקרוב עם דברים טובים מהמטבח."
         />
       ) : (
         <Grid container spacing={2}>
           {recipes.map((recipe) => (
-            <Grid key={recipe.id} size={{ xs: 6, sm: 4, md: 3 }}>
+            <Grid key={recipe.id} size={{ xs: 12, sm: 4, md: 3 }}>
               <RecipeCard recipe={recipe} />
             </Grid>
           ))}
@@ -125,7 +154,13 @@ function ResultsContent() {
 
 export default function ResultsPage() {
   return (
-    <Suspense fallback={<LoadingState label="טוען..." minHeight={400} />}>
+    <Suspense
+      fallback={
+        <PageContainer>
+          <RecipeGridSkeleton count={8} />
+        </PageContainer>
+      }
+    >
       <ResultsContent />
     </Suspense>
   );

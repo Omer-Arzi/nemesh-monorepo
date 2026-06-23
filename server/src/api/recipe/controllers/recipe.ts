@@ -1,5 +1,5 @@
 import { factories } from '@strapi/strapi';
-import { processRecipeIngredients } from '../../ingredient-match-candidate/services/processor';
+import { processRecipeIngredientsByDocumentId } from '../../ingredient-match-candidate/services/processor';
 
 export default factories.createCoreController('api::recipe.recipe', ({ strapi }) => ({
   async related(ctx) {
@@ -12,7 +12,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
       populate: {
         categories: { fields: ['documentId'] },
         tags: { fields: ['documentId'] },
-        ingredients: { fields: ['ingredientName'] },
+        ingredientSections: { populate: { ingredients: { fields: ['ingredientName'] } } },
       },
       status: 'published',
       limit: 1,
@@ -30,7 +30,8 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
       (current as any).tags.map((t: any) => t.documentId)
     );
     const currentIngredientNames = new Set<string>(
-      (current as any).ingredients
+      ((current as any).ingredientSections ?? [])
+        .flatMap((sec: any) => sec.ingredients ?? [])
         .map((i: any) => i.ingredientName?.toLowerCase().trim())
         .filter(Boolean)
     );
@@ -43,7 +44,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
         image: { fields: ['url', 'alternativeText', 'width', 'height'] },
         categories: { fields: ['documentId', 'name', 'slug'] },
         tags: { fields: ['documentId', 'name', 'slug'] },
-        ingredients: { fields: ['ingredientName'] },
+        ingredientSections: { populate: { ingredients: { fields: ['ingredientName'] } } },
       },
       status: 'published',
       limit: 500,
@@ -65,10 +66,12 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
         currentTagIds.has(t.documentId)
       ).length;
 
-      const sharedIngredients = r.ingredients.filter((i: any) => {
-        const name = i.ingredientName?.toLowerCase().trim();
-        return name && currentIngredientNames.has(name);
-      }).length;
+      const sharedIngredients = (r.ingredientSections ?? [])
+        .flatMap((sec: any) => sec.ingredients ?? [])
+        .filter((i: any) => {
+          const name = i.ingredientName?.toLowerCase().trim();
+          return name && currentIngredientNames.has(name);
+        }).length;
 
       return {
         r,
@@ -138,12 +141,16 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
 
       UNION
 
-      SELECT DISTINCT r.document_id FROM recipes r
-      JOIN recipes_cmps rc
-        ON rc.entity_id = r.id
-        AND rc.field = 'ingredients'
-      JOIN components_recipe_recipe_ingredients i
-        ON i.id = rc.cmp_id
+      SELECT DISTINCT r.document_id
+      FROM recipes r
+      INNER JOIN recipes_cmps rc
+        ON rc.entity_id = r.id AND rc.field = 'ingredientSections'
+      INNER JOIN components_recipe_ingredient_sections s
+        ON s.id = rc.cmp_id
+      INNER JOIN components_recipe_ingredient_sections_cmps sic
+        ON sic.entity_id = s.id AND sic.field = 'ingredients'
+      INNER JOIN components_recipe_recipe_ingredients i
+        ON i.id = sic.cmp_id
       WHERE r.published_at IS NOT NULL
         AND word_similarity(?, i.ingredient_name) > 0.4
       `,
@@ -172,22 +179,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
 
   async processIngredientCandidates(ctx) {
     const { documentId } = ctx.params as { documentId: string };
-
-    const recipe = await strapi.documents('api::recipe.recipe').findOne({
-      documentId,
-      populate: { ingredients: { fields: ['ingredientName'] } },
-    });
-
-    if (!recipe) {
-      return ctx.notFound(`Recipe not found: ${documentId}`);
-    }
-
-    const ingredientLines: string[] = ((recipe as any).ingredients ?? [])
-      .map((ing: any) => ing.ingredientName as string | undefined)
-      .filter((text: string | undefined): text is string => Boolean(text));
-
-    const result = await processRecipeIngredients(strapi, documentId, ingredientLines);
-
+    const result = await processRecipeIngredientsByDocumentId(strapi, documentId);
     ctx.body = { data: result };
   },
 }));

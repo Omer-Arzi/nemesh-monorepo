@@ -11,6 +11,7 @@ import NextLink from "next/link";
 import { ROUTES } from "@/constants";
 import type { RecipeSummary } from "@/types/domain";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
+import { formatPrepTime } from "@/lib/formatters/prepTime";
 import RecipeMeta from "../RecipeMeta";
 import { RecipeCardStyle } from "./styles/RecipeCardStyle";
 
@@ -61,7 +62,7 @@ export default function RecipeCard({ recipe, small = false }: Props) {
           {small ? (
             <Typography variant="body2" sx={RecipeCardStyle.smallMeta}>
               {[
-                recipe.prepTime != null ? `${recipe.prepTime} דק'` : null,
+                recipe.prepTime != null ? formatPrepTime(recipe.prepTime) : null,
                 recipe.difficulty != null ? DIFFICULTY_LABEL[recipe.difficulty] : null,
                 ...recipe.categories.map((c) => c.name),
                 ...recipe.tags.map((t) => t.name),

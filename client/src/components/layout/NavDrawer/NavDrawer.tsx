@@ -5,35 +5,36 @@ import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
-import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
-import type { NavItem } from "../navConfig";
+import type { RailNavItem } from "../navConfig";
+import NavigationItem from "../NavigationItem";
+import { useSurpriseMe } from "@/hooks/useSurpriseMe";
 import { NavDrawerStyle } from "./styles/NavDrawerStyle";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  items: readonly NavItem[];
+  items: readonly RailNavItem[];
 };
 
 /**
  * Mobile navigation drawer.
  *
- * Slides in from the end-side of the screen: right in LTR, left in RTL.
- * Closes automatically when the active route changes (e.g. after link tap or
- * browser back).
+ * Renders the same RAIL_NAV_ITEMS as the desktop NavigationRail — icons,
+ * active states, and the "תפתיע אותי" surprise-me action are all included.
  *
- * Receives `items` from Header so the nav structure stays in one place
- * (navConfig.ts) and both surfaces stay in sync.
+ * Anchor: "right" in RTL so the drawer opens from the same physical side as
+ * the hamburger button (physical right = start side in Hebrew).
+ *
+ * Closes automatically when the active route changes.
  */
 export default function NavDrawer({ open, onClose, items }: Props) {
   const pathname = usePathname();
   const { direction } = useTheme();
+  const { handleSurpriseMe, loading: surpriseLoading } = useSurpriseMe();
 
   // Close when the route changes — handles link taps and browser back/forward.
   const isFirstRender = useRef(true);
@@ -44,59 +45,44 @@ export default function NavDrawer({ open, onClose, items }: Props) {
     }
     onClose();
   }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
-  // onClose is stable (useCallback in Header); pathname drives close intent.
 
   return (
     <Drawer
-      anchor={direction === "rtl" ? "left" : "right"}
+      // In RTL the hamburger sits on the physical right, so the drawer opens from
+      // the right. In LTR the conventional position is the left.
+      anchor={direction === "rtl" ? "right" : "left"}
       open={open}
       onClose={onClose}
       slotProps={{ paper: { sx: NavDrawerStyle.paper } }}
     >
       <Box role="navigation" aria-label="Mobile navigation" sx={NavDrawerStyle.nav}>
-        {/* Drawer header label */}
         <Box sx={NavDrawerStyle.drawerHeader}>
           <Typography variant="overline" color="text.secondary">
-            Menu
+            תפריט
           </Typography>
         </Box>
 
         <Divider />
 
-        <List disablePadding>
-          {items.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              pathname.startsWith(`${item.href}/`);
-
-            return (
-              <ListItem key={item.href} disablePadding>
-                {/*
-                 * NextLink wraps the button so the anchor is in the DOM
-                 * for right-click / open-in-new-tab, while ListItemButton
-                 * handles the visual feedback.
-                 */}
-                <NextLink
+        <Box sx={NavDrawerStyle.navContent}>
+          <List disablePadding>
+            {items.map((item) => (
+              <ListItem key={item.href + item.label} disablePadding>
+                <NavigationItem
+                  label={item.label}
                   href={item.href}
-                  style={{
-                    width: "100%",
-                    textDecoration: "none",
-                    color: "inherit",
-                  }}
-                >
-                  <ListItemButton selected={isActive} sx={NavDrawerStyle.listItemButton}>
-                    <ListItemText
-                      primary={item.label}
-                      slotProps={{
-                        primary: { sx: NavDrawerStyle.listItemText(isActive) },
-                      }}
-                    />
-                  </ListItemButton>
-                </NextLink>
+                  icon={item.icon}
+                  railOpen={true}
+                  neverActive={item.neverActive}
+                  {...(item.action === "surprise-me" && {
+                    onClick: handleSurpriseMe,
+                    loading: surpriseLoading,
+                  })}
+                />
               </ListItem>
-            );
-          })}
-        </List>
+            ))}
+          </List>
+        </Box>
       </Box>
     </Drawer>
   );
