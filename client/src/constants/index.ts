@@ -13,7 +13,6 @@ export const ROUTES = {
   HOME: "/",
   /** Recipe listing / results page. */
   RESULTS: "/results",
-  RECIPES: "/recipes",
   /** Call as a function: `ROUTES.RECIPE(slug)` → "/recipes/pasta-bolognese" */
   RECIPE: (slug: string) => `/recipes/${slug}`,
   CATEGORIES: "/categories",
@@ -30,6 +29,3 @@ export const PAGINATION = {
   MAX_PAGE_SIZE: 100,
 } as const;
 
-export const LOCAL_STORAGE_KEYS = {
-  // TODO: add keys as needed
-} as const;
