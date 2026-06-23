@@ -10,6 +10,7 @@ import type { CookingModeStepProps } from "@/features/cooking-mode";
 import { SectionHeader } from "@/components/shared";
 import PreparationSteps from "../PreparationSteps";
 import { PreparationStepsSectionStyle } from "./styles/PreparationStepsSectionStyle";
+import { PreparationStepsSectionText } from "./PreparationStepsSection.consts";
 
 type CookingModeBase = Omit<CookingModeStepProps, "sectionIndex">;
 
@@ -30,11 +31,11 @@ export default function PreparationStepsSection({
   return (
     <section>
       <Box sx={PreparationStepsSectionStyle.sectionHeaderRow}>
-        <SectionHeader title="אופן הכנה" sx={sx} />
+        <SectionHeader title={PreparationStepsSectionText.sectionTitle} sx={sx} />
         <Box sx={PreparationStepsSectionStyle.sectionHeaderActions}>
           {cookingMode?.isActive && cookingMode.stepProgress.total > 0 && (
             <Chip
-              label={`${cookingMode.stepProgress.checked} מתוך ${cookingMode.stepProgress.total} שלבים`}
+              label={PreparationStepsSectionText.progressLabel(cookingMode.stepProgress.checked, cookingMode.stepProgress.total)}
               size="small"
               color="success"
               variant="outlined"
@@ -49,7 +50,7 @@ export default function PreparationStepsSection({
               onClick={cookingMode.reset}
               sx={PreparationStepsSectionStyle.resetButton}
             >
-              איפוס סימונים
+              {PreparationStepsSectionText.resetButton}
             </Button>
           )}
         </Box>

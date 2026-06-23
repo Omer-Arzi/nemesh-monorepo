@@ -2,6 +2,7 @@
 
 import Grid from "@mui/material/Grid";
 import { PageContainer, SectionHeader, LoadingState, ErrorState, EmptyState } from "@/components/shared";
+import { CategoriesPageText } from "./consts";
 import { CollectionCard } from "@/components/domain";
 import { useCategories } from "@/features/category/hooks";
 import { useTags } from "@/features/tag/hooks";
@@ -23,11 +24,11 @@ export default function CategoriesPage() {
   const isLoading = categoriesLoading || tagsLoading;
 
   if (isLoading) {
-    return <LoadingState label="טוען קטגוריות..." minHeight={400} />;
+    return <LoadingState label={CategoriesPageText.loading} minHeight={400} />;
   }
 
   if (categoriesError) {
-    return <ErrorState description="לא הצלחנו לטעון את הקטגוריות. אנא נסה שוב." />;
+    return <ErrorState description={CategoriesPageText.errorLoad} />;
   }
 
   const shirChallenge = findShirChallenge(tags);
@@ -35,10 +36,10 @@ export default function CategoriesPage() {
 
   return (
     <PageContainer>
-      <SectionHeader title="קטגוריות" sx={{ mb: 3 }} />
+      <SectionHeader title={CategoriesPageText.sectionTitle} sx={{ mb: 3 }} />
 
       {totalCards === 0 ? (
-        <EmptyState title="אין קטגוריות" description="אין קטגוריות עדיין." />
+        <EmptyState title={CategoriesPageText.emptyTitle} description={CategoriesPageText.emptyDescription} />
       ) : (
         <Grid container columnSpacing={2} rowSpacing={3}>
           {/* ── Special "האתגר של שיר" card first (only if tag exists in Strapi) ── */}

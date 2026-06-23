@@ -10,6 +10,7 @@ import type { Recipe } from "@/types/domain";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
 import { formatPrepTime } from "@/lib/formatters/prepTime";
 import { RecipeHeroStyle } from "./styles/RecipeHeroStyle";
+import { RecipeHeroText } from "./RecipeHero.consts";
 
 // Descriptions longer than this are truncated until the user expands them.
 const DESCRIPTION_CHAR_LIMIT = 200;
@@ -124,13 +125,13 @@ export default function RecipeHero({
               <Divider sx={RecipeHeroStyle.divider} />
               <Box sx={RecipeHeroStyle.metaRow}>
                 {prepTime != null && (
-                  <HeroStat label="זמן הכנה" value={formatPrepTime(prepTime)} />
+                  <HeroStat label={RecipeHeroText.prepTimeLabel} value={formatPrepTime(prepTime)} />
                 )}
                 {difficulty != null && (
-                  <HeroStat label="רמת קושי" value={DIFFICULTY_LABEL[difficulty]} />
+                  <HeroStat label={RecipeHeroText.difficultyLabel} value={DIFFICULTY_LABEL[difficulty]} />
                 )}
                 {servings != null && (
-                  <HeroStat label="מנות" value={String(servings)} />
+                  <HeroStat label={RecipeHeroText.servingsLabel} value={String(servings)} />
                 )}
               </Box>
             </>

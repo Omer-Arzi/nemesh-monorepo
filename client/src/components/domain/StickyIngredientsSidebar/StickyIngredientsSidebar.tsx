@@ -14,6 +14,7 @@ import type { CookingModeIngredientProps } from "@/features/cooking-mode";
 import IngredientSectionList from "../IngredientSectionList";
 import IngredientsBottomSheet from "../IngredientsBottomSheet";
 import { StickyIngredientsSidebarStyle } from "./styles/StickyIngredientsSidebarStyle";
+import { StickyIngredientsSidebarText } from "./StickyIngredientsSidebar.consts";
 
 type CookingModeBase = Omit<CookingModeIngredientProps, "sectionIndex">;
 
@@ -136,7 +137,7 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
         >
           <Box>
             <Typography sx={StickyIngredientsSidebarStyle.mobileTriggerTitle}>
-              מצרכים
+              {StickyIngredientsSidebarText.sectionTitle}
               {count > 0 && (
                 <Box component="span" sx={StickyIngredientsSidebarStyle.count}>
                   {` · ${count}`}
@@ -144,7 +145,7 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
               )}
             </Typography>
             <Typography sx={StickyIngredientsSidebarStyle.mobileTriggerHint}>
-              לחצו לצפייה
+              {StickyIngredientsSidebarText.clickHint}
             </Typography>
           </Box>
           <ChevronLeftIcon sx={StickyIngredientsSidebarStyle.mobileTriggerArrow} />
@@ -167,7 +168,7 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
             <Box sx={StickyIngredientsSidebarStyle.header}>
               <Box>
                 <Typography variant="subtitle2" sx={StickyIngredientsSidebarStyle.headerTitle}>
-                  מצרכים
+                  {StickyIngredientsSidebarText.sectionTitle}
                   {count > 0 && (
                     <Box component="span" sx={StickyIngredientsSidebarStyle.count}>
                       {` · ${count}`}
@@ -176,7 +177,7 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
                 </Typography>
                 {cookingMode?.isActive && cookingMode.ingredientProgress.total > 0 && (
                   <Chip
-                    label={`${cookingMode.ingredientProgress.checked} מתוך ${cookingMode.ingredientProgress.total} סומנו`}
+                    label={StickyIngredientsSidebarText.progressLabel(cookingMode.ingredientProgress.checked, cookingMode.ingredientProgress.total)}
                     size="small"
                     color="success"
                     variant="outlined"
@@ -193,7 +194,7 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
                     onClick={cookingMode.reset}
                     sx={StickyIngredientsSidebarStyle.resetButton}
                   >
-                    איפוס
+                    {StickyIngredientsSidebarText.resetButton}
                   </Button>
                 )}
                 <Button
@@ -204,7 +205,7 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
                   onClick={cookingMode?.toggleActive}
                   sx={StickyIngredientsSidebarStyle.cookingModeButton}
                 >
-                  מצב בישול
+                  {StickyIngredientsSidebarText.cookingModeButton}
                 </Button>
               </Box>
             </Box>
@@ -241,13 +242,13 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
         <Box
           role="button"
           aria-haspopup="dialog"
-          aria-label="פתח רשימת מצרכים"
+          aria-label={StickyIngredientsSidebarText.openAriaLabel}
           onClick={() => setSheetOpen(true)}
           sx={StickyIngredientsSidebarStyle.stickyBarInner}
         >
           <Box>
             <Typography sx={StickyIngredientsSidebarStyle.stickyBarTitle}>
-              מצרכים
+              {StickyIngredientsSidebarText.sectionTitle}
               {count > 0 && (
                 <Box component="span" sx={StickyIngredientsSidebarStyle.count}>
                   {` · ${count}`}
@@ -255,7 +256,7 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
               )}
             </Typography>
             <Typography sx={StickyIngredientsSidebarStyle.stickyBarHint}>
-              לחצו לצפייה
+              {StickyIngredientsSidebarText.clickHint}
             </Typography>
           </Box>
           <KeyboardArrowUpIcon sx={StickyIngredientsSidebarStyle.stickyBarIcon} />

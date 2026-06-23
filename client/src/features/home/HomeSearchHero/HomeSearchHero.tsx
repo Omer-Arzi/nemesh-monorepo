@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
 import { ROUTES } from "@/constants";
 import { HomeSearchHeroStyle } from "./HomeSearchHero.style";
+import { HomeSearchHeroText } from "./HomeSearchHero.consts";
 
 export default function HomeSearchHero() {
   const [query, setQuery] = useState("");
@@ -27,18 +28,18 @@ export default function HomeSearchHero() {
     <Box component="section" sx={HomeSearchHeroStyle.root}>
       <Stack sx={HomeSearchHeroStyle.inner}>
         <Typography variant="h3" component="h1" sx={HomeSearchHeroStyle.headline}>
-          האוכל שמתאים למה שיש בבית
+          {HomeSearchHeroText.headline}
         </Typography>
 
         <Typography variant="body1" sx={HomeSearchHeroStyle.subtitle}>
-          חפשו מתכונים לפי שם, מרכיב או חשק.
+          {HomeSearchHeroText.subtitle}
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit} sx={HomeSearchHeroStyle.form}>
           <TextField
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="חפשו מתכון או מרכיב..."
+            placeholder={HomeSearchHeroText.placeholder}
             fullWidth
             sx={HomeSearchHeroStyle.searchField}
             slotProps={{
@@ -57,7 +58,7 @@ export default function HomeSearchHero() {
                       size="large"
                       sx={HomeSearchHeroStyle.submitButton}
                     >
-                      חיפוש
+                      {HomeSearchHeroText.submitButton}
                     </Button>
                   </InputAdornment>
                 ),

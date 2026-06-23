@@ -8,11 +8,12 @@ import { RecipeCard } from "@/components/domain";
 import { useLatestRecipes } from "@/features/home/hooks";
 import { ROUTES } from "@/constants";
 import { LatestRecipesStyle } from "./LatestRecipes.style";
+import { LatestRecipesText } from "./LatestRecipes.consts";
 
 function ShowAllLink() {
   return (
     <Box component={NextLink} href={ROUTES.RESULTS} sx={LatestRecipesStyle.showAllLink}>
-      הצג הכל ←
+      {LatestRecipesText.showAll}
     </Box>
   );
 }
@@ -21,14 +22,14 @@ export default function LatestRecipes() {
   const { data: recipes = [], isLoading, isError } = useLatestRecipes();
 
   if (isLoading) return <LoadingState minHeight={200} />;
-  if (isError) return <ErrorState description="לא הצלחנו לטעון מתכונים." />;
+  if (isError) return <ErrorState description={LatestRecipesText.errorLoad} />;
   if (recipes.length === 0) return null;
 
   return (
     <Box sx={LatestRecipesStyle.root}>
       <PageContainer>
         <SectionHeader
-          title="המתכונים האחרונים באתר"
+          title={LatestRecipesText.sectionTitle}
           action={<ShowAllLink />}
           sx={{ mb: 3 }}
         />
