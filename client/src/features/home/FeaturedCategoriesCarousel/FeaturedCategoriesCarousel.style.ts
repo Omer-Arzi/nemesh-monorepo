@@ -7,10 +7,13 @@ export const FeaturedCategoriesCarouselStyle = {
     pb: { xs: 4, sm: 5 },
   },
 
-  // Scrollable card track — sits inside PageContainer so it inherits the same
-  // horizontal safe area as the section title. PageContainer's padding and
-  // max-width are the true boundaries; no spacer hacks needed.
-  // Edge fades are applied via maskImage in the component based on scroll position.
+  // Wraps the track + absolute-positioned arrows. position:relative is the
+  // anchor for the arrows; no overflow set so arrows can bleed to the edges.
+  trackWrapper: {
+    position: "relative" as const,
+  },
+
+  // Scrollable card track. Edge fades applied via maskImage in the component.
   track: {
     display: "flex",
     flexDirection: "row" as const,
@@ -22,9 +25,38 @@ export const FeaturedCategoriesCarouselStyle = {
     // track's implicit overflow-y boundary (overflow-x:auto forces it non-visible)
     pt: 2,
     pb: 2.5,
-    // Hide the scrollbar while keeping scroll functionality
     scrollbarWidth: "none" as const,
     "&::-webkit-scrollbar": { display: "none" },
     msOverflowStyle: "none" as const,
+    // Grab cursor signals drag affordance to desktop mouse users
+    cursor: "grab",
+    "&:active": { cursor: "grabbing" },
+  },
+
+  // Base style shared by both arrow buttons — desktop only.
+  arrow: {
+    display: { xs: "none", md: "flex" },
+    position: "absolute" as const,
+    top: "50%",
+    transform: "translateY(-50%)",
+    zIndex: 2,
+    width: 40,
+    height: 40,
+    bgcolor: "background.paper",
+    border: "1px solid",
+    borderColor: "divider",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+    transition: "opacity 0.2s ease, background-color 0.15s ease",
+    "&:hover": { bgcolor: "action.hover" },
+  },
+
+  // Right arrow — sits at the right edge, navigates toward start of list (RTL).
+  arrowRight: {
+    right: 0,
+  },
+
+  // Left arrow — sits at the left edge, navigates toward end of list (RTL).
+  arrowLeft: {
+    left: 0,
   },
 } as const;

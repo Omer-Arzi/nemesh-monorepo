@@ -26,9 +26,25 @@ export const IngredientsBottomSheetStyle = {
     alignItems: "center",
     justifyContent: "space-between",
     px: 3,
-    py: 2,
+    py: 1.5,
     borderBottom: 1,
     borderColor: "divider",
+    flexShrink: 0,
+    gap: 1,
+    flexWrap: "wrap" as const,
+  },
+
+  headerStart: {
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+    flexWrap: "wrap" as const,
+  },
+
+  headerEnd: {
+    display: "flex",
+    alignItems: "center",
+    gap: 0.5,
     flexShrink: 0,
   },
 
@@ -40,6 +56,19 @@ export const IngredientsBottomSheetStyle = {
   count: {
     fontWeight: "normal",
     color: "text.secondary",
+  },
+
+  progressChip: {
+    fontSize: "0.72rem",
+    height: 22,
+  },
+
+  cookingModeButton: {
+    fontSize: "0.78rem",
+    px: 1.25,
+    py: 0.5,
+    whiteSpace: "nowrap" as const,
+    borderRadius: 5,
   },
 
   content: {
