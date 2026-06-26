@@ -243,6 +243,25 @@ client/
 * Prefer `public/` when the image should be referenced by URL (e.g. `<img src="/images/placeholders/recipe.jpg">`).
 * Prefer `src/assets/` when the asset is imported into code (e.g. `import Logo from "@/assets/icons/logo.svg"`).
 
+## Architecture Documentation Rule
+
+When making architectural changes, update `docs/architecture.md` at the repo root.
+
+Architectural changes include:
+
+* Data model changes (new fields, renamed types, removed entities)
+* Strapi schema changes
+* Import pipeline changes
+* localStorage / storage changes (new features, key format, TTL)
+* Routing or layout changes
+* Major feature boundary changes (new top-level feature folder, restructured component tree)
+
+If a change adds or modifies custom scripts, update `server/docs/scripts.md` as well.
+
+At the end of each relevant task, note whether `docs/architecture.md` or `docs/scripts.md` were updated, or explain briefly why they were not needed.
+
+---
+
 ## Theme Philosophy
 
 Nemesh should feel:
