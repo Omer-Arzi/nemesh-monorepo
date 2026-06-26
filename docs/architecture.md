@@ -235,7 +235,36 @@ All client-side persistence goes through `NemeshStorage` ([client/src/lib/storag
 
 ---
 
-## 12. Safety Notes
+## 12. Deployment & Storage
+
+| Environment | Database | File Uploads | Notes |
+|---|---|---|---|
+| Development | Local PostgreSQL | Local disk (`public/uploads/`) | Default Strapi behavior |
+| Production | Railway PostgreSQL | AWS S3 | Activated by `NODE_ENV=production` |
+
+**Upload provider selection** — `config/plugins.ts` gates S3 on `NODE_ENV === 'production'`. In development, no upload plugin is configured and Strapi falls back to local disk.
+
+**CORS** — `config/middlewares.ts` restricts to `CLIENT_URL` in production. Development allows all origins.
+
+**Required production env vars (non-secret):**
+
+| Var | Example value |
+|---|---|
+| `NODE_ENV` | `production` |
+| `DATABASE_CLIENT` | `postgres` |
+| `DATABASE_URL` | injected by Railway |
+| `DATABASE_SSL` | `true` |
+| `DATABASE_SSL_REJECT_UNAUTHORIZED` | `false` |
+| `AWS_REGION` | `eu-central-1` |
+| `AWS_BUCKET` | your bucket name |
+| `AWS_BUCKET_URL` | `https://<bucket>.s3.<region>.amazonaws.com` |
+| `CLIENT_URL` | Vercel deployment URL |
+
+Full Railway + S3 setup steps: [docs/deployment.md](./deployment.md).
+
+---
+
+## 13. Safety Notes
 
 - **Strapi component schema changes are risky.** Renaming or removing a component field without a DB backup can cause silent data loss. Always export/backup before schema changes.
 - **Do not run destructive migrations casually.** Migration scripts in `server/scripts/` are one-time operations; verify on a backup first.
