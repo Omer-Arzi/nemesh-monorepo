@@ -16,8 +16,8 @@ Strapi server → Railway + PostgreSQL. Next.js client → Vercel (future step).
 
 ### 2. Set bucket public access (choose one approach)
 
-**Option A — ACL (simpler, requires "Block public access" off):**
-- Leave `AWS_ACL=public-read` in env vars.
+**Option A — ACL (requires "Block public access" off, not recommended for new buckets):**
+- Set `AWS_ACL=public-read` in Railway env vars.
 - Images are served directly via `https://<bucket>.s3.<region>.amazonaws.com/<key>`.
 
 **Option B — Bucket policy (recommended for new AWS accounts):**
@@ -130,7 +130,7 @@ In the Strapi service → **Variables**, add:
 | `AWS_REGION` | e.g. `eu-central-1` |
 | `AWS_BUCKET` | your bucket name |
 | `AWS_BUCKET_URL` | `https://<bucket>.s3.<region>.amazonaws.com` |
-| `AWS_ACL` | `public-read` *(omit if using bucket policy)* |
+| `AWS_ACL` | **leave unset** if bucket ACLs are disabled (default for new buckets); `public-read` only if ACLs are explicitly enabled |
 | `CLIENT_URL` | your Vercel client URL *(set after client is deployed)* |
 
 **Generate secrets:**

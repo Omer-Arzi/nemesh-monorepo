@@ -55,9 +55,12 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
             region,
             params: {
               Bucket: bucket,
-              // ACL: only include if explicitly set. Omit when using bucket policies
-              // for public access (required if "Block public access" is ON).
-              ...(acl ? { ACL: acl } : {}),
+              // ACL key must always be present to prevent the provider from defaulting
+              // to public-read. Set AWS_ACL only if bucket ACLs are enabled; leave
+              // unset (undefined) for buckets with ACLs disabled ("Bucket owner enforced").
+              // undefined value → key exists in params (bypasses provider default) but
+              // ACL header is not sent to S3.
+              ACL: acl || undefined,
             },
           },
         },
