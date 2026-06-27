@@ -105,9 +105,14 @@ In production, tighten `AllowedOrigins` to your Strapi domain.
 
 In the Strapi service → **Variables**, add:
 
+> **`NODE_ENV=production` is the single most critical variable.**
+> Without it, `config/plugins.ts` returns an empty config and Strapi silently uses local disk uploads.
+> Files will appear in the admin panel but are written to the Railway ephemeral filesystem and lost on every redeploy.
+> The startup log will print `[upload] provider: local` if this is missing.
+
 | Variable | Value |
 |---|---|
-| `NODE_ENV` | `production` |
+| `NODE_ENV` | `production` ← **required for S3 to activate** |
 | `HOST` | `0.0.0.0` |
 | `PORT` | `1337` |
 | `APP_KEYS` | 4 random base64 strings, comma-separated |
@@ -157,13 +162,31 @@ Copy `.env.example` → `.env` and fill in your local DB credentials.
 
 `config/plugins.ts` checks `NODE_ENV`:
 
-- `NODE_ENV !== 'production'` → no upload plugin configured → Strapi uses **local disk** (`public/uploads/`)
+- `NODE_ENV !== 'production'` → returns `{}` → Strapi uses **local disk** (`public/uploads/`)
 - `NODE_ENV === 'production'` → `@strapi/provider-upload-aws-s3` is active → all uploads go to **S3**
+
+If required S3 env vars are missing when `NODE_ENV=production`, Strapi **throws an error at startup** rather than falling back to local disk.
 
 `config/middlewares.ts` applies the same `NODE_ENV` check for CORS:
 
 - Development → `origin: '*'` (open)
 - Production → `origin: [CLIENT_URL]` (restricted to deployed client)
+
+## Verifying S3 is active
+
+**1. Check the Railway deploy log** — look for the startup line:
+```
+[upload] provider: aws-s3 | bucket: <name> | region: <region> | baseUrl: ...
+```
+If you see `[upload] provider: local` instead, `NODE_ENV` is not set to `production`.
+
+**2. Upload a test image** in the Strapi admin (Media Library → + Add new assets).
+
+**3. Check the URL of the uploaded file:**
+- `https://<bucket>.s3.<region>.amazonaws.com/...` → S3 is working ✓
+- `/uploads/...` → still using local disk, `NODE_ENV` or S3 vars are wrong ✗
+
+**4. Check the S3 bucket** in the AWS Console → the file should appear under the uploads path.
 
 ---
 
