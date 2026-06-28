@@ -30,22 +30,23 @@ export default function ShirChallengeStatusPanel({ currentMonth, previousMonth }
   const isActive = status === "active";
   const isNeutral = !isActive;
 
+  const monthLabel = currentMonth?.monthStart
+    ? formatHebrewMonthLabel(currentMonth.monthStart)
+    : null;
+
   return (
-    <Box sx={[S.root, isNeutral && S.rootNeutral]}>
-      {/* ── Collapsible header ── */}
+    <Box sx={S.section}>
+      {/* ── Section trigger ─────────────────────────────────────────────── */}
       <Box
         component="button"
         type="button"
         aria-expanded={expanded}
         onClick={() => setExpanded((v) => !v)}
-        sx={[S.header, isNeutral && S.headerNeutral]}
+        sx={S.trigger}
       >
-        <Box sx={S.titleGroup}>
-          <Box component="span" sx={S.title}>
+        <Box sx={S.triggerLeft}>
+          <Box component="span" sx={S.triggerLabel}>
             {ShirChallengeText.statusPanelTitle}
-          </Box>
-          <Box component="span" sx={[S.statusChip, isNeutral && S.statusChipNeutral]}>
-            {MONTHLY_CHALLENGE_STATUS_LABELS[status]}
           </Box>
         </Box>
         <KeyboardArrowDownIcon
@@ -53,100 +54,116 @@ export default function ShirChallengeStatusPanel({ currentMonth, previousMonth }
         />
       </Box>
 
-      {/* ── Expandable body ── */}
+      {/* ── Card row ────────────────────────────────────────────────────── */}
       <Collapse in={expanded}>
-        <Box sx={[S.body, isNeutral && S.bodyNeutral]}>
-          {status === "pending" && (
-            <Box sx={{ typography: "body2", color: "text.secondary", lineHeight: 1.7 }}>
-              {currentMonth?.monthlyChallengeNote ?? ShirChallengeDefaults.pendingNote}
+        <Box sx={S.cardRow}>
+          {/* Current month card */}
+          <Box
+            sx={[
+              S.card,
+              S.currentCard,
+              isNeutral && S.currentCardNeutral,
+              !previousMonth && S.currentCardAlone,
+            ]}
+          >
+            <Box sx={[S.cardHeader, isNeutral && S.cardHeaderNeutral]}>
+              {monthLabel && (
+                <Box component="span" sx={S.cardHeaderMonth}>
+                  {monthLabel}
+                </Box>
+              )}
+              <Box component="span" sx={[S.statusChip, isNeutral && S.statusChipNeutral]}>
+                {MONTHLY_CHALLENGE_STATUS_LABELS[status]}
+              </Box>
             </Box>
-          )}
 
-          {status === "active" && currentMonth && (
-            <>
-              <Box sx={S.row}>
-                <Box component="span" sx={S.rowLabel}>
-                  {ShirChallengeText.statusPanelLabelMonth}
-                </Box>
-                <Box component="span" sx={S.rowValue}>
-                  {formatHebrewMonthLabel(currentMonth.monthStart)}
-                </Box>
-              </Box>
-
-              <Box sx={S.row}>
-                <Box component="span" sx={S.rowLabel}>
-                  {ShirChallengeText.statusPanelLabelIngredient}
-                </Box>
-                <Box component="span" sx={S.rowValue}>
-                  {currentMonth.monthlyIngredientName ?? ShirChallengeDefaults.ingredientNameFallback}
-                </Box>
-              </Box>
-
-              {currentMonth.myProgressStatus && (
-                <Box sx={S.row}>
-                  <Box component="span" sx={S.rowLabel}>
-                    {ShirChallengeText.statusPanelLabelProgress}
-                  </Box>
-                  <Box component="span" sx={S.rowValue}>
-                    {PROGRESS_STATUS_LABELS[currentMonth.myProgressStatus]}
-                  </Box>
+            <Box sx={[S.cardBody, isNeutral && S.cardBodyNeutral]}>
+              {status === "pending" && (
+                <Box sx={{ typography: "body2", color: "text.secondary", lineHeight: 1.7 }}>
+                  {currentMonth?.monthlyChallengeNote ?? ShirChallengeDefaults.pendingNote}
                 </Box>
               )}
 
-              {currentMonth.monthlyChallengeNote && (
-                <Box sx={S.note}>{currentMonth.monthlyChallengeNote}</Box>
+              {status === "active" && currentMonth && (
+                <>
+                  <Box sx={S.row}>
+                    <Box component="span" sx={S.rowLabel}>
+                      {ShirChallengeText.statusPanelLabelIngredient}
+                    </Box>
+                    <Box component="span" sx={S.rowValue}>
+                      {currentMonth.monthlyIngredientName ??
+                        ShirChallengeDefaults.ingredientNameFallback}
+                    </Box>
+                  </Box>
+
+                  {currentMonth.myProgressStatus && (
+                    <Box sx={S.row}>
+                      <Box component="span" sx={S.rowLabel}>
+                        {ShirChallengeText.statusPanelLabelProgress}
+                      </Box>
+                      <Box component="span" sx={S.rowValue}>
+                        {PROGRESS_STATUS_LABELS[currentMonth.myProgressStatus]}
+                      </Box>
+                    </Box>
+                  )}
+
+                  {currentMonth.monthlyChallengeNote && (
+                    <Box sx={S.note}>{currentMonth.monthlyChallengeNote}</Box>
+                  )}
+                </>
               )}
-            </>
-          )}
 
-          {status === "skipped" && (
-            <Box sx={{ typography: "body2", color: "text.secondary", lineHeight: 1.7 }}>
-              {currentMonth?.monthlyChallengeNote ?? ShirChallengeDefaults.skippedNoteFallback}
+              {status === "skipped" && (
+                <Box sx={{ typography: "body2", color: "text.secondary", lineHeight: 1.7 }}>
+                  {currentMonth?.monthlyChallengeNote ?? ShirChallengeDefaults.skippedNoteFallback}
+                </Box>
+              )}
             </Box>
-          )}
+          </Box>
 
+          {/* Previous month card */}
           {previousMonth && (
-            <Box sx={S.prevSection}>
-              <Box component="span" sx={S.prevTitle}>
-                {ShirChallengeText.prevSectionTitle}
-              </Box>
-
-              <Box sx={S.prevRow}>
-                <Box component="span" sx={S.prevRowLabel}>
-                  {ShirChallengeText.statusPanelLabelMonth}
+            <Box sx={[S.card, S.prevCard]}>
+              <Box sx={S.prevCardHeader}>
+                <Box component="span" sx={S.prevCardTitle}>
+                  {ShirChallengeText.prevSectionTitle}
                 </Box>
-                <Box component="span" sx={S.prevRowValue}>
-                  {formatHebrewMonthLabel(previousMonth.monthStart)}
-                </Box>
-              </Box>
-
-              {previousMonth.monthlyIngredientName && (
-                <Box sx={S.prevRow}>
-                  <Box component="span" sx={S.prevRowLabel}>
-                    {ShirChallengeText.statusPanelLabelIngredient}
-                  </Box>
-                  <Box component="span" sx={S.prevRowValue}>
-                    {previousMonth.monthlyIngredientName}
-                  </Box>
-                </Box>
-              )}
-
-              {previousMonth.myProgressStatus && (
-                <Box sx={S.prevRow}>
-                  <Box component="span" sx={S.prevRowLabel}>
-                    {ShirChallengeText.statusPanelLabelProgress}
-                  </Box>
-                  <Box component="span" sx={S.prevRowValue}>
-                    {PROGRESS_STATUS_LABELS[previousMonth.myProgressStatus]}
-                  </Box>
-                </Box>
-              )}
-
-              <Box sx={S.prevRow}>
-                <Box component="span" sx={S.prevRowLabel}>סטטוס</Box>
                 <Box component="span" sx={S.prevChip}>
                   {MONTHLY_CHALLENGE_STATUS_LABELS[previousMonth.monthlyChallengeStatus]}
                 </Box>
+              </Box>
+
+              <Box sx={S.prevCardBody}>
+                <Box sx={S.prevRow}>
+                  <Box component="span" sx={S.prevRowLabel}>
+                    {ShirChallengeText.statusPanelLabelMonth}
+                  </Box>
+                  <Box component="span" sx={S.prevRowValue}>
+                    {formatHebrewMonthLabel(previousMonth.monthStart)}
+                  </Box>
+                </Box>
+
+                {previousMonth.monthlyIngredientName && (
+                  <Box sx={S.prevRow}>
+                    <Box component="span" sx={S.prevRowLabel}>
+                      {ShirChallengeText.statusPanelLabelIngredient}
+                    </Box>
+                    <Box component="span" sx={S.prevRowValue}>
+                      {previousMonth.monthlyIngredientName}
+                    </Box>
+                  </Box>
+                )}
+
+                {previousMonth.myProgressStatus && (
+                  <Box sx={S.prevRow}>
+                    <Box component="span" sx={S.prevRowLabel}>
+                      {ShirChallengeText.statusPanelLabelProgress}
+                    </Box>
+                    <Box component="span" sx={S.prevRowValue}>
+                      {PROGRESS_STATUS_LABELS[previousMonth.myProgressStatus]}
+                    </Box>
+                  </Box>
+                )}
               </Box>
             </Box>
           )}

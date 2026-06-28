@@ -38,6 +38,6 @@ export const ShirChallengeText = {
   statusPanelTitle: "סטטוס האתגר החודשי",
   statusPanelLabelIngredient: "חומר הגלם",
   statusPanelLabelMonth: "חודש",
-  statusPanelLabelProgress: "סטטוס ההכנה שלי",
+  statusPanelLabelProgress: "סטטוס ההכנה",
   prevSectionTitle: "האתגר הקודם",
 } as const;

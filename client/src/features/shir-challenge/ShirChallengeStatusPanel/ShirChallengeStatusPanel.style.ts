@@ -1,110 +1,150 @@
 import { SHIR_CHALLENGE_TOKENS } from "../ShirChallenge.tokens";
 
 export const ShirChallengeStatusPanelStyle = {
-  // ── Outer container ─────────────────────────────────────────────────────
-  root: {
-    border: "1px solid",
-    borderColor: SHIR_CHALLENGE_TOKENS.peachChip,
-    borderRadius: 2.5,
-    overflow: "hidden" as const,
+  // ── Outer section wrapper ────────────────────────────────────────────────
+  section: {
     mb: { xs: 3, sm: 4 },
   },
-  rootNeutral: {
-    // pending or skipped: softer border
-    borderColor: "divider",
-  },
 
-  // ── Collapsible header (rendered as <button>) ────────────────────────────
-  header: {
+  // ── Collapse trigger (lightweight full-width button) ─────────────────────
+  trigger: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
-    gap: 1.5,
-    px: { xs: 2, sm: 2.5 },
-    py: 1.5,
-    bgcolor: SHIR_CHALLENGE_TOKENS.peachSurface,
+    mb: 1.5,
+    py: 0.75,
     cursor: "pointer",
     border: "none",
+    bgcolor: "transparent",
     fontFamily: "inherit",
     textAlign: "unset" as const,
-    "&:hover": { bgcolor: "#FDEADE" },
     "&:focus-visible": {
       outline: "2px solid",
       outlineColor: "primary.main",
-      outlineOffset: "-2px",
+      outlineOffset: "3px",
+      borderRadius: 1,
     },
   },
-  headerNeutral: {
-    bgcolor: "action.hover",
-    "&:hover": { bgcolor: "action.selected" },
-  },
 
-  titleGroup: {
+  triggerLeft: {
     display: "flex",
     alignItems: "center",
-    gap: 1.5,
-    minWidth: 0,
-  },
-  title: {
-    fontWeight: 700,
-    fontSize: "0.875rem",
-    color: "text.primary",
+    gap: 1.25,
   },
 
-  // ── Status chip ──────────────────────────────────────────────────────────
+  triggerLabel: {
+    typography: "caption",
+    color: "text.secondary",
+    fontWeight: 700,
+    letterSpacing: "0.04em",
+    textTransform: "uppercase" as const,
+  },
+
+  // ── Status chip (used both in trigger and in current card header) ─────────
   statusChip: {
     display: "inline-block",
     bgcolor: SHIR_CHALLENGE_TOKENS.peachChip,
     color: SHIR_CHALLENGE_TOKENS.peachAccent,
     px: 1.25,
-    py: 0.35,
+    py: 0.3,
     borderRadius: 1.5,
     typography: "caption",
     fontWeight: 700,
-    flexShrink: 0,
     lineHeight: 1.4,
+    flexShrink: 0,
   },
   statusChipNeutral: {
-    // pending or skipped
     bgcolor: "action.selected",
     color: "text.secondary",
   },
 
+  // ── Chevron ───────────────────────────────────────────────────────────────
   chevron: {
     display: "block",
     color: "text.secondary",
     transition: "transform 250ms ease",
     flexShrink: 0,
-    fontSize: "1.25rem",
+    fontSize: "1.125rem",
   },
 
-  // ── Expanded body ────────────────────────────────────────────────────────
-  body: {
+  // ── Card row (holds 1 or 2 cards) ────────────────────────────────────────
+  cardRow: {
+    display: "flex",
+    flexDirection: { xs: "column", sm: "row" } as const,
+    alignItems: "flex-start",
+    gap: 2,
+  },
+
+  // ── Base card (shared by current + previous) ─────────────────────────────
+  card: {
+    borderRadius: 2,
+    overflow: "hidden" as const,
+    // Mobile: always full width; desktop: flex 1
+    width: "100%",
+    flex: 1,
+    minWidth: 0,
+  },
+
+  // ── Current month card ────────────────────────────────────────────────────
+  currentCard: {
+    border: "1px solid",
+    borderColor: SHIR_CHALLENGE_TOKENS.peachChip,
+  },
+  currentCardNeutral: {
+    borderColor: "divider",
+  },
+  // Applied only when there is no previous month record
+  currentCardAlone: {
+    flex: "0 0 auto" as const,
+    maxWidth: { sm: 720 },
+  },
+
+  cardHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
     px: { xs: 2, sm: 2.5 },
-    pt: 2,
-    pb: 2.5,
+    py: 1.25,
+    bgcolor: SHIR_CHALLENGE_TOKENS.peachSurface,
+  },
+  cardHeaderNeutral: {
+    bgcolor: "action.hover",
+  },
+
+  // Month name shown in the current card header
+  cardHeaderMonth: {
+    typography: "body2",
+    fontWeight: 700,
+    color: "text.primary",
+  },
+
+  cardBody: {
+    px: { xs: 2, sm: 2.5 },
+    pt: 1.75,
+    pb: 2,
     bgcolor: "background.paper",
     borderTop: "1px solid",
     borderColor: SHIR_CHALLENGE_TOKENS.peachChip,
   },
-  bodyNeutral: {
+  cardBodyNeutral: {
     borderColor: "divider",
   },
 
-  // ── Data rows (label + value) ────────────────────────────────────────────
+  // ── Data rows in current card ─────────────────────────────────────────────
   row: {
     display: "flex",
     alignItems: "baseline",
     gap: 1,
-    mb: 1.25,
+    mb: 1,
+    "&:last-child": { mb: 0 },
   },
   rowLabel: {
     typography: "caption",
     color: "text.secondary",
     fontWeight: 600,
     flexShrink: 0,
-    minWidth: 100,
+    minWidth: 80,
     letterSpacing: "0.02em",
   },
   rowValue: {
@@ -117,47 +157,36 @@ export const ShirChallengeStatusPanelStyle = {
   note: {
     typography: "body2",
     color: "text.secondary",
-    mt: 2,
-    pt: 2,
+    mt: 1.5,
+    pt: 1.5,
     borderTop: "1px solid",
     borderColor: "divider",
     lineHeight: 1.7,
   },
 
-  // ── Previous month section ───────────────────────────────────────────────
-  prevSection: {
-    mt: 2.5,
-    pt: 2,
-    borderTop: "1px solid",
+  // ── Previous month card ───────────────────────────────────────────────────
+  prevCard: {
+    border: "1px solid",
     borderColor: "divider",
   },
-  prevTitle: {
-    typography: "caption",
-    color: "text.secondary",
-    fontWeight: 700,
-    letterSpacing: "0.05em",
-    textTransform: "uppercase" as const,
-    mb: 1.25,
-    display: "block",
-  },
-  prevRow: {
+
+  prevCardHeader: {
     display: "flex",
     alignItems: "center",
     gap: 1,
-    mb: 0.75,
-    "&:last-child": { mb: 0 },
+    px: { xs: 2, sm: 2.5 },
+    py: 1.25,
+    bgcolor: "action.hover",
   },
-  prevRowLabel: {
+
+  prevCardTitle: {
     typography: "caption",
     color: "text.secondary",
-    flexShrink: 0,
-    minWidth: 100,
+    fontWeight: 700,
+    letterSpacing: "0.03em",
+    flex: 1,
   },
-  prevRowValue: {
-    typography: "caption",
-    color: "text.primary",
-    fontWeight: 600,
-  },
+
   prevChip: {
     display: "inline-block",
     border: "1px solid",
@@ -169,5 +198,35 @@ export const ShirChallengeStatusPanelStyle = {
     typography: "caption",
     fontWeight: 600,
     lineHeight: 1.4,
+    flexShrink: 0,
+  },
+
+  prevCardBody: {
+    px: { xs: 2, sm: 2.5 },
+    pt: 1.75,
+    pb: 2,
+    bgcolor: "background.paper",
+    borderTop: "1px solid",
+    borderColor: "divider",
+  },
+
+  // ── Data rows in previous card ────────────────────────────────────────────
+  prevRow: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: 1,
+    mb: 0.875,
+    "&:last-child": { mb: 0 },
+  },
+  prevRowLabel: {
+    typography: "caption",
+    color: "text.secondary",
+    flexShrink: 0,
+    minWidth: 80,
+  },
+  prevRowValue: {
+    typography: "caption",
+    color: "text.primary",
+    fontWeight: 600,
   },
 } as const;
