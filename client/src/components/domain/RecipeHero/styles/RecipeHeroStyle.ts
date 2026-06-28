@@ -113,6 +113,28 @@ export const RecipeHeroStyle = {
     color: "primary.main",
   },
 
+  // ── No-image placeholder ─────────────────────────────────────────────────
+  noImageState: {
+    position: "absolute" as const,
+    inset: 0,
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 1,
+    bgcolor: "background.default",
+  },
+  noImageIcon: {
+    fontSize: 52,
+    color: "primary.light",
+    opacity: 0.5,
+  },
+  noImageText: {
+    fontSize: "0.75rem",
+    color: "text.disabled",
+    letterSpacing: "0.03em",
+  },
+
   // 3:2 aspect ratio. borderRadius: 4 = 16px for a softer, premium frame.
   imageColumn: {
     position: "relative",

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { Recipe } from "@/types/domain";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
@@ -146,6 +147,12 @@ export default function RecipeHero({
             priority
             sizes="(max-width: 900px) 0vw, 50vw"
             objectFit="cover"
+            fallback={
+              <Box sx={RecipeHeroStyle.noImageState}>
+                <RestaurantIcon sx={RecipeHeroStyle.noImageIcon} />
+                <Typography sx={RecipeHeroStyle.noImageText}>אין תמונה</Typography>
+              </Box>
+            }
           />
         </Box>
       </Box>
