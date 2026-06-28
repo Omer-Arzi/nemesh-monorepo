@@ -24,13 +24,6 @@ export const CollectionCardStyle = {
     bgcolor: "action.hover",
     flexShrink: 0,
   },
-  image: {
-    position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  },
   imageFallback: {
     width: "100%",
     height: "100%",

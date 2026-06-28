@@ -12,18 +12,21 @@ import { ROUTES } from "@/constants";
 import type { RecipeSummary } from "@/types/domain";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
 import { formatPrepTime } from "@/lib/formatters/prepTime";
+import { NemeshImage } from "@/components/shared";
 import RecipeMeta from "../RecipeMeta";
 import { RecipeCardStyle } from "./styles/RecipeCardStyle";
 
 type Props = {
   recipe: RecipeSummary;
   small?: boolean;
+  /** Mark the card image as high-priority (eager load + preload). Use for the first card in a list that is likely the LCP. */
+  priority?: boolean;
 };
 
 const MAX_VISIBLE_CATEGORIES = 3;
 const MAX_VISIBLE_TAGS = 3;
 
-export default function RecipeCard({ recipe, small = false }: Props) {
+export default function RecipeCard({ recipe, small = false, priority = false }: Props) {
   const visibleCategories = recipe.categories.slice(0, MAX_VISIBLE_CATEGORIES);
   const hiddenCount = recipe.categories.length - visibleCategories.length;
 
@@ -40,11 +43,12 @@ export default function RecipeCard({ recipe, small = false }: Props) {
         {/* ── Image zone ──────────────────────────────────────────── */}
         <Box sx={RecipeCardStyle.imageZone}>
           {recipe.image ? (
-            <Box
-              component="img"
-              src={recipe.image.url}
-              alt={recipe.image.alt}
-              sx={RecipeCardStyle.image}
+            <NemeshImage
+              image={recipe.image}
+              fill
+              priority={priority}
+              sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+              style={{ objectFit: "cover" }}
             />
           ) : (
             <Box sx={RecipeCardStyle.imageFallback}>

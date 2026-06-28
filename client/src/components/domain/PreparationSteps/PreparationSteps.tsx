@@ -6,6 +6,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { PreparationStep } from "@/types/domain";
 import type { CookingModeStepProps } from "@/features/cooking-mode";
+import { NemeshImage } from "@/components/shared";
 import { PreparationStepsStyle } from "./styles/PreparationStepsStyle";
 
 type Props = {
@@ -68,12 +69,13 @@ export default function PreparationSteps({ steps, sx, cookingMode }: Props) {
             >
               <Typography variant="body1">{step.description}</Typography>
               {step.image && (
-                <Box
-                  component="img"
-                  src={step.image.url}
-                  alt={step.image.alt}
-                  sx={PreparationStepsStyle.stepImage}
-                />
+                <Box sx={PreparationStepsStyle.stepImageWrapper}>
+                  <NemeshImage
+                    image={step.image}
+                    style={{ width: "100%", height: "auto", objectFit: "cover", display: "block" }}
+                    sizes="(max-width: 600px) 100vw, 480px"
+                  />
+                </Box>
               )}
             </Box>
           </Box>

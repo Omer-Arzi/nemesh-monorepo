@@ -19,14 +19,6 @@ export const FeaturedCategoryCardStyle = {
     },
   },
 
-  image: {
-    position: "absolute" as const,
-    inset: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover" as const,
-  },
-
   fallback: {
     position: "absolute" as const,
     inset: 0,
