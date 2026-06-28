@@ -127,14 +127,6 @@ export const RecipeHeroStyle = {
     boxShadow: "inset 0 0 0 1px rgba(193, 123, 60, 0.10)",
   },
 
-  image: {
-    position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  },
-
   imageFallback: {
     width: "100%",
     height: "100%",

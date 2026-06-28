@@ -6,7 +6,7 @@ import { TagPageText } from "./consts";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import { PageContainer, LoadingState, ErrorState, EmptyState, SectionHeader } from "@/components/shared";
+import { PageContainer, LoadingState, ErrorState, EmptyState, SectionHeader, NemeshImage } from "@/components/shared";
 import { RecipeCard } from "@/components/domain";
 import { useTag, useRecipesByTag } from "@/features/tag/hooks";
 
@@ -31,12 +31,13 @@ export default function TagPage() {
       {/* ── Header ──────────────────────────────────────────────────── */}
       <Box sx={{ mb: 4, textAlign: "center" }}>
         {tag.image ? (
-          <Box
-            component="img"
-            src={tag.image.url}
-            alt={tag.image.alt}
-            sx={{ width: "100%", maxHeight: 280, objectFit: "cover", borderRadius: 3, mb: 3 }}
-          />
+          <Box sx={{ overflow: "hidden", maxHeight: 280, borderRadius: 3, mb: 3 }}>
+            <NemeshImage
+              image={tag.image}
+              style={{ width: "100%", height: "auto", objectFit: "cover", display: "block" }}
+              sizes="(max-width: 600px) 100vw, 800px"
+            />
+          </Box>
         ) : (
           <Box
             sx={{

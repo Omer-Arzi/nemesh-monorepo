@@ -193,6 +193,36 @@ type IngredientCatalogItem = BaseEntity & {
 | Routing               | Next.js App Router; routes centralized in `src/constants/ROUTES`          |
 | Domain types          | `src/types/domain.ts` — single source of truth for UI                     |
 | API wire types        | `src/types/api.ts` — only used inside `src/lib/api/`                      |
+| Image rendering       | `NemeshImage` (shared component) + `getImageUrl` (lib/image/imageService) — see §9a |
+
+---
+
+## 9a. Image Architecture
+
+All image rendering goes through two layers:
+
+### URL resolution — `src/lib/api/mappers.ts`
+`mapImage(StrapiMediaRaw)` converts raw Strapi media objects to the domain `Image` type. Relative Strapi paths (`/uploads/...`) are resolved to absolute URLs using `NEXT_PUBLIC_API_URL`. S3 URLs are passed through unchanged. This happens once, in the API layer — components never see raw Strapi shapes.
+
+### URL access — `src/lib/image/imageService.ts`
+`getImageUrl(image: Image | null | undefined): string | undefined` is the single point of access for retrieving a display URL from a domain Image. CDN migrations, URL transformations, or versioning strategies belong here.
+
+### Rendering — `src/components/shared/NemeshImage`
+`NemeshImage` wraps Next.js `<Image>` and accepts the domain `Image` type directly:
+- Resolves `src` and `alt` automatically from the `image` prop
+- Supports `fill` mode (parent must be `position: relative`) and responsive dimensions mode
+- Passes `sizes`, `priority`, `className`, `style` through to Next.js Image
+- Falls back to native `<img>` when intrinsic dimensions are unavailable and `fill` is not set
+
+**All image-rendering components use `NemeshImage`.** Never use `<img>` or `<Box component="img">` for dynamic content images.
+
+### Remote patterns — `next.config.ts`
+The allowed image hostname is read from `NEXT_PUBLIC_IMAGE_HOST` (never hardcoded). Set this to your S3 bucket hostname (or CloudFront domain) in the deployment environment. Changing CDN providers only requires updating the env var.
+
+| Environment | NEXT_PUBLIC_IMAGE_HOST |
+|---|---|
+| Local dev | *(unset — localhost is always allowed)* |
+| Production (S3) | `nemesh-images.s3.eu-west-1.amazonaws.com` |
 
 **Component structure:**
 ```

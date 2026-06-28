@@ -15,3 +15,5 @@ export { default as SearchInput } from "./SearchInput";
 export { default as EmptyState } from "./EmptyState";
 export { default as LoadingState } from "./LoadingState";
 export { default as ErrorState } from "./ErrorState";
+export { default as NemeshImage } from "./NemeshImage";
+export type { NemeshImageProps } from "./NemeshImage";

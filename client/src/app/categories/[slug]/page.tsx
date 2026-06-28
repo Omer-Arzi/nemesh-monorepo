@@ -7,7 +7,7 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
-import { PageContainer, LoadingState, ErrorState, EmptyState, SectionHeader } from "@/components/shared";
+import { PageContainer, LoadingState, ErrorState, EmptyState, SectionHeader, NemeshImage } from "@/components/shared";
 import { RecipeCard, RecipeGridSkeleton } from "@/components/domain";
 import { useCategory, useRecipesByCategory } from "@/features/category/hooks";
 
@@ -32,12 +32,13 @@ export default function CategoryPage() {
       {/* ── Category header ──────────────────────────────────────────── */}
       <Box sx={{ mb: 3, textAlign: "center" }}>
         {category.image ? (
-          <Box
-            component="img"
-            src={category.image.url}
-            alt={category.image.alt}
-            sx={{ width: "100%", maxHeight: 280, objectFit: "cover", borderRadius: 3, mb: 3 }}
-          />
+          <Box sx={{ overflow: "hidden", maxHeight: 280, borderRadius: 3, mb: 3 }}>
+            <NemeshImage
+              image={category.image}
+              style={{ width: "100%", height: "auto", objectFit: "cover", display: "block" }}
+              sizes="(max-width: 600px) 100vw, 800px"
+            />
+          </Box>
         ) : (
           <Box
             sx={{

@@ -9,6 +9,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type { Recipe } from "@/types/domain";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
 import { formatPrepTime } from "@/lib/formatters/prepTime";
+import { NemeshImage } from "@/components/shared";
 import { RecipeHeroStyle } from "./styles/RecipeHeroStyle";
 import { RecipeHeroText } from "./RecipeHero.consts";
 
@@ -141,11 +142,12 @@ export default function RecipeHero({
         {/* ── Image column (LEFT in RTL — column 2) ───────────────── */}
         <Box sx={RecipeHeroStyle.imageColumn}>
           {image ? (
-            <Box
-              component="img"
-              src={image.url}
-              alt={image.alt}
-              sx={RecipeHeroStyle.image}
+            <NemeshImage
+              image={image}
+              fill
+              priority
+              sizes="(max-width: 900px) 0vw, 50vw"
+              style={{ objectFit: "cover" }}
             />
           ) : (
             <Box sx={RecipeHeroStyle.imageFallback}>

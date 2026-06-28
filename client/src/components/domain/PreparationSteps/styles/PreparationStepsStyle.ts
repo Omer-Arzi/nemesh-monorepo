@@ -53,12 +53,10 @@ export const PreparationStepsStyle = {
   stepContentChecked: {
     opacity: 0.5,
   },
-  stepImage: {
+  stepImageWrapper: {
     mt: 1.5,
-    width: "100%",
     maxWidth: 480,
     borderRadius: 1,
-    objectFit: "cover",
-    display: "block",
+    overflow: "hidden",
   },
 } as const;

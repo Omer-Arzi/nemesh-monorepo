@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import NextLink from "next/link";
 import type { Image } from "@/types/domain";
+import { NemeshImage } from "@/components/shared";
 import { CollectionCardStyle } from "./CollectionCard.style";
 
 type Props = {
@@ -37,11 +38,11 @@ export default function CollectionCard({ name, image, href, special = false }: P
         {/* ── Image zone ──────────────────────────────────────────── */}
         <Box sx={CollectionCardStyle.imageZone}>
           {image ? (
-            <Box
-              component="img"
-              src={image.url}
-              alt={image.alt}
-              sx={CollectionCardStyle.image}
+            <NemeshImage
+              image={image}
+              fill
+              sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+              style={{ objectFit: "cover" }}
             />
           ) : (
             <Box sx={CollectionCardStyle.imageFallback}>
