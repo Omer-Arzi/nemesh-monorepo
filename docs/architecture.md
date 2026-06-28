@@ -33,6 +33,7 @@ nemesh/
 │   │   │   ├── home/            # Home page feature blocks (carousel, search hero, etc.)
 │   │   │   ├── recipe/          # Recipe detail hooks
 │   │   │   ├── results/         # Browse/search results hooks
+│   │   │   ├── shir-challenge/  # Shir Challenge page feature (single type + special UI)
 │   │   │   └── tag/             # Tag hooks
 │   │   ├── lib/
 │   │   │   ├── api/services/    # Strapi REST clients (recipeService, categoryService, …)
@@ -47,8 +48,8 @@ nemesh/
 │   └── public/images/           # Static images (placeholders, branding, categories)
 │
 ├── server/                      # Strapi CMS
-│   ├── src/api/                 # Collection type controllers/routes/services
-│   ├── src/components/          # Strapi component schemas (IngredientSection, etc.)
+│   ├── src/api/                 # Collection type + single type controllers/routes/services
+│   ├── src/components/          # Strapi component schemas (IngredientSection, IntroStep, etc.)
 │   ├── scripts/                 # One-off import/migration/backfill scripts
 │   │   └── import-recipes/      # DOCX → Strapi pipeline
 │   ├── local-recipes/           # DOCX source files (not committed in prod)
@@ -294,7 +295,41 @@ Full Railway + S3 setup steps: [docs/deployment.md](./deployment.md).
 
 ---
 
-## 13. Safety Notes
+## 13. Shir Challenge Page
+
+`/tags/shir-challenge` is handled by a **static Next.js route** (`app/tags/shir-challenge/page.tsx`) which takes precedence over the dynamic `app/tags/[slug]/page.tsx`. This prevents any change to existing tag-page logic.
+
+### Strapi single type — `shir-challenge-page`
+
+A single type (not collection) at `server/src/api/shir-challenge-page/`. Provides admin-controlled presentation content around the monthly ingredient challenge. Fields:
+
+| Field | Type | Notes |
+|---|---|---|
+| `title` | string | Page title |
+| `badgeText` | string | Small pill above title |
+| `subtitle` | text | Short description |
+| `heroImage` | media | Cover image; objectPosition "center 42%" |
+| `monthlyIngredientName` | string | Ingredient of the month |
+| `monthlyIngredientDescription` | text | Context copy |
+| `monthLabel` | string | e.g. "יוני 2026" |
+| `myProgressStatus` | enum | idea / writing / cooked / published |
+| `recipesSectionTitle` | string | Section header above recipe grid |
+| `recipesSectionSubtitle` | text | Optional subtitle |
+| `introSteps` | component (repeatable) | `challenge.intro-step` — title + description per step |
+
+The **recipe list** is still driven entirely by the existing `shir-challenge` **tag** — no relation between the single type and recipes.
+
+### Fallback behavior
+
+Every field falls back to a Hebrew default (see `ShirChallengeDefaults` in `features/shir-challenge/ShirChallenge.consts.ts`) when the admin has not filled it in. The page renders with full default copy even if the single type document has never been saved.
+
+### Design tokens
+
+Peach accent palette defined in `features/shir-challenge/ShirChallenge.tokens.ts`. Used only within the shir-challenge feature boundary.
+
+---
+
+## 14. Safety Notes
 
 - **Strapi component schema changes are risky.** Renaming or removing a component field without a DB backup can cause silent data loss. Always export/backup before schema changes.
 - **Do not run destructive migrations casually.** Migration scripts in `server/scripts/` are one-time operations; verify on a backup first.

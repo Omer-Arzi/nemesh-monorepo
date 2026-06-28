@@ -57,4 +57,11 @@ export const queryKeys = {
     /** Single tag by slug. */
     detail: (slug: string) => ["tags", "detail", slug] as const,
   },
+
+  shirChallengePage: {
+    /** Invalidate to clear the single type cache. */
+    all: () => ["shirChallengePage"] as const,
+    /** The single shir-challenge-page document. */
+    detail: () => ["shirChallengePage", "detail"] as const,
+  },
 } as const;

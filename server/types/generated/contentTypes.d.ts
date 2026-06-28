@@ -601,6 +601,48 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiShirChallengePageShirChallengePage
+  extends Struct.SingleTypeSchema {
+  collectionName: 'shir_challenge_pages';
+  info: {
+    description: 'Admin-controlled content for the monthly Shir Challenge page';
+    displayName: 'Shir Challenge Page';
+    pluralName: 'shir-challenge-pages';
+    singularName: 'shir-challenge-page';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    badgeText: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    heroImage: Schema.Attribute.Media<'images'>;
+    introSteps: Schema.Attribute.Component<'challenge.intro-step', true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shir-challenge-page.shir-challenge-page'
+    > &
+      Schema.Attribute.Private;
+    monthLabel: Schema.Attribute.String;
+    monthlyIngredientDescription: Schema.Attribute.Text;
+    monthlyIngredientName: Schema.Attribute.String;
+    myProgressStatus: Schema.Attribute.Enumeration<
+      ['idea', 'writing', 'cooked', 'published']
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    recipesSectionSubtitle: Schema.Attribute.Text;
+    recipesSectionTitle: Schema.Attribute.String;
+    subtitle: Schema.Attribute.Text;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiTagTag extends Struct.CollectionTypeSchema {
   collectionName: 'tags';
   info: {
@@ -1146,6 +1188,7 @@ declare module '@strapi/strapi' {
       'api::ingredient-catalog-item.ingredient-catalog-item': ApiIngredientCatalogItemIngredientCatalogItem;
       'api::ingredient-match-candidate.ingredient-match-candidate': ApiIngredientMatchCandidateIngredientMatchCandidate;
       'api::recipe.recipe': ApiRecipeRecipe;
+      'api::shir-challenge-page.shir-challenge-page': ApiShirChallengePageShirChallengePage;
       'api::tag.tag': ApiTagTag;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

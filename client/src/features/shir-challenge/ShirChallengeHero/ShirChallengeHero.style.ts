@@ -1,0 +1,50 @@
+import { SHIR_CHALLENGE_TOKENS } from "../ShirChallenge.tokens";
+
+export const ShirChallengeHeroStyle = {
+  root: {
+    position: "relative" as const,
+    height: { xs: 240, sm: 300, md: 380 },
+    overflow: "hidden" as const,
+    borderRadius: 3,
+    mb: { xs: 3, sm: 4 },
+    bgcolor: SHIR_CHALLENGE_TOKENS.peachSurface,
+  },
+  overlay: {
+    position: "absolute" as const,
+    inset: 0,
+    display: "flex",
+    flexDirection: "column" as const,
+    justifyContent: "flex-end",
+    px: { xs: 2.5, sm: 4 },
+    py: { xs: 2.5, sm: 3.5 },
+    background:
+      "linear-gradient(to top, rgba(26,18,8,0.78) 0%, rgba(26,18,8,0.38) 52%, transparent 100%)",
+  },
+  badge: {
+    display: "inline-block",
+    bgcolor: SHIR_CHALLENGE_TOKENS.peachChip,
+    color: SHIR_CHALLENGE_TOKENS.peachAccent,
+    px: 1.5,
+    py: 0.5,
+    borderRadius: 1.5,
+    typography: "caption",
+    fontWeight: 700,
+    letterSpacing: "0.06em",
+    mb: 1.5,
+    alignSelf: "flex-start",
+  },
+  title: {
+    color: "#FFFFFF",
+    fontWeight: 800,
+    letterSpacing: "-0.02em",
+    textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+    lineHeight: 1.2,
+  },
+  subtitle: {
+    color: "rgba(255,255,255,0.88)",
+    mt: 0.75,
+    textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+    maxWidth: 540,
+    lineHeight: 1.55,
+  },
+} as const;

@@ -125,3 +125,30 @@ export type IngredientCatalogItem = BaseEntity & {
   approvalStatus: "approved" | "pending";
   notes: string | null;
 };
+
+// ─── Shir Challenge Page (single type) ───────────────────────────────────────
+
+export type MyProgressStatus = "idea" | "writing" | "cooked" | "published";
+
+export type ChallengeIntroStep = {
+  title: string;
+  description: string;
+};
+
+/**
+ * Admin-controlled content for the Shir Challenge page.
+ * All fields are optional — the page falls back to Hebrew defaults if missing.
+ */
+export type ShirChallengePage = {
+  title: string | null;
+  badgeText: string | null;
+  subtitle: string | null;
+  heroImage: Image | null;
+  monthlyIngredientName: string | null;
+  monthlyIngredientDescription: string | null;
+  monthLabel: string | null;
+  myProgressStatus: MyProgressStatus | null;
+  recipesSectionTitle: string | null;
+  recipesSectionSubtitle: string | null;
+  introSteps: ChallengeIntroStep[];
+};

@@ -1,0 +1,54 @@
+{
+  "kind": "singleType",
+  "collectionName": "shir_challenge_pages",
+  "info": {
+    "singularName": "shir-challenge-page",
+    "pluralName": "shir-challenge-pages",
+    "displayName": "Shir Challenge Page",
+    "description": "Admin-controlled content for the monthly Shir Challenge page"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "badgeText": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "text"
+    },
+    "heroImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "monthlyIngredientName": {
+      "type": "string"
+    },
+    "monthlyIngredientDescription": {
+      "type": "text"
+    },
+    "monthLabel": {
+      "type": "string"
+    },
+    "myProgressStatus": {
+      "type": "enumeration",
+      "enum": ["idea", "writing", "cooked", "published"]
+    },
+    "recipesSectionTitle": {
+      "type": "string"
+    },
+    "recipesSectionSubtitle": {
+      "type": "text"
+    },
+    "introSteps": {
+      "type": "component",
+      "repeatable": true,
+      "component": "challenge.intro-step"
+    }
+  }
+}
