@@ -6,6 +6,7 @@ import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
 import NextLink from "next/link";
 import { ROUTES } from "@/constants";
 import type { RecipeSummary } from "@/types/domain";
@@ -24,6 +25,13 @@ type Props = {
 
 const MAX_VISIBLE_CATEGORIES = 3;
 const MAX_VISIBLE_TAGS = 3;
+
+const noImageFallback = (
+  <Box sx={RecipeCardStyle.noImageState}>
+    <RestaurantIcon sx={RecipeCardStyle.noImageIcon} />
+    <Typography sx={RecipeCardStyle.noImageText}>אין תמונה</Typography>
+  </Box>
+);
 
 export default function RecipeCard({ recipe, small = false, priority = false }: Props) {
   const visibleCategories = recipe.categories.slice(0, MAX_VISIBLE_CATEGORIES);
@@ -47,6 +55,8 @@ export default function RecipeCard({ recipe, small = false, priority = false }: 
             priority={priority}
             sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
             objectFit="cover"
+            className="RecipeCard-image"
+            fallback={noImageFallback}
           />
         </Box>
 
