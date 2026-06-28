@@ -1,6 +1,8 @@
 export const LatestRecipesStyle = {
   root: {
-    py: { xs: 5, sm: 6 },
+    // Graduated vertical rhythm: compact on mobile (avoid hollow sections),
+    // generous on desktop (wide screens benefit from more breathing room).
+    py: { xs: 4, sm: 5, md: 6 },
     bgcolor: "background.paper",
     borderTop: "1px solid",
     borderBottom: "1px solid",
@@ -13,6 +15,7 @@ export const LatestRecipesStyle = {
     color: "primary.main",
     textDecoration: "none",
     "&:hover": {
+      color: "primary.dark",
       textDecoration: "underline",
     },
   },

@@ -3,7 +3,7 @@ export const FeaturedCategoriesCarouselStyle = {
     borderTop: "1px solid",
     borderBottom: "1px solid",
     borderColor: "divider",
-    pt: { xs: 5, sm: 6 },
+    pt: { xs: 4, sm: 5, md: 6 },
     pb: { xs: 4, sm: 5 },
   },
 

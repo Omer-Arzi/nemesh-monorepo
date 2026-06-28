@@ -134,7 +134,7 @@ export default function FeaturedCategoriesCarousel() {
   return (
     <Box sx={FeaturedCategoriesCarouselStyle.root}>
       <PageContainer sx={{ py: 0, pb: 0 }}>
-        <SectionHeader title={FeaturedCategoriesCarouselText.sectionTitle} sx={{ pb: 3 }} />
+        <SectionHeader title={FeaturedCategoriesCarouselText.sectionTitle} sx={{ mb: 2.5 }} />
 
         <Box sx={FeaturedCategoriesCarouselStyle.trackWrapper}>
           {/* Left arrow — "previous" in RTL: scrolls content rightward toward start */}

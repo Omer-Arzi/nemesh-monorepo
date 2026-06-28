@@ -16,9 +16,10 @@ export default function SectionHeader({ title, subtitle, action, sx }: Props) {
   return (
     <Box sx={{ ...SectionHeaderStyle.root, ...sx }}>
       <Box sx={SectionHeaderStyle.titleGroup}>
-        <Typography variant="h5" component="h2" sx={{ fontWeight: 700 }}>
+        <Typography variant="h5" component="h2" sx={SectionHeaderStyle.title}>
           {title}
         </Typography>
+        <Box sx={SectionHeaderStyle.accent} />
         {subtitle && (
           <Typography variant="body2" color="text.secondary" sx={SectionHeaderStyle.subtitle}>
             {subtitle}
