@@ -2,7 +2,6 @@
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import NextLink from "next/link";
 import type { Category } from "@/types/domain";
 import { ROUTES } from "@/constants";
@@ -22,19 +21,13 @@ export default function FeaturedCategoryCard({ category }: Props) {
       href={ROUTES.CATEGORY(category.slug)}
       sx={FeaturedCategoryCardStyle.root}
     >
-      {category.image ? (
-        <NemeshImage
-          image={category.image}
-          alt={category.image.alt || label}
-          fill
-          sizes="200px"
-          style={{ objectFit: "cover" }}
-        />
-      ) : (
-        <Box sx={FeaturedCategoryCardStyle.fallback}>
-          <CategoryOutlinedIcon fontSize="inherit" />
-        </Box>
-      )}
+      <NemeshImage
+        image={category.image}
+        alt={category.image?.alt || label}
+        fill
+        sizes="200px"
+        objectFit="cover"
+      />
 
       <Box sx={FeaturedCategoryCardStyle.overlay}>
         <Typography component="span" sx={FeaturedCategoryCardStyle.label}>

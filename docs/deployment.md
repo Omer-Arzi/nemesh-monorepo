@@ -131,7 +131,9 @@ In the Strapi service → **Variables**, add:
 | `AWS_BUCKET` | your bucket name |
 | `AWS_BUCKET_URL` | `https://<bucket>.s3.<region>.amazonaws.com` |
 | `AWS_ACL` | **leave unset** if bucket ACLs are disabled (default for new buckets); `public-read` only if ACLs are explicitly enabled |
-| `CLIENT_URL` | your Vercel client URL *(set after client is deployed)* |
+| `CLIENT_URLS` | comma-separated list of exact allowed origins, e.g. `https://nemesh-client.vercel.app` |
+| `VERCEL_PREVIEW_ORIGIN_PATTERNS` | comma-separated regex patterns for Vercel preview URLs (see CORS section below) |
+| `CLIENT_URL` | *(legacy)* single allowed origin — superseded by `CLIENT_URLS` but still supported |
 
 **Generate secrets:**
 ```bash
@@ -170,7 +172,7 @@ If required S3 env vars are missing when `NODE_ENV=production`, Strapi **throws 
 `config/middlewares.ts` applies the same `NODE_ENV` check for CORS:
 
 - Development → `origin: '*'` (open)
-- Production → `origin: [CLIENT_URL]` (restricted to deployed client)
+- Production → function-based origin check (see CORS section below)
 
 ## Verifying S3 is active
 
@@ -187,6 +189,75 @@ If you see `[upload] provider: local` instead, `NODE_ENV` is not set to `product
 - `/uploads/...` → still using local disk, `NODE_ENV` or S3 vars are wrong ✗
 
 **4. Check the S3 bucket** in the AWS Console → the file should appear under the uploads path.
+
+---
+
+## CORS Configuration
+
+`config/middlewares.ts` implements function-based CORS in production so that Vercel preview deployments work without a Railway redeploy after every Vercel push.
+
+### How it works
+
+The `isAllowedCorsOrigin` helper is called for every browser request:
+
+1. **No `Origin` header** → allowed (server-to-server, curl, non-browser)
+2. **Exact match** in `CLIENT_URLS` or `CLIENT_URL` → allowed
+3. **Regex match** against `VERCEL_PREVIEW_ORIGIN_PATTERNS` → allowed
+4. **Everything else** → rejected (CORS error in the browser)
+
+### Railway env vars
+
+| Variable | Example | Notes |
+|---|---|---|
+| `CLIENT_URLS` | `https://nemesh-client.vercel.app` | Comma-separated exact origins. Add production + any fixed staging URLs here. |
+| `VERCEL_PREVIEW_ORIGIN_PATTERNS` | see below | Comma-separated anchored regex patterns. |
+| `CLIENT_URL` | *(legacy)* | Single origin form — still honoured but superseded by `CLIENT_URLS`. |
+
+### Configuring Vercel preview patterns
+
+Vercel preview URLs follow this format:
+```
+https://<project>-<hash>-<team-slug>.vercel.app
+https://<project>-git-<branch>-<team-slug>.vercel.app
+```
+
+Set `VERCEL_PREVIEW_ORIGIN_PATTERNS` to match only your project's previews:
+
+```
+VERCEL_PREVIEW_ORIGIN_PATTERNS=^https://nemesh-client-[a-z0-9-]+-omer-arzis-projects\.vercel\.app$,^https://nemesh-client-[a-z0-9-]+\.vercel\.app$
+```
+
+**Pattern rules:**
+- Each pattern is used as `new RegExp(pattern)` — anchor with `^` and `$`
+- Use `\.` (single backslash in the env var file) for literal dots — prevents `xvercel-app` or similar from matching
+- The character class `[a-z0-9-]+` matches the hash or branch slug Vercel inserts
+- Never use `^https://.*\.vercel\.app$` — that allows any Vercel project
+
+### Startup log
+
+At startup, Railway logs:
+```
+[cors] Production: 1 exact origin(s), 2 preview pattern(s)
+[cors] Allowed origins: https://nemesh-client.vercel.app
+[cors] Preview patterns: ^https://nemesh-client-[a-z0-9-]+-omer-arzis-projects\.vercel\.app$, ...
+```
+
+Check this log after every Railway redeploy to confirm CORS is configured correctly.
+
+### Verifying CORS behaviour
+
+```bash
+# Should succeed (production domain)
+curl -I -H "Origin: https://nemesh-client.vercel.app" https://<railway-domain>/api/recipes
+
+# Should succeed (preview domain matching pattern)
+curl -I -H "Origin: https://nemesh-client-abc123-omer-arzis-projects.vercel.app" https://<railway-domain>/api/recipes
+
+# Should be rejected (random vercel.app domain)
+curl -I -H "Origin: https://evil-app.vercel.app" https://<railway-domain>/api/recipes
+```
+
+A rejected origin returns an empty (or missing) `Access-Control-Allow-Origin` header, not a 4xx status — CORS errors are enforced by the browser, not the server.
 
 ---
 

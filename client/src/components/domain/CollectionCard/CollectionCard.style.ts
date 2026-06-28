@@ -24,18 +24,6 @@ export const CollectionCardStyle = {
     bgcolor: "action.hover",
     flexShrink: 0,
   },
-  imageFallback: {
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  imageFallbackIcon: {
-    fontSize: 64,
-    color: "text.disabled",
-    opacity: 0.4,
-  },
   content: {
     flexGrow: 1,
     display: "flex",

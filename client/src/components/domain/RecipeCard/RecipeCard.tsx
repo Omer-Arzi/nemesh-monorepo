@@ -6,7 +6,6 @@ import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
 import NextLink from "next/link";
 import { ROUTES } from "@/constants";
 import type { RecipeSummary } from "@/types/domain";
@@ -42,19 +41,13 @@ export default function RecipeCard({ recipe, small = false, priority = false }: 
       >
         {/* ── Image zone ──────────────────────────────────────────── */}
         <Box sx={RecipeCardStyle.imageZone}>
-          {recipe.image ? (
-            <NemeshImage
-              image={recipe.image}
-              fill
-              priority={priority}
-              sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-              style={{ objectFit: "cover" }}
-            />
-          ) : (
-            <Box sx={RecipeCardStyle.imageFallback}>
-              <RestaurantIcon sx={RecipeCardStyle.imageFallbackIcon} />
-            </Box>
-          )}
+          <NemeshImage
+            image={recipe.image}
+            fill
+            priority={priority}
+            sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+            objectFit="cover"
+          />
         </Box>
 
         {/* ── Content zone ────────────────────────────────────────── */}

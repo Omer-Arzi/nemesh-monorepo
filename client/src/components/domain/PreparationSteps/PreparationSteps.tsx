@@ -72,7 +72,8 @@ export default function PreparationSteps({ steps, sx, cookingMode }: Props) {
                 <Box sx={PreparationStepsStyle.stepImageWrapper}>
                   <NemeshImage
                     image={step.image}
-                    style={{ width: "100%", height: "auto", objectFit: "cover", display: "block" }}
+                    style={{ width: "100%", height: "auto" }}
+                    objectFit="cover"
                     sizes="(max-width: 600px) 100vw, 480px"
                   />
                 </Box>

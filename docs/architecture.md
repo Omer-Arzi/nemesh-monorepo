@@ -274,7 +274,7 @@ All client-side persistence goes through `NemeshStorage` ([client/src/lib/storag
 
 **Upload provider selection** — `config/plugins.ts` gates S3 on `NODE_ENV === 'production'`. In development, no upload plugin is configured and Strapi falls back to local disk.
 
-**CORS** — `config/middlewares.ts` restricts to `CLIENT_URL` in production. Development allows all origins.
+**CORS** — `config/middlewares.ts` uses a function-based origin check in production: exact matches from `CLIENT_URLS`/`CLIENT_URL` and regex patterns from `VERCEL_PREVIEW_ORIGIN_PATTERNS` are allowed; everything else is rejected. Development uses `origin: '*'`. See `docs/deployment.md` § CORS Configuration.
 
 **Required production env vars (non-secret):**
 

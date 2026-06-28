@@ -34,7 +34,8 @@ export default function TagPage() {
           <Box sx={{ overflow: "hidden", maxHeight: 280, borderRadius: 3, mb: 3 }}>
             <NemeshImage
               image={tag.image}
-              style={{ width: "100%", height: "auto", objectFit: "cover", display: "block" }}
+              style={{ width: "100%", height: "auto" }}
+              objectFit="cover"
               sizes="(max-width: 600px) 100vw, 800px"
             />
           </Box>

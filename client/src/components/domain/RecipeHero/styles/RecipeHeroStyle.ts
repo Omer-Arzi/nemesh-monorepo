@@ -127,17 +127,4 @@ export const RecipeHeroStyle = {
     boxShadow: "inset 0 0 0 1px rgba(193, 123, 60, 0.10)",
   },
 
-  imageFallback: {
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  imageFallbackIcon: {
-    fontSize: 72,
-    color: "secondary.main",
-    opacity: 0.5,
-  },
 } as const;
