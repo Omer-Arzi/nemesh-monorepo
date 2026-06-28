@@ -16,11 +16,7 @@ export default function FeaturedCategoryCard({ category }: Props) {
   const label = category.menuName ?? category.name;
 
   return (
-    <Box
-      component={NextLink}
-      href={ROUTES.CATEGORY(category.slug)}
-      sx={FeaturedCategoryCardStyle.root}
-    >
+    <Box sx={FeaturedCategoryCardStyle.root}>
       <NemeshImage
         image={category.image}
         alt={category.image?.alt || label}
@@ -34,6 +30,13 @@ export default function FeaturedCategoryCard({ category }: Props) {
           {label}
         </Typography>
       </Box>
+
+      {/* Stretched link — last in DOM so it's on top, covers the whole card */}
+      <NextLink
+        href={ROUTES.CATEGORY(category.slug)}
+        style={FeaturedCategoryCardStyle.stretchedLink}
+        aria-label={label}
+      />
     </Box>
   );
 }

@@ -76,8 +76,9 @@ export default function FeaturedCategoriesCarousel() {
     hasDraggedRef.current = false;
     dragStartXRef.current = e.clientX;
     dragStartScrollRef.current = el.scrollLeft;
-    el.setPointerCapture(e.pointerId);
-    el.style.cursor = "grabbing";
+    // Pointer capture is set lazily in handlePointerMove once a real drag is confirmed.
+    // Setting it here (eagerly) causes browsers to fire click on the track rather than on
+    // child link elements, which breaks card navigation.
     el.style.scrollBehavior = "auto"; // instant response during drag
   }, []);
 
@@ -86,7 +87,15 @@ export default function FeaturedCategoriesCarousel() {
     const el = trackRef.current;
     if (!el) return;
     const dx = e.clientX - dragStartXRef.current;
-    if (Math.abs(dx) > DRAG_THRESHOLD) hasDraggedRef.current = true;
+    if (Math.abs(dx) > DRAG_THRESHOLD) {
+      hasDraggedRef.current = true;
+      // Capture lazily — only once drag is confirmed — so simple clicks are unaffected and
+      // the drag continues even if the pointer leaves the track bounds.
+      if (!el.hasPointerCapture(e.pointerId)) {
+        el.setPointerCapture(e.pointerId);
+        el.style.cursor = "grabbing";
+      }
+    }
     // RTL: pointer moves right (+dx) → scrollLeft increases toward 0 → content scrolls toward start. ✓
     el.scrollLeft = dragStartScrollRef.current + dx;
   }, []);
