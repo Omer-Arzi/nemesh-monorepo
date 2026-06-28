@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import NextImage from "next/image";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
@@ -22,6 +22,8 @@ export type NemeshImageProps = {
   style?: CSSProperties;
   objectFit?: CSSProperties["objectFit"];
   objectPosition?: CSSProperties["objectPosition"];
+  /** Content to render when src is absent or fails to load. Defaults to a warm surface. */
+  fallback?: ReactNode;
 };
 
 export default function NemeshImage({
@@ -37,6 +39,7 @@ export default function NemeshImage({
   style,
   objectFit,
   objectPosition,
+  fallback,
 }: NemeshImageProps) {
   const src = srcProp ?? getImageUrl(image);
   const alt = altProp ?? image?.alt ?? "";
@@ -99,7 +102,7 @@ export default function NemeshImage({
             />
           </>
         ) : (
-          <Box sx={NemeshImageStyle.fallback} />
+          fallback ?? <Box sx={NemeshImageStyle.fallback} />
         )}
       </Box>
     );

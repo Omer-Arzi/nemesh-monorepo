@@ -7,7 +7,7 @@ export const FeaturedCategoryCardStyle = {
     borderRadius: "14px",
     overflow: "hidden",
     flexShrink: 0,
-    textDecoration: "none",
+    cursor: "pointer",
     scrollSnapAlign: "start",
     boxShadow:
       "0 2px 12px rgba(26, 18, 8, 0.10), 0 1px 4px rgba(26, 18, 8, 0.06)",
@@ -37,5 +37,11 @@ export const FeaturedCategoryCardStyle = {
     fontSize: "0.9rem",
     lineHeight: 1.3,
     textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+  },
+
+  stretchedLink: {
+    position: "absolute" as const,
+    inset: 0,
+    display: "block" as const,
   },
 } as const;

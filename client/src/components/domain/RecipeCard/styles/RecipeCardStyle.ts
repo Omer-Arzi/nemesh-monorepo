@@ -5,9 +5,18 @@ export const RecipeCardStyle = {
     flexDirection: "column",
     borderRadius: 3,
     overflow: "hidden",
-    transition: "box-shadow 200ms ease",
+    transition: "box-shadow 250ms ease",
     "&:hover": {
-      boxShadow: 6,
+      boxShadow: "0 8px 24px rgba(193, 123, 60, 0.18), 0 2px 6px rgba(193, 123, 60, 0.10)",
+    },
+    // Image zoom on card hover — targets the NemeshImage wrapper div (className in RecipeCard.tsx).
+    // The img inside NemeshImage carries an inline opacity transition that would override
+    // a stylesheet rule targeting img directly, so we scale the wrapper instead.
+    "& .RecipeCard-image": {
+      transition: "transform 0.5s ease",
+    },
+    "&:hover .RecipeCard-image": {
+      transform: "scale(1.04)",
     },
   },
   actionArea: {
@@ -23,14 +32,37 @@ export const RecipeCardStyle = {
     bgcolor: "action.hover",
     flexShrink: 0,
   },
+
+  // ── No-image branded placeholder ─────────────────────────────────────────
+  noImageState: {
+    position: "absolute" as const,
+    inset: 0,
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 0.75,
+    bgcolor: "background.default",
+  },
+  noImageIcon: {
+    fontSize: 34,
+    color: "primary.light",
+    opacity: 0.6,
+  },
+  noImageText: {
+    fontSize: "0.68rem",
+    color: "text.disabled",
+    letterSpacing: "0.03em",
+  },
+
   content: {
     flexGrow: 1,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: 1.5,
-    pt: 2,
-    pb: "16px !important",
+    gap: 1,
+    pt: 1.5,
+    pb: "12px !important",
     px: 2,
   },
   title: {
@@ -47,7 +79,7 @@ export const RecipeCardStyle = {
   categoriesRow: {
     display: "flex",
     flexWrap: "wrap",
-    gap: 0.75,
+    gap: 0.5,
     justifyContent: "center",
   },
   overflowChip: {
@@ -61,8 +93,8 @@ export const RecipeCardStyle = {
     justifyContent: "center",
   },
   tagChip: {
-    fontSize: "0.7rem",
-    height: 20,
+    fontSize: "0.65rem",
+    height: 18,
     color: "text.secondary",
     bgcolor: "action.hover",
     border: "none",
