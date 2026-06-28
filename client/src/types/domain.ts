@@ -125,3 +125,31 @@ export type IngredientCatalogItem = BaseEntity & {
   approvalStatus: "approved" | "pending";
   notes: string | null;
 };
+
+// ─── Shir Challenge ───────────────────────────────────────────────────────────
+
+export type MyProgressStatus = "idea" | "writing" | "cooked" | "published";
+
+/** pending = announced but ingredient not yet revealed. */
+export type MonthlyChallengeStatus = "pending" | "active" | "skipped";
+
+/**
+ * Static page-level content (single type).
+ * Monthly challenge data lives in ShirChallengeMonth.
+ */
+export type ShirChallengePage = {
+  title: string | null;
+  badgeText: string | null;
+  subtitle: string | null;
+  heroImage: Image | null;
+};
+
+/** One record per calendar month in the shir-challenge-month collection. */
+export type ShirChallengeMonth = BaseEntity & {
+  monthKey: string;                          // "YYYY-MM"
+  monthStart: string;                        // "YYYY-MM-DD"
+  monthlyIngredientName: string | null;
+  monthlyChallengeStatus: MonthlyChallengeStatus;
+  monthlyChallengeNote: string | null;
+  myProgressStatus: MyProgressStatus | null;
+};

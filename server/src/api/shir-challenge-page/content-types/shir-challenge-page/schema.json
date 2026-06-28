@@ -1,0 +1,30 @@
+{
+  "kind": "singleType",
+  "collectionName": "shir_challenge_pages",
+  "info": {
+    "singularName": "shir-challenge-page",
+    "pluralName": "shir-challenge-pages",
+    "displayName": "Shir Challenge Page",
+    "description": "Static page-level content for the Shir Challenge page (title, hero, subtitle). Monthly challenge data lives in the shir-challenge-month collection."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "badgeText": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "text"
+    },
+    "heroImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}

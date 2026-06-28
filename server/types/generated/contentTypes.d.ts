@@ -601,6 +601,82 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiShirChallengeMonthShirChallengeMonth
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'shir_challenge_months';
+  info: {
+    description: 'One record per calendar month. Tracks the monthly ingredient challenge status and admin progress.';
+    displayName: 'Shir Challenge Month';
+    pluralName: 'shir-challenge-months';
+    singularName: 'shir-challenge-month';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shir-challenge-month.shir-challenge-month'
+    > &
+      Schema.Attribute.Private;
+    monthKey: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    monthlyChallengeNote: Schema.Attribute.Text;
+    monthlyChallengeStatus: Schema.Attribute.Enumeration<
+      ['pending', 'active', 'skipped']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    monthlyIngredientName: Schema.Attribute.String;
+    monthStart: Schema.Attribute.Date & Schema.Attribute.Required;
+    myProgressStatus: Schema.Attribute.Enumeration<
+      ['idea', 'writing', 'cooked', 'published']
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiShirChallengePageShirChallengePage
+  extends Struct.SingleTypeSchema {
+  collectionName: 'shir_challenge_pages';
+  info: {
+    description: 'Static page-level content for the Shir Challenge page (title, hero, subtitle). Monthly challenge data lives in the shir-challenge-month collection.';
+    displayName: 'Shir Challenge Page';
+    pluralName: 'shir-challenge-pages';
+    singularName: 'shir-challenge-page';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    badgeText: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    heroImage: Schema.Attribute.Media<'images'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shir-challenge-page.shir-challenge-page'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    subtitle: Schema.Attribute.Text;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiTagTag extends Struct.CollectionTypeSchema {
   collectionName: 'tags';
   info: {
@@ -1146,6 +1222,8 @@ declare module '@strapi/strapi' {
       'api::ingredient-catalog-item.ingredient-catalog-item': ApiIngredientCatalogItemIngredientCatalogItem;
       'api::ingredient-match-candidate.ingredient-match-candidate': ApiIngredientMatchCandidateIngredientMatchCandidate;
       'api::recipe.recipe': ApiRecipeRecipe;
+      'api::shir-challenge-month.shir-challenge-month': ApiShirChallengeMonthShirChallengeMonth;
+      'api::shir-challenge-page.shir-challenge-page': ApiShirChallengePageShirChallengePage;
       'api::tag.tag': ApiTagTag;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
