@@ -4,7 +4,6 @@ import { useState } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { Recipe } from "@/types/domain";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
@@ -141,19 +140,13 @@ export default function RecipeHero({
 
         {/* ── Image column (LEFT in RTL — column 2) ───────────────── */}
         <Box sx={RecipeHeroStyle.imageColumn}>
-          {image ? (
-            <NemeshImage
-              image={image}
-              fill
-              priority
-              sizes="(max-width: 900px) 0vw, 50vw"
-              style={{ objectFit: "cover" }}
-            />
-          ) : (
-            <Box sx={RecipeHeroStyle.imageFallback}>
-              <RestaurantIcon sx={RecipeHeroStyle.imageFallbackIcon} />
-            </Box>
-          )}
+          <NemeshImage
+            image={image}
+            fill
+            priority
+            sizes="(max-width: 900px) 0vw, 50vw"
+            objectFit="cover"
+          />
         </Box>
       </Box>
     </Box>

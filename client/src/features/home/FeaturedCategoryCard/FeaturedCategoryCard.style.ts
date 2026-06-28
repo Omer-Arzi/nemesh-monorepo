@@ -19,18 +19,6 @@ export const FeaturedCategoryCardStyle = {
     },
   },
 
-  fallback: {
-    position: "absolute" as const,
-    inset: 0,
-    background:
-      "linear-gradient(135deg, #E8A96B 0%, #C17B3C 100%)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "3rem",
-    color: "rgba(255,255,255,0.55)",
-  },
-
   overlay: {
     position: "absolute" as const,
     bottom: 0,

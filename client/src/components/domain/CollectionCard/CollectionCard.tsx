@@ -6,7 +6,6 @@ import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
 import NextLink from "next/link";
 import type { Image } from "@/types/domain";
 import { NemeshImage } from "@/components/shared";
@@ -37,18 +36,12 @@ export default function CollectionCard({ name, image, href, special = false }: P
       >
         {/* ── Image zone ──────────────────────────────────────────── */}
         <Box sx={CollectionCardStyle.imageZone}>
-          {image ? (
-            <NemeshImage
-              image={image}
-              fill
-              sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-              style={{ objectFit: "cover" }}
-            />
-          ) : (
-            <Box sx={CollectionCardStyle.imageFallback}>
-              <RestaurantIcon sx={CollectionCardStyle.imageFallbackIcon} />
-            </Box>
-          )}
+          <NemeshImage
+            image={image}
+            fill
+            sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+            objectFit="cover"
+          />
         </Box>
 
         {/* ── Content zone ────────────────────────────────────────── */}
