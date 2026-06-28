@@ -1,17 +1,5 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
-export interface ChallengeIntroStep extends Struct.ComponentSchema {
-  collectionName: 'components_challenge_intro_steps';
-  info: {
-    description: 'A step in the Shir Challenge introduction';
-    displayName: 'IntroStep';
-  };
-  attributes: {
-    description: Schema.Attribute.Text & Schema.Attribute.Required;
-    title: Schema.Attribute.String & Schema.Attribute.Required;
-  };
-}
-
 export interface RecipeIngredientSection extends Struct.ComponentSchema {
   collectionName: 'components_recipe_ingredient_sections';
   info: {
@@ -76,7 +64,6 @@ export interface RecipeRecipeTip extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
-      'challenge.intro-step': ChallengeIntroStep;
       'recipe.ingredient-section': RecipeIngredientSection;
       'recipe.preparation-section': RecipePreparationSection;
       'recipe.preparation-step': RecipePreparationStep;

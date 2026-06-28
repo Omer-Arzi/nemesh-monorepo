@@ -2,3 +2,4 @@ export { getRecipes, getRecipeBySlug, searchRecipes, getLatestRecipes, getRecipe
 export { getCategories, getCategoryBySlug } from "./categoryService";
 export { getTags, getTagBySlug } from "./tagService";
 export { getShirChallengePage } from "./shirChallengePageService";
+export { getCurrentChallengeMonth, getPreviousChallengeMonth } from "./shirChallengeMonthService";

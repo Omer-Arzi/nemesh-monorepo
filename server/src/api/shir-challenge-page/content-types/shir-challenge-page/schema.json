@@ -5,7 +5,7 @@
     "singularName": "shir-challenge-page",
     "pluralName": "shir-challenge-pages",
     "displayName": "Shir Challenge Page",
-    "description": "Admin-controlled content for the monthly Shir Challenge page"
+    "description": "Static page-level content for the Shir Challenge page (title, hero, subtitle). Monthly challenge data lives in the shir-challenge-month collection."
   },
   "options": {
     "draftAndPublish": false
@@ -25,30 +25,6 @@
       "multiple": false,
       "required": false,
       "allowedTypes": ["images"]
-    },
-    "monthlyIngredientName": {
-      "type": "string"
-    },
-    "monthlyIngredientDescription": {
-      "type": "text"
-    },
-    "monthLabel": {
-      "type": "string"
-    },
-    "myProgressStatus": {
-      "type": "enumeration",
-      "enum": ["idea", "writing", "cooked", "published"]
-    },
-    "recipesSectionTitle": {
-      "type": "string"
-    },
-    "recipesSectionSubtitle": {
-      "type": "text"
-    },
-    "introSteps": {
-      "type": "component",
-      "repeatable": true,
-      "component": "challenge.intro-step"
     }
   }
 }

@@ -5,10 +5,13 @@ import Box from "@mui/material/Box";
 import { PageContainer, SectionHeader, LoadingState, ErrorState, EmptyState } from "@/components/shared";
 import { RecipeCard } from "@/components/domain";
 import { useTag, useRecipesByTag } from "@/features/tag/hooks";
-import { useShirChallengePage } from "@/features/shir-challenge/hooks";
+import {
+  useShirChallengePage,
+  useCurrentChallengeMonth,
+  usePreviousChallengeMonth,
+} from "@/features/shir-challenge/hooks";
 import { ShirChallengeHero } from "@/features/shir-challenge/ShirChallengeHero";
-import { ShirChallengeIngredientCard } from "@/features/shir-challenge/ShirChallengeIngredientCard";
-import { ShirChallengeIntroSteps } from "@/features/shir-challenge/ShirChallengeIntroSteps";
+import { ShirChallengeStatusPanel } from "@/features/shir-challenge/ShirChallengeStatusPanel";
 import {
   SHIR_CHALLENGE_SLUG,
   ShirChallengeDefaults,
@@ -19,6 +22,10 @@ export default function ShirChallengePage() {
   const { data: content, isLoading: contentLoading } = useShirChallengePage();
   const { data: tag, isLoading: tagLoading, isError: tagError } = useTag(SHIR_CHALLENGE_SLUG);
   const { data: recipesResult, isLoading: recipesLoading } = useRecipesByTag(SHIR_CHALLENGE_SLUG);
+
+  // Both month queries run in parallel (month keys are computed client-side, no waterfall).
+  const { data: currentMonth } = useCurrentChallengeMonth();
+  const { data: previousMonth } = usePreviousChallengeMonth();
 
   if (contentLoading || tagLoading) {
     return <LoadingState label={ShirChallengeText.loading} minHeight={400} />;
@@ -32,9 +39,6 @@ export default function ShirChallengePage() {
   const badgeText = content?.badgeText ?? ShirChallengeDefaults.badgeText;
   const subtitle = content?.subtitle ?? ShirChallengeDefaults.subtitle;
   const heroImage = content?.heroImage ?? tag.image ?? null;
-  const introSteps = content?.introSteps ?? [];
-  const recipesSectionTitle = content?.recipesSectionTitle ?? ShirChallengeDefaults.recipesSectionTitle;
-  const recipesSectionSubtitle = content?.recipesSectionSubtitle ?? ShirChallengeDefaults.recipesSectionSubtitle;
 
   const recipes = recipesResult?.items ?? [];
 
@@ -48,24 +52,14 @@ export default function ShirChallengePage() {
           heroImage={heroImage}
         />
 
-        {content?.monthlyIngredientName && (
-          <ShirChallengeIngredientCard
-            monthlyIngredientName={content.monthlyIngredientName}
-            monthlyIngredientDescription={content.monthlyIngredientDescription}
-            monthLabel={content.monthLabel}
-            myProgressStatus={content.myProgressStatus}
-          />
-        )}
-
-        {introSteps.length > 0 && <ShirChallengeIntroSteps steps={introSteps} />}
+        <ShirChallengeStatusPanel
+          currentMonth={currentMonth ?? null}
+          previousMonth={previousMonth ?? null}
+        />
       </PageContainer>
 
       <PageContainer>
-        <SectionHeader
-          title={recipesSectionTitle}
-          subtitle={recipesSectionSubtitle ?? undefined}
-          sx={{ mb: 2.5 }}
-        />
+        <SectionHeader title={ShirChallengeDefaults.recipesSectionTitle} sx={{ mb: 2.5 }} />
 
         {recipesLoading ? (
           <LoadingState label={ShirChallengeText.recipesLoading} minHeight={200} />

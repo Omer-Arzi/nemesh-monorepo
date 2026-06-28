@@ -64,4 +64,14 @@ export const queryKeys = {
     /** The single shir-challenge-page document. */
     detail: () => ["shirChallengePage", "detail"] as const,
   },
+
+  shirChallengeMonth: {
+    /** Invalidate to clear all monthly challenge queries. */
+    all: () => ["shirChallengeMonth"] as const,
+    /** Current month record, keyed by YYYY-MM so it re-fetches on month rollover. */
+    current: (monthKey: string) => ["shirChallengeMonth", "current", monthKey] as const,
+    /** Previous month record, keyed by the current month's start date. */
+    previous: (currentMonthStart: string) =>
+      ["shirChallengeMonth", "previous", currentMonthStart] as const,
+  },
 } as const;

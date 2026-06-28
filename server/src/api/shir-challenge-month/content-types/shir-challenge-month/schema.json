@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "shir_challenge_months",
+  "info": {
+    "singularName": "shir-challenge-month",
+    "pluralName": "shir-challenge-months",
+    "displayName": "Shir Challenge Month",
+    "description": "One record per calendar month. Tracks the monthly ingredient challenge status and admin progress."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "monthKey": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "monthStart": {
+      "type": "date",
+      "required": true
+    },
+    "monthlyIngredientName": {
+      "type": "string"
+    },
+    "monthlyChallengeStatus": {
+      "type": "enumeration",
+      "enum": ["pending", "active", "skipped"],
+      "required": true,
+      "default": "pending"
+    },
+    "monthlyChallengeNote": {
+      "type": "text"
+    },
+    "myProgressStatus": {
+      "type": "enumeration",
+      "enum": ["idea", "writing", "cooked", "published"]
+    }
+  }
+}
