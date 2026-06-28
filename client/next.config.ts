@@ -1,16 +1,35 @@
 import type { NextConfig } from "next";
 
-// NEXT_PUBLIC_IMAGE_HOST controls which remote hostname Next.js Image is allowed
-// to optimise. Set this to the S3 bucket hostname (or CloudFront/CDN domain) in
-// your deployment environment. Changing CDN providers only requires updating this
-// variable — no code changes needed.
+// Derive the Strapi server origin from the API base URL (strip /api suffix).
+// This covers uploads served directly by Strapi in production.
+const strapiOrigin = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:1337/api"
+).replace(/\/api\/?$/, "");
+
+// NEXT_PUBLIC_IMAGE_HOST controls the S3/CDN hostname.
+// Changing CDN providers only requires updating this env var, not the codebase.
 const imageHost = process.env.NEXT_PUBLIC_IMAGE_HOST;
 
 const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
-  // Allow local Strapi uploads in development (http://localhost:1337/uploads/...)
+  // Local Strapi in development (http://localhost:1337/uploads/...)
   { protocol: "http", hostname: "localhost" },
 ];
 
+// Add the production Strapi server hostname so relative-URL images still resolve
+// correctly during / after S3 migration (some records may still carry relative paths).
+try {
+  const { hostname, protocol } = new URL(strapiOrigin);
+  if (hostname !== "localhost") {
+    remotePatterns.push({
+      protocol: protocol.replace(":", "") as "http" | "https",
+      hostname,
+    });
+  }
+} catch {
+  // NEXT_PUBLIC_API_URL not set or malformed; localhost fallback covers dev.
+}
+
+// S3 / CDN: set NEXT_PUBLIC_IMAGE_HOST to the bucket or distribution hostname.
 if (imageHost) {
   remotePatterns.push({ protocol: "https", hostname: imageHost });
 }
@@ -18,7 +37,6 @@ if (imageHost) {
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-
   images: {
     remotePatterns,
     // Next.js Image blocks private IPs (SSRF protection, added in 14.1.1).

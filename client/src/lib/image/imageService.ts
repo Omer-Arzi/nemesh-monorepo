@@ -1,12 +1,17 @@
 import type { Image } from "@/types/domain";
 
-/**
- * Returns the absolute URL for a domain Image, or undefined if no image is provided.
- *
- * This is the single point of truth for resolving display URLs from the Image domain type.
- * URL resolution from raw Strapi paths happens earlier, in src/lib/api/mappers.ts.
- * CDN migration or URL transformation should be done here, not in components.
- */
+// Strapi serves media from its own origin, not from /api — strip the suffix so
+// relative /uploads/... paths resolve to the server root, not /api/uploads/...
+const STRAPI_ORIGIN = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:1337/api"
+).replace(/\/api\/?$/, "");
+
+export function resolveImageUrl(rawUrl: string | null | undefined): string | undefined {
+  if (!rawUrl) return undefined;
+  if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) return rawUrl;
+  return `${STRAPI_ORIGIN}${rawUrl}`;
+}
+
 export function getImageUrl(image: Image | null | undefined): string | undefined {
-  return image?.url || undefined;
+  return resolveImageUrl(image?.url);
 }
