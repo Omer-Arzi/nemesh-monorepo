@@ -12,8 +12,8 @@ const IS_DEV = process.env.NODE_ENV === "development";
  * In development: no caching (cache: "no-store") + console logs at every step
  * so the exact failure point is always visible in the Next.js terminal.
  *
- * In production: ISR with 1-hour revalidation (theme changes are rare and the
- * classic fallback is safe).
+ * In production: ISR with 5-minute revalidation — scoped only to this fetch
+ * so recipe/category caches are unaffected. Theme changes appear within ~5 min.
  *
  * Common failure reasons and how to fix them:
  *   403 Forbidden  → Enable "find" for site-setting in Strapi:
@@ -31,7 +31,7 @@ export async function getActiveThemeKey(): Promise<ThemePresetKey | null> {
   }
 
   try {
-    const res = await fetch(url, IS_DEV ? { cache: "no-store" } : { next: { revalidate: 3600 } });
+    const res = await fetch(url, IS_DEV ? { cache: "no-store" } : { next: { revalidate: 300 } });
 
     if (IS_DEV) {
       console.log(`[Nemesh theme] Response status: ${res.status}`);
