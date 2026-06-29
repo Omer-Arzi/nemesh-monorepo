@@ -32,15 +32,6 @@ export default function MuiProvider({
       ? darkThemePresets[activePresetKey]
       : lightThemePresets[activePresetKey];
 
-  if (process.env.NODE_ENV === "development") {
-    console.log(
-      "[MuiProvider]",
-      "preset:", activePresetKey,
-      "| primary.main:", theme.palette.primary.main,
-      "| bg.default:", theme.palette.background.default,
-    );
-  }
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

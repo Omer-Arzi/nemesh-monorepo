@@ -1,5 +1,3 @@
-"use client";
-
 import Box, { type BoxProps } from "@mui/material/Box";
 import { SectionStyle } from "./styles/SectionStyle";
 
