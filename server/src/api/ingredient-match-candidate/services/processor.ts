@@ -50,7 +50,10 @@ export async function processRecipeIngredients(
       continue;
     }
 
-    const suggestionDocumentId = await findFuzzySuggestion(strapi, normalizedText);
+    const suggestionDocumentId = await findFuzzySuggestion(strapi, normalizedText).catch((err) => {
+      strapi.log.error('[ingredient-processor] findFuzzySuggestion failed, continuing without suggestion:', err);
+      return null;
+    });
 
     await strapi.documents(CANDIDATE_UID).create({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

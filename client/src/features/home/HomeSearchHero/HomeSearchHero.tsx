@@ -9,13 +9,25 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
+import type { Image } from "@/types/domain";
+import { NemeshImage } from "@/components/shared";
 import { ROUTES } from "@/constants";
 import { HomeSearchHeroStyle } from "./HomeSearchHero.style";
 import { HomeSearchHeroText } from "./HomeSearchHero.consts";
 
-export default function HomeSearchHero() {
+type Props = {
+  title?: string | null;
+  subtitle?: string | null;
+  backgroundImage?: Image | null;
+};
+
+export default function HomeSearchHero({ title, subtitle, backgroundImage }: Props) {
   const [query, setQuery] = useState("");
   const router = useRouter();
+
+  const headline = title ?? HomeSearchHeroText.headline;
+  const subtitleText = subtitle ?? HomeSearchHeroText.subtitle;
+  const hasImage = Boolean(backgroundImage);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,14 +37,25 @@ export default function HomeSearchHero() {
   }
 
   return (
-    <Box component="section" sx={HomeSearchHeroStyle.root}>
-      <Stack sx={HomeSearchHeroStyle.inner}>
+    <Box component="section" sx={hasImage ? HomeSearchHeroStyle.rootWithImage : HomeSearchHeroStyle.root}>
+      {hasImage && backgroundImage && (
+        <NemeshImage
+          image={backgroundImage}
+          fill
+          objectFit="cover"
+          objectPosition="center"
+          sizes="100vw"
+          priority
+        />
+      )}
+
+      <Stack sx={[HomeSearchHeroStyle.inner, hasImage && HomeSearchHeroStyle.innerOnImage]}>
         <Typography variant="h3" component="h1" sx={HomeSearchHeroStyle.headline}>
-          {HomeSearchHeroText.headline}
+          {headline}
         </Typography>
 
         <Typography variant="body1" sx={HomeSearchHeroStyle.subtitle}>
-          {HomeSearchHeroText.subtitle}
+          {subtitleText}
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit} sx={HomeSearchHeroStyle.form}>

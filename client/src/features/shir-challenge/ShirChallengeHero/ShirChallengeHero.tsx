@@ -1,10 +1,7 @@
-"use client";
-
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { Image } from "@/types/domain";
 import { NemeshImage } from "@/components/shared";
-import { SHIR_CHALLENGE_TOKENS } from "../ShirChallenge.tokens";
 import { ShirChallengeHeroStyle } from "./ShirChallengeHero.style";
 
 type Props = {
@@ -29,7 +26,7 @@ export default function ShirChallengeHero({ title, badgeText, subtitle, heroImag
             sx={{
               position: "absolute" as const,
               inset: 0,
-              bgcolor: SHIR_CHALLENGE_TOKENS.peachSurface,
+              bgcolor: "surface.placeholder",
             }}
           />
         }

@@ -3,25 +3,36 @@ import type { PaletteOptions } from "@mui/material/styles";
 export const freckleWarmLightPalette: PaletteOptions = {
   mode: "light",
 
+  // Burnt cinnamon — slightly deeper than classic's toasted crust.
   primary: {
-    main: "#B85B2A",
-    light: "#D9824D",
-    dark: "#7A3518",
+    main: "#B85E2B",
+    light: "#D98C59",
+    dark: "#7A381C",
     contrastText: "#FFFFFF",
   },
 
+  // Deep cinnamon brown — muted secondary that sits behind primary.
   secondary: {
-    main: "#E8A933",
-    light: "#F0C460",
-    dark: "#B97712",
+    main: "#8B5A3C",
+    light: "#B5805F",
+    dark: "#60361F",
+    contrastText: "#FFFFFF",
+  },
+
+  // Honey gold — the accent color for status chips, accent bars, active indicators.
+  warning: {
+    main: "#D9A441",
+    light: "#ECC76E",
+    dark: "#A8781E",
     contrastText: "#24160D",
   },
 
-  warning: {
-    main: "#F0B84A",
-    light: "#F5D17A",
-    dark: "#C48A1A",
-    contrastText: "#24160D",
+  // Sage green — freshness / ingredient accent. Used sparingly.
+  info: {
+    main: "#667A55",
+    light: "#8DA07E",
+    dark: "#4A5A3D",
+    contrastText: "#FFFFFF",
   },
 
   error: {
@@ -32,24 +43,28 @@ export const freckleWarmLightPalette: PaletteOptions = {
   },
 
   background: {
-    default: "#FFF7EF",
-    paper: "#FFFFFF",
+    default: "#FBF6EF", // warm parchment — the freckle identity lives here
+    paper: "#FFFDFC",   // near-white cards — clearly distinct from the page
   },
 
   text: {
-    primary: "#24160D",
-    secondary: "#76563B",
-    disabled: "#BCA58C",
+    primary: "#26170F",
+    secondary: "#6B5648",
+    disabled: "#B79D87",
   },
 
-  divider: "#E6C9A9",
+  divider: "#E1CFBB",
 
-  // Warm-tinted interaction states so hovers/selections stay on-brand
-  // instead of defaulting to MUI's cool-gray overlays.
   action: {
-    hover: "rgba(184, 91, 42, 0.06)",
-    selected: "rgba(184, 91, 42, 0.10)",
-    focus: "rgba(184, 91, 42, 0.14)",
+    hover: "#F6EADD",
+    selected: "#F0DFCF",
+    focus: "rgba(184, 94, 43, 0.14)",
+  },
+
+  // ── Custom surface tokens (augmented in themeAugmentation.d.ts) ────────────
+  surface: {
+    alt: "#EEDFCB",         // warm section bands — carousel, outer panels
+    placeholder: "#E9D7C4", // image placeholder areas — distinct from page and card
   },
 };
 
@@ -57,24 +72,31 @@ export const freckleWarmDarkPalette: PaletteOptions = {
   mode: "dark",
 
   primary: {
-    main: "#DD9562",
-    light: "#F0B585",
+    main: "#E39B67",
+    light: "#F0B88A",
     dark: "#C96F32",
     contrastText: "#24160D",
   },
 
   secondary: {
-    main: "#E8A933",
-    light: "#F0C460",
-    dark: "#C48A1A",
+    main: "#C89A78",
+    light: "#E0BDA0",
+    dark: "#9A7050",
     contrastText: "#24160D",
   },
 
   warning: {
-    main: "#E8A933",
-    light: "#F0C460",
+    main: "#F0C35F",
+    light: "#F7D98A",
     dark: "#C48A1A",
     contrastText: "#24160D",
+  },
+
+  info: {
+    main: "#8DA07E",
+    light: "#AABF9C",
+    dark: "#667A55",
+    contrastText: "#1C110B",
   },
 
   error: {
@@ -85,15 +107,20 @@ export const freckleWarmDarkPalette: PaletteOptions = {
   },
 
   background: {
-    default: "#1A0C04",
-    paper: "#261208",
+    default: "#1C110B",
+    paper: "#3B2A21",
   },
 
   text: {
-    primary: "#FAF0E0",
-    secondary: "#C8AA82",
+    primary: "#FAF1E5",
+    secondary: "#D1B8A0",
     disabled: "#7D6248",
   },
 
-  divider: "#3E2818",
+  divider: "#7E5946",
+
+  surface: {
+    alt: "#2B1A0D",
+    placeholder: "#3A2415",
+  },
 };

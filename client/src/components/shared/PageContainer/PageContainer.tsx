@@ -1,5 +1,3 @@
-"use client";
-
 import Container, { type ContainerProps } from "@mui/material/Container";
 import { PageContainerStyle } from "./styles/PageContainerStyle";
 

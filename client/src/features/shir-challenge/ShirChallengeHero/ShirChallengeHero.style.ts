@@ -1,5 +1,3 @@
-import { SHIR_CHALLENGE_TOKENS } from "../ShirChallenge.tokens";
-
 export const ShirChallengeHeroStyle = {
   root: {
     position: "relative" as const,
@@ -7,7 +5,7 @@ export const ShirChallengeHeroStyle = {
     overflow: "hidden" as const,
     borderRadius: 3,
     mb: { xs: 3, sm: 4 },
-    bgcolor: SHIR_CHALLENGE_TOKENS.peachSurface,
+    bgcolor: "surface.alt",
   },
   overlay: {
     position: "absolute" as const,
@@ -20,10 +18,11 @@ export const ShirChallengeHeroStyle = {
     background:
       "linear-gradient(to top, rgba(26,18,8,0.78) 0%, rgba(26,18,8,0.38) 52%, transparent 100%)",
   },
+  // Honey badge on the dark overlay — consistent with warning.main accents used elsewhere.
   badge: {
     display: "inline-block",
-    bgcolor: SHIR_CHALLENGE_TOKENS.peachChip,
-    color: SHIR_CHALLENGE_TOKENS.peachAccent,
+    bgcolor: "warning.main",
+    color: "warning.contrastText",
     px: 1.5,
     py: 0.5,
     borderRadius: 1.5,

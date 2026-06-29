@@ -18,12 +18,12 @@ export const SectionHeaderStyle = {
     fontWeight: 700,
     letterSpacing: "-0.015em",
   },
-  // Small warm accent bar — editorial marker that gives the title a visual anchor
-  // without needing a heavy border or large decorative element.
+  // Honey-yellow accent bar — uses warning.main so section titles read as warm
+  // editorial markers without competing with the primary burnt-orange CTA color.
   accent: {
     width: 28,
     height: 3,
-    bgcolor: "primary.main",
+    bgcolor: "warning.main",
     borderRadius: 1,
     mt: 0.75,
   },
