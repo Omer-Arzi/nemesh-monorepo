@@ -131,7 +131,7 @@ export const RecipeHeroStyle = {
   },
   noImageText: {
     fontSize: "0.75rem",
-    color: "text.disabled",
+    color: "text.secondary",
     letterSpacing: "0.03em",
   },
 

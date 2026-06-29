@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import RootProviders from "@/providers";
 import AppShell from "@/components/layout/AppShell";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
         <RootProviders>
           <AppShell>{children}</AppShell>
         </RootProviders>
+        <SpeedInsights />
       </body>
     </html>
   );

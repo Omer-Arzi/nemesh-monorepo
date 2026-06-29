@@ -51,7 +51,7 @@ export const RecipeCardStyle = {
   },
   noImageText: {
     fontSize: "0.68rem",
-    color: "text.disabled",
+    color: "text.secondary",
     letterSpacing: "0.03em",
   },
 

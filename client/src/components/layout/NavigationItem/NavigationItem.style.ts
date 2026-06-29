@@ -31,7 +31,7 @@ export const NavigationItemStyle = {
     cursor: "pointer",
     ...(active
       ? {
-          color: "primary.main",
+          color: "primary.dark",
           bgcolor: (theme: Theme) => alpha(theme.palette.primary.main, 0.09),
           "&:hover": {
             bgcolor: (theme: Theme) => alpha(theme.palette.primary.main, 0.14),
@@ -49,7 +49,7 @@ export const NavigationItemStyle = {
   icon: (active: boolean) => ({
     fontSize: "1.25rem",
     flexShrink: 0,
-    color: active ? "primary.main" : "inherit",
+    color: active ? "primary.dark" : "inherit",
     transition: "color 200ms ease",
   }),
 
@@ -59,7 +59,7 @@ export const NavigationItemStyle = {
     fontWeight: active ? 600 : 500,
     fontSize: "0.875rem",
     lineHeight: 1.4,
-    color: active ? "primary.main" : "inherit",
+    color: active ? "primary.dark" : "inherit",
     opacity: railOpen ? 1 : 0,
     transition: "opacity 200ms ease, color 200ms ease",
     whiteSpace: "nowrap" as const,
