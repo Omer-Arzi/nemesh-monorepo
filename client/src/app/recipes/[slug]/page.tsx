@@ -1,117 +1,63 @@
-"use client";
+import type { Metadata } from "next";
+import { getRecipeBySlug } from "@/lib/api/services/recipeService";
+import RecipePageClient from "./RecipePageClient";
 
-import { useParams } from "next/navigation";
-import { useEffect } from "react";
-import { RecipePageText } from "./consts";
-import { Section, LoadingState, ErrorState } from "@/components/shared";
-import {
-  RecipeHero,
-  RecipeDetailLayout,
-  StickyIngredientsSidebar,
-  PreparationStepsSection,
-  RecipeTipsSection,
-  RelatedRecipes,
-} from "@/components/domain";
-import { useRecipe, useRelatedRecipes } from "@/features/recipe/hooks";
-import { useCookingMode } from "@/features/cooking-mode";
-import type { Recipe, RecipeSummary } from "@/types/domain";
+// Place a 1200×630px image at this path in /public for sharing fallback.
+const DEFAULT_OG_IMAGE = "/images/branding/og-default.jpg";
+const SITE_NAME = "Nemesh";
 
-// ── RecipeContent ────────────────────────────────────────────────────────────
-// Extracted so useCookingMode is ALWAYS called with a real recipe.id (never "").
-// All cooking-mode state lives here and flows down via explicit props.
-
-type ContentProps = {
-  recipe: Recipe;
-  relatedRecipes: RecipeSummary[];
+type Props = {
+  params: Promise<{ slug: string }>;
 };
 
-function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
-  const totalIngredients = recipe.ingredientSections.reduce(
-    (n, s) => n + s.ingredients.length,
-    0,
-  );
-  const totalSteps = recipe.preparationSections.reduce(
-    (n, s) => n + s.steps.length,
-    0,
-  );
-
-  const cookingMode = useCookingMode(recipe.id, totalIngredients, totalSteps);
-
-  return (
-    <>
-      <RecipeHero
-        title={recipe.title}
-        image={recipe.image}
-        description={recipe.description}
-        categories={recipe.categories}
-        prepTime={recipe.prepTime}
-        servings={recipe.servings}
-        difficulty={recipe.difficulty}
-      />
-
-      <RecipeTipsSection tips={recipe.tips} />
-
-      <RecipeDetailLayout
-        sidebar={
-          <StickyIngredientsSidebar
-            ingredientSections={recipe.ingredientSections}
-            cookingMode={{
-              isActive: cookingMode.isActive,
-              checkedKeys: cookingMode.checkedIngredientKeys,
-              onToggle: cookingMode.toggleIngredient,
-              toggleActive: cookingMode.toggleActive,
-              ingredientProgress: cookingMode.ingredientProgress,
-              reset: cookingMode.reset,
-            }}
-          />
-        }
-      >
-        <Section sx={{ px: { xs: 2, md: 4 } }}>
-          <PreparationStepsSection
-            preparationSections={recipe.preparationSections}
-            cookingMode={{
-              isActive: cookingMode.isActive,
-              checkedKeys: cookingMode.checkedStepKeys,
-              onToggle: cookingMode.toggleStep,
-              stepProgress: cookingMode.stepProgress,
-              reset: cookingMode.reset,
-            }}
-          />
-        </Section>
-      </RecipeDetailLayout>
-
-      <RelatedRecipes recipes={relatedRecipes} />
-    </>
-  );
+function getSiteUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
 }
 
-// ── RecipePage ───────────────────────────────────────────────────────────────
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
 
-export default function RecipePage() {
-  const { slug } = useParams<{ slug: string }>();
-  const { data: recipe, isLoading, isError, refetch } = useRecipe(slug);
-  const { data: relatedRecipes = [] } = useRelatedRecipes(slug);
+  const recipe = await getRecipeBySlug(slug).catch(() => null);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [slug]);
+  const base = getSiteUrl();
+  const canonicalUrl = `${base}/recipes/${slug}`;
+  const title = recipe?.title ?? SITE_NAME;
+  const description =
+    recipe?.description?.trim().replace(/\n+/g, " ") || undefined;
 
-  if (isLoading) {
-    return <LoadingState label={RecipePageText.loading} minHeight={400} />;
-  }
+  const ogImages = recipe?.image?.url
+    ? [
+        {
+          url: recipe.image.url,
+          width: recipe.image.width || undefined,
+          height: recipe.image.height || undefined,
+          alt: recipe.image.alt || title,
+        },
+      ]
+    : [{ url: `${base}${DEFAULT_OG_IMAGE}`, alt: SITE_NAME }];
 
-  if (isError) {
-    return (
-      <ErrorState
-        description={RecipePageText.errorLoad}
-        onRetry={() => refetch()}
-      />
-    );
-  }
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: canonicalUrl,
+      siteName: SITE_NAME,
+      locale: "he_IL",
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImages.map((img) => img.url),
+    },
+  };
+}
 
-  if (!recipe) {
-    return <ErrorState title={RecipePageText.errorNotFound} />;
-  }
-
-  return <RecipeContent recipe={recipe} relatedRecipes={relatedRecipes} />;
+export default async function RecipePage({ params }: Props) {
+  const { slug } = await params;
+  return <RecipePageClient slug={slug} />;
 }
