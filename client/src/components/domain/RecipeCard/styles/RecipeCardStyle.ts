@@ -42,12 +42,12 @@ export const RecipeCardStyle = {
     alignItems: "center",
     justifyContent: "center",
     gap: 0.75,
-    bgcolor: "background.default",
+    bgcolor: "action.selected",
   },
   noImageIcon: {
     fontSize: 34,
-    color: "primary.light",
-    opacity: 0.6,
+    color: "primary.main",
+    opacity: 0.55,
   },
   noImageText: {
     fontSize: "0.68rem",

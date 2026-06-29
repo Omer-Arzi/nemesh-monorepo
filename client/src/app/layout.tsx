@@ -3,6 +3,7 @@ import { Heebo } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import RootProviders from "@/providers";
 import AppShell from "@/components/layout/AppShell";
+import { getActiveThemeKey } from "@/lib/api/services/siteSettingService";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -29,13 +30,15 @@ export const metadata: Metadata = {
   description: "Nemesh", // TODO: replace with product description
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const activePresetKey = await getActiveThemeKey();
+
   return (
     <html lang="he" dir="rtl" className={heebo.variable}>
       <body>
-        <RootProviders>
+        <RootProviders activePresetKey={activePresetKey ?? undefined}>
           <AppShell>{children}</AppShell>
         </RootProviders>
         <SpeedInsights />

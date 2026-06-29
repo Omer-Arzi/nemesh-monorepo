@@ -122,12 +122,12 @@ export const RecipeHeroStyle = {
     alignItems: "center",
     justifyContent: "center",
     gap: 1,
-    bgcolor: "background.default",
+    bgcolor: "action.selected",
   },
   noImageIcon: {
     fontSize: 52,
-    color: "primary.light",
-    opacity: 0.5,
+    color: "primary.main",
+    opacity: 0.45,
   },
   noImageText: {
     fontSize: "0.75rem",

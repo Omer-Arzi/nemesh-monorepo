@@ -6,3 +6,5 @@ export { lightTheme, darkTheme } from "./theme";
 export { lightPalette, darkPalette } from "./palette";
 export { typography } from "./typography";
 export { components } from "./components";
+export { lightThemePresets, darkThemePresets, isValidPresetKey } from "./themePresets";
+export type { ThemePresetKey } from "./themePresets";

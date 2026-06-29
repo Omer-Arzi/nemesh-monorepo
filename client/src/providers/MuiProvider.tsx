@@ -2,7 +2,7 @@
 
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
-import { lightTheme, darkTheme } from "@/lib/theme";
+import { lightThemePresets, darkThemePresets, type ThemePresetKey } from "@/lib/theme/themePresets";
 import { useUiStore } from "@/stores/uiStore";
 
 /**
@@ -11,17 +11,35 @@ import { useUiStore } from "@/stores/uiStore";
  * Reads `colorMode` from the global UI store so the theme responds to the
  * user's preference without prop-drilling through the component tree.
  *
+ * `activePresetKey` is fetched server-side in the root layout and passed down
+ * as a stable prop. It selects which predefined MUI theme preset to apply.
+ * Falls back to "classic" if not provided.
+ *
  * Hydration note: `uiStore` initialises to "light", matching the server render,
  * so there is no hydration mismatch on first load. If color mode persistence is
  * added later (e.g. localStorage), use a mounted guard to avoid mismatches.
  */
 export default function MuiProvider({
   children,
+  activePresetKey = "classic",
 }: {
   children: React.ReactNode;
+  activePresetKey?: ThemePresetKey;
 }) {
   const colorMode = useUiStore((s) => s.colorMode);
-  const theme = colorMode === "dark" ? darkTheme : lightTheme;
+  const theme =
+    colorMode === "dark"
+      ? darkThemePresets[activePresetKey]
+      : lightThemePresets[activePresetKey];
+
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      "[MuiProvider]",
+      "preset:", activePresetKey,
+      "| primary.main:", theme.palette.primary.main,
+      "| bg.default:", theme.palette.background.default,
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>

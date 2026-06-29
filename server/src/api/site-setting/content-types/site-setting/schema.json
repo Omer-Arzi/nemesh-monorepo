@@ -1,0 +1,23 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_settings",
+  "info": {
+    "singularName": "site-setting",
+    "pluralName": "site-settings",
+    "displayName": "Site Settings",
+    "description": "Global site configuration. Theme preset key maps to a predefined MUI theme in the frontend — no raw color editing from admin."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "activeThemeKey": {
+      "type": "enumeration",
+      "enum": [
+        "classic",
+        "freckleWarm"
+      ],
+      "default": "classic"
+    }
+  }
+}

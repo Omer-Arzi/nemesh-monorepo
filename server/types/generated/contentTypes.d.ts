@@ -677,6 +677,36 @@ export interface ApiShirChallengePageShirChallengePage
   };
 }
 
+export interface ApiSiteSettingSiteSetting extends Struct.SingleTypeSchema {
+  collectionName: 'site_settings';
+  info: {
+    description: 'Global site configuration. Theme preset key maps to a predefined MUI theme in the frontend \u2014 no raw color editing from admin.';
+    displayName: 'Site Settings';
+    pluralName: 'site-settings';
+    singularName: 'site-setting';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    activeThemeKey: Schema.Attribute.Enumeration<['classic', 'freckleWarm']> &
+      Schema.Attribute.DefaultTo<'classic'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::site-setting.site-setting'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiTagTag extends Struct.CollectionTypeSchema {
   collectionName: 'tags';
   info: {
@@ -1224,6 +1254,7 @@ declare module '@strapi/strapi' {
       'api::recipe.recipe': ApiRecipeRecipe;
       'api::shir-challenge-month.shir-challenge-month': ApiShirChallengeMonthShirChallengeMonth;
       'api::shir-challenge-page.shir-challenge-page': ApiShirChallengePageShirChallengePage;
+      'api::site-setting.site-setting': ApiSiteSettingSiteSetting;
       'api::tag.tag': ApiTagTag;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
