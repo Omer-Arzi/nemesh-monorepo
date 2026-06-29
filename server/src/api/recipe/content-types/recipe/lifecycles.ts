@@ -13,4 +13,14 @@ export default {
       strapi.log.error('[recipe lifecycle] afterCreate ingredient processing failed:', err);
     }
   },
+
+  async afterUpdate(event: { result: any }) {
+    const documentId = event.result?.documentId;
+    if (!documentId) return;
+    try {
+      await processRecipeIngredientsByDocumentId(strapi, documentId);
+    } catch (err) {
+      strapi.log.error('[recipe lifecycle] afterUpdate ingredient processing failed:', err);
+    }
+  },
 };
