@@ -67,6 +67,12 @@ export const lightPalette: PaletteOptions = {
   },
 
   divider: "#EDE4D5", // warm cream — card borders and rule lines
+
+  // ── Custom surface tokens (augmented in themeAugmentation.d.ts) ────────────
+  surface: {
+    alt: "#EDE6DC",         // warm section band — slightly deeper than page bg
+    placeholder: "#E2DAD0", // image placeholder — neutral warm, clearly off-white
+  },
 };
 
 export const darkPalette: PaletteOptions = {
@@ -112,4 +118,9 @@ export const darkPalette: PaletteOptions = {
   },
 
   divider: "#3D2A15",
+
+  surface: {
+    alt: "#211509",
+    placeholder: "#2E1E0E",
+  },
 };

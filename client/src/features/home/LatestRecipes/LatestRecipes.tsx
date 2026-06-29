@@ -18,7 +18,11 @@ function ShowAllLink() {
   );
 }
 
-export default function LatestRecipes() {
+type Props = {
+  sectionTitle?: string | null;
+};
+
+export default function LatestRecipes({ sectionTitle }: Props) {
   const { data: recipes = [], isLoading, isError } = useLatestRecipes();
 
   if (isLoading) return <LoadingState minHeight={200} />;
@@ -29,7 +33,7 @@ export default function LatestRecipes() {
     <Box sx={LatestRecipesStyle.root}>
       <PageContainer>
         <SectionHeader
-          title={LatestRecipesText.sectionTitle}
+          title={sectionTitle ?? LatestRecipesText.sectionTitle}
           action={<ShowAllLink />}
           sx={{ mb: 3 }}
         />

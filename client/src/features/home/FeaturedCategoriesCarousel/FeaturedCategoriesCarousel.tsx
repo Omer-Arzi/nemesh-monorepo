@@ -17,7 +17,11 @@ const FADE_WIDTH = 72;
 const SCROLL_AMOUNT = 440; // ~2 cards (200px + 16px gap = 216px each)
 const DRAG_THRESHOLD = 5; // px movement before a drag is registered
 
-export default function FeaturedCategoriesCarousel() {
+type Props = {
+  sectionTitle?: string | null;
+};
+
+export default function FeaturedCategoriesCarousel({ sectionTitle }: Props) {
   const { data: categories = [], isLoading, isError } = useCategories();
   const trackRef = useRef<HTMLDivElement>(null);
   const [rightFade, setRightFade] = useState(0);
@@ -134,7 +138,7 @@ export default function FeaturedCategoriesCarousel() {
   return (
     <Box sx={FeaturedCategoriesCarouselStyle.root}>
       <PageContainer sx={{ py: 0, pb: 0 }}>
-        <SectionHeader title={FeaturedCategoriesCarouselText.sectionTitle} sx={{ mb: 2.5 }} />
+        <SectionHeader title={sectionTitle ?? FeaturedCategoriesCarouselText.sectionTitle} sx={{ mb: 2.5 }} />
 
         <Box sx={FeaturedCategoriesCarouselStyle.trackWrapper}>
           {/* Left arrow — "previous" in RTL: scrolls content rightward toward start */}

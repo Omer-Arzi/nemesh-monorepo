@@ -1,8 +1,8 @@
 export const FeaturedCategoriesCarouselStyle = {
-  // Warm peach band breaks the page into distinct sections — sits between the
-  // hero (page-bg) and the white LatestRecipes section below it.
+  // surface.alt band creates a page rhythm — clearly distinct from the parchment
+  // page background and the near-white cards in the sections around it.
   root: {
-    bgcolor: "action.hover",
+    bgcolor: "surface.alt",
     borderTop: "1px solid",
     borderBottom: "1px solid",
     borderColor: "divider",

@@ -464,6 +464,39 @@ export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiHomepageHomepage extends Struct.SingleTypeSchema {
+  collectionName: 'homepages';
+  info: {
+    description: 'Editable display text and hero image for the homepage. Fields are optional \u2014 the frontend falls back to its built-in Hebrew defaults when a field is empty.';
+    displayName: 'Homepage';
+    pluralName: 'homepages';
+    singularName: 'homepage';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    featuredCategoriesTitle: Schema.Attribute.String;
+    heroBackgroundImage: Schema.Attribute.Media<'images'>;
+    heroSubtitle: Schema.Attribute.Text;
+    heroTitle: Schema.Attribute.String;
+    latestRecipesTitle: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::homepage.homepage'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiIngredientCatalogItemIngredientCatalogItem
   extends Struct.CollectionTypeSchema {
   collectionName: 'ingredient_catalog_items';
@@ -1249,6 +1282,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::category.category': ApiCategoryCategory;
+      'api::homepage.homepage': ApiHomepageHomepage;
       'api::ingredient-catalog-item.ingredient-catalog-item': ApiIngredientCatalogItemIngredientCatalogItem;
       'api::ingredient-match-candidate.ingredient-match-candidate': ApiIngredientMatchCandidateIngredientMatchCandidate;
       'api::recipe.recipe': ApiRecipeRecipe;

@@ -1,21 +1,18 @@
-import { SHIR_CHALLENGE_TOKENS } from "../ShirChallenge.tokens";
-
 export const ShirChallengeStatusPanelStyle = {
   // ── Outer accordion panel ──────────────────────────────────────────────────
-  // One bordered card that contains both the header trigger and the body.
-  // overflow: hidden clips the button's background to the rounded corners.
+  // overflow:hidden clips the button bg to the rounded corners.
+  // divider border is used for all states — status is signalled by the header bg.
   panel: {
     border: "1px solid",
-    borderColor: SHIR_CHALLENGE_TOKENS.peachChip,
+    borderColor: "divider",
     borderRadius: 3,
     overflow: "hidden" as const,
     mb: { xs: 3, sm: 4 },
   },
-  panelNeutral: {
-    borderColor: "divider",
-  },
 
   // ── Accordion header — the clickable trigger ───────────────────────────────
+  // Active: surface.alt (warm section tone — signals "something live here").
+  // Neutral: action.hover (subtle tint — muted, not calling for attention).
   header: {
     display: "flex",
     alignItems: "center",
@@ -23,7 +20,7 @@ export const ShirChallengeStatusPanelStyle = {
     width: "100%",
     px: { xs: 2, sm: 2.5 },
     py: 1.5,
-    bgcolor: SHIR_CHALLENGE_TOKENS.peachSurface,
+    bgcolor: "surface.alt",
     border: "none",
     cursor: "pointer",
     fontFamily: "inherit",
@@ -55,8 +52,8 @@ export const ShirChallengeStatusPanelStyle = {
   },
 
   // ── Status chip (header only) ──────────────────────────────────────────────
-  // Active state uses honey yellow (warning.main) to signal "live / in progress"
-  // and introduce the accent color the peach surface family lacks.
+  // Active: honey yellow (warning.main) — "live / in progress".
+  // Neutral: subtle muted chip — not competing with primary actions.
   statusChip: {
     display: "inline-block",
     bgcolor: "warning.main",
@@ -84,15 +81,10 @@ export const ShirChallengeStatusPanelStyle = {
   },
 
   // ── Accordion body ─────────────────────────────────────────────────────────
-  // borderTop separates the body from the header when expanded.
-  // When collapsed the Collapse removes the body from flow, so no double border.
   body: {
     borderTop: "1px solid",
-    borderColor: SHIR_CHALLENGE_TOKENS.peachChip,
-    p: { xs: 1.5, sm: 2 },
-  },
-  bodyNeutral: {
     borderColor: "divider",
+    p: { xs: 1.5, sm: 2 },
   },
 
   // ── Card row (1 or 2 inner cards) ─────────────────────────────────────────
@@ -104,8 +96,6 @@ export const ShirChallengeStatusPanelStyle = {
   },
 
   // ── Base inner card ────────────────────────────────────────────────────────
-  // Uses divider border (warm cream) instead of peachChip so the inner card
-  // does not visually compete with the outer accordion's peach identity.
   card: {
     border: "1px solid",
     borderColor: "divider",
@@ -122,15 +112,12 @@ export const ShirChallengeStatusPanelStyle = {
     borderTopColor: "warning.main",
     boxShadow: "0 1px 3px rgba(26,18,8,0.06)",
   },
-  // When no previous card exists, cap width so a short card doesn't stretch awkwardly.
   currentCardAlone: {
     flex: "0 0 auto" as const,
     width: "100%",
     maxWidth: { sm: 720 },
   },
 
-  // Month label as a caption at the top of the card body — replaces the tinted
-  // inner header that was duplicating the outer accordion's peach surface.
   cardMonthLabel: {
     typography: "caption",
     color: "text.secondary",
@@ -140,7 +127,6 @@ export const ShirChallengeStatusPanelStyle = {
     mb: 1.25,
   },
 
-  // Card body fills the full card (no separate inner header for the current card).
   cardBody: {
     px: { xs: 1.75, sm: 2 },
     py: 1.75,
@@ -148,8 +134,6 @@ export const ShirChallengeStatusPanelStyle = {
   },
 
   // ── Stat blocks (active status) ───────────────────────────────────────────
-  // Label-above-value layout arranged in a flex-wrap row.
-  // Reads as a content card, not a data table.
   statRow: {
     display: "flex",
     flexWrap: "wrap" as const,
@@ -174,6 +158,11 @@ export const ShirChallengeStatusPanelStyle = {
     fontWeight: 700,
     color: "text.primary",
     lineHeight: 1.2,
+  },
+  // Ingredient name gets a sage accent — differentiates it from progress text
+  // and introduces the info color role in a content-appropriate way.
+  statValueIngredient: {
+    color: "info.main",
   },
 
   note: {

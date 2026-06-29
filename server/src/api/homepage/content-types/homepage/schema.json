@@ -1,0 +1,33 @@
+{
+  "kind": "singleType",
+  "collectionName": "homepages",
+  "info": {
+    "singularName": "homepage",
+    "pluralName": "homepages",
+    "displayName": "Homepage",
+    "description": "Editable display text and hero image for the homepage. Fields are optional — the frontend falls back to its built-in Hebrew defaults when a field is empty."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "heroTitle": {
+      "type": "string"
+    },
+    "heroSubtitle": {
+      "type": "text"
+    },
+    "heroBackgroundImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "latestRecipesTitle": {
+      "type": "string"
+    },
+    "featuredCategoriesTitle": {
+      "type": "string"
+    }
+  }
+}

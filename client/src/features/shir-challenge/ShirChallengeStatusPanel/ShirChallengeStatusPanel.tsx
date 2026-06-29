@@ -37,7 +37,7 @@ export default function ShirChallengeStatusPanel({ currentMonth, previousMonth }
 
   return (
     // ── Outer panel — one bordered accordion card ────────────────────────────
-    <Box sx={[S.panel, isNeutral && S.panelNeutral]}>
+    <Box sx={S.panel}>
 
       {/* ── Header / trigger (always visible) ─────────────────────────── */}
       <Box
@@ -65,7 +65,7 @@ export default function ShirChallengeStatusPanel({ currentMonth, previousMonth }
 
       {/* ── Body (collapses) ─────────────────────────────────────────────── */}
       <Collapse in={expanded}>
-        <Box sx={[S.body, isNeutral && S.bodyNeutral]}>
+        <Box sx={S.body}>
           <Box sx={S.cardRow}>
 
             {/* ── Current month card ─────────────────────────────────────── */}
@@ -90,7 +90,7 @@ export default function ShirChallengeStatusPanel({ currentMonth, previousMonth }
                         <Box component="span" sx={S.statLabel}>
                           {ShirChallengeText.statusPanelLabelIngredient}
                         </Box>
-                        <Box component="span" sx={S.statValue}>
+                        <Box component="span" sx={[S.statValue, S.statValueIngredient]}>
                           {currentMonth.monthlyIngredientName ??
                             ShirChallengeDefaults.ingredientNameFallback}
                         </Box>

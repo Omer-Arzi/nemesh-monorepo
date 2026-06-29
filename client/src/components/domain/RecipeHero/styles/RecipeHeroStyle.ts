@@ -114,7 +114,6 @@ export const RecipeHeroStyle = {
   },
 
   // ── No-image placeholder ─────────────────────────────────────────────────
-  // Hardcoded because no theme token maps to these placeholder-specific values.
   noImageState: {
     position: "absolute" as const,
     inset: 0,
@@ -123,11 +122,11 @@ export const RecipeHeroStyle = {
     alignItems: "center",
     justifyContent: "center",
     gap: 1,
-    bgcolor: "#F3E1D6",
+    bgcolor: "surface.placeholder",
   },
   noImageIcon: {
     fontSize: 52,
-    color: "#D89573",
+    color: "secondary.main",
   },
   noImageText: {
     fontSize: "0.75rem",

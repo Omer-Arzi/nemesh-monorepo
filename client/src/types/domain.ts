@@ -126,6 +126,21 @@ export type IngredientCatalogItem = BaseEntity & {
   notes: string | null;
 };
 
+// ─── Homepage ─────────────────────────────────────────────────────────────────
+
+/**
+ * Editable homepage content from the homepage single type.
+ * All fields are optional — components fall back to their built-in defaults
+ * when a field is null (not yet filled in Strapi).
+ */
+export type HomePage = {
+  heroTitle: string | null;
+  heroSubtitle: string | null;
+  heroBackgroundImage: Image | null;
+  latestRecipesTitle: string | null;
+  featuredCategoriesTitle: string | null;
+};
+
 // ─── Shir Challenge ───────────────────────────────────────────────────────────
 
 export type MyProgressStatus = "idea" | "writing" | "cooked" | "published";
