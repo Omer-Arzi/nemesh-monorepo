@@ -13,7 +13,7 @@ export const ShirChallengeStatusPanelStyle = {
     justifyContent: "space-between",
     width: "100%",
     mb: 1.5,
-    py: 0.75,
+    py: 1.25,
     cursor: "pointer",
     border: "none",
     bgcolor: "transparent",

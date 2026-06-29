@@ -41,6 +41,7 @@ export const ShirChallengeHeroStyle = {
     lineHeight: 1.2,
   },
   subtitle: {
+    display: { xs: "none", sm: "block" },
     color: "rgba(255,255,255,0.88)",
     mt: 0.75,
     textShadow: "0 1px 4px rgba(0,0,0,0.5)",
