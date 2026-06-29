@@ -61,9 +61,9 @@ function SearchResults({ q }: { q: string }) {
         />
       ) : (
         <Grid container spacing={2}>
-          {recipes.map((recipe) => (
+          {recipes.map((recipe, index) => (
             <Grid key={recipe.id} size={{ xs: 12, sm: 4, md: 3 }}>
-              <RecipeCard recipe={recipe} />
+              <RecipeCard recipe={recipe} priority={index < 3} />
             </Grid>
           ))}
         </Grid>
@@ -123,9 +123,9 @@ function BrowseResults() {
         />
       ) : (
         <Grid container spacing={2}>
-          {recipes.map((recipe) => (
+          {recipes.map((recipe, index) => (
             <Grid key={recipe.id} size={{ xs: 12, sm: 4, md: 3 }}>
-              <RecipeCard recipe={recipe} />
+              <RecipeCard recipe={recipe} priority={index < 3} />
             </Grid>
           ))}
         </Grid>

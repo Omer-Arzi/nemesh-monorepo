@@ -16,11 +16,18 @@ import { NemeshImage } from "@/components/shared";
 import RecipeMeta from "../RecipeMeta";
 import { RecipeCardStyle } from "./styles/RecipeCardStyle";
 
+// Accurate sizes for the standard xs:12 / sm:4 / md:3 MUI Grid layout.
+// Derived from: Container gutters (32px) + Grid spacing-2 column gaps (16px each).
+const DEFAULT_SIZES =
+  "(max-width: 599px) calc(100vw - 32px), (max-width: 899px) calc((100vw - 64px) / 3), calc((min(100vw, 1200px) - 80px) / 4)";
+
 type Props = {
   recipe: RecipeSummary;
   small?: boolean;
   /** Mark the card image as high-priority (eager load + preload). Use for the first card in a list that is likely the LCP. */
   priority?: boolean;
+  /** Override the default sizes hint when this card lives in a different grid layout. */
+  sizes?: string;
 };
 
 const MAX_VISIBLE_CATEGORIES = 3;
@@ -33,7 +40,7 @@ const noImageFallback = (
   </Box>
 );
 
-export default function RecipeCard({ recipe, small = false, priority = false }: Props) {
+export default function RecipeCard({ recipe, small = false, priority = false, sizes = DEFAULT_SIZES }: Props) {
   const visibleCategories = recipe.categories.slice(0, MAX_VISIBLE_CATEGORIES);
   const hiddenCount = recipe.categories.length - visibleCategories.length;
 
@@ -53,7 +60,7 @@ export default function RecipeCard({ recipe, small = false, priority = false }: 
             image={recipe.image}
             fill
             priority={priority}
-            sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+            sizes={sizes}
             objectFit="cover"
             className="RecipeCard-image"
             fallback={noImageFallback}

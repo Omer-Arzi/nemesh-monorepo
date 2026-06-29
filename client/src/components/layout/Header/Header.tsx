@@ -9,9 +9,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import NextLink from "next/link";
 import { useCallback, useState } from "react";
 import { ROUTES } from "@/constants";
-import { NAV_ITEMS, RAIL_NAV_ITEMS } from "../navConfig";
+import { RAIL_NAV_ITEMS } from "../navConfig";
 import NavDrawer from "../NavDrawer";
-import NavLink from "../NavLink";
 import { HeaderStyle } from "./styles/HeaderStyle";
 
 /**
@@ -52,15 +51,6 @@ export default function Header() {
             <Typography variant="h6" sx={HeaderStyle.wordmarkText}>
               Nemesh
             </Typography>
-          </Box>
-
-          {/* ── Desktop navigation ────────────────────────────── */}
-          <Box component="nav" aria-label="Main navigation" sx={HeaderStyle.desktopNav}>
-            {NAV_ITEMS.map((item) => (
-              <NavLink key={item.href} href={item.href}>
-                {item.label}
-              </NavLink>
-            ))}
           </Box>
 
           {/* Spacer pushes hamburger to the right on mobile */}

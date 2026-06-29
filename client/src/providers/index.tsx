@@ -17,15 +17,18 @@
 import EmotionRegistry from "./EmotionRegistry";
 import MuiProvider from "./MuiProvider";
 import QueryProvider from "./QueryProvider";
+import type { ThemePresetKey } from "@/lib/theme/themePresets";
 
 export default function RootProviders({
   children,
+  activePresetKey,
 }: {
   children: React.ReactNode;
+  activePresetKey?: ThemePresetKey;
 }) {
   return (
     <EmotionRegistry>
-      <MuiProvider>
+      <MuiProvider activePresetKey={activePresetKey}>
         <QueryProvider>{children}</QueryProvider>
       </MuiProvider>
     </EmotionRegistry>

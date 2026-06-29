@@ -1,51 +1,64 @@
 import { SHIR_CHALLENGE_TOKENS } from "../ShirChallenge.tokens";
 
 export const ShirChallengeStatusPanelStyle = {
-  // ── Outer section wrapper ────────────────────────────────────────────────
-  section: {
+  // ── Outer accordion panel ──────────────────────────────────────────────────
+  // One bordered card that contains both the header trigger and the body.
+  // overflow: hidden clips the button's background to the rounded corners.
+  panel: {
+    border: "1px solid",
+    borderColor: SHIR_CHALLENGE_TOKENS.peachChip,
+    borderRadius: 3,
+    overflow: "hidden" as const,
     mb: { xs: 3, sm: 4 },
   },
+  panelNeutral: {
+    borderColor: "divider",
+  },
 
-  // ── Collapse trigger (lightweight full-width button) ─────────────────────
-  trigger: {
+  // ── Accordion header — the clickable trigger ───────────────────────────────
+  header: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
-    mb: 1.5,
-    py: 1.25,
-    cursor: "pointer",
+    px: { xs: 2, sm: 2.5 },
+    py: 1.5,
+    bgcolor: SHIR_CHALLENGE_TOKENS.peachSurface,
     border: "none",
-    bgcolor: "transparent",
+    cursor: "pointer",
     fontFamily: "inherit",
     textAlign: "unset" as const,
     "&:focus-visible": {
       outline: "2px solid",
       outlineColor: "primary.main",
-      outlineOffset: "3px",
-      borderRadius: 1,
+      outlineOffset: "-2px",
     },
+    "&:active": { opacity: 0.85 },
+  },
+  headerNeutral: {
+    bgcolor: "action.hover",
   },
 
-  triggerLeft: {
+  // Left side of header in RTL: title + status chip
+  headerStart: {
     display: "flex",
     alignItems: "center",
     gap: 1.25,
+    flex: 1,
+    minWidth: 0,
   },
 
-  triggerLabel: {
-    typography: "caption",
-    color: "text.secondary",
+  headerTitle: {
+    typography: "body2",
     fontWeight: 700,
-    letterSpacing: "0.04em",
-    textTransform: "uppercase" as const,
+    color: "text.primary",
   },
 
-  // ── Status chip (used both in trigger and in current card header) ─────────
+  // ── Status chip (header only) ──────────────────────────────────────────────
   statusChip: {
     display: "inline-block",
     bgcolor: SHIR_CHALLENGE_TOKENS.peachChip,
-    color: SHIR_CHALLENGE_TOKENS.peachAccent,
+    color: "primary.dark",
     px: 1.25,
     py: 0.3,
     borderRadius: 1.5,
@@ -59,7 +72,7 @@ export const ShirChallengeStatusPanelStyle = {
     color: "text.secondary",
   },
 
-  // ── Chevron ───────────────────────────────────────────────────────────────
+  // ── Chevron ────────────────────────────────────────────────────────────────
   chevron: {
     display: "block",
     color: "text.secondary",
@@ -68,115 +81,120 @@ export const ShirChallengeStatusPanelStyle = {
     fontSize: "1.125rem",
   },
 
-  // ── Card row (holds 1 or 2 cards) ────────────────────────────────────────
+  // ── Accordion body ─────────────────────────────────────────────────────────
+  // borderTop separates the body from the header when expanded.
+  // When collapsed the Collapse removes the body from flow, so no double border.
+  body: {
+    borderTop: "1px solid",
+    borderColor: SHIR_CHALLENGE_TOKENS.peachChip,
+    p: { xs: 1.5, sm: 2 },
+  },
+  bodyNeutral: {
+    borderColor: "divider",
+  },
+
+  // ── Card row (1 or 2 inner cards) ─────────────────────────────────────────
   cardRow: {
     display: "flex",
     flexDirection: { xs: "column", sm: "row" } as const,
     alignItems: "flex-start",
-    gap: 2,
+    gap: 1.5,
   },
 
-  // ── Base card (shared by current + previous) ─────────────────────────────
+  // ── Base inner card ────────────────────────────────────────────────────────
+  // Uses divider border (warm cream) instead of peachChip so the inner card
+  // does not visually compete with the outer accordion's peach identity.
   card: {
+    border: "1px solid",
+    borderColor: "divider",
     borderRadius: 2,
     overflow: "hidden" as const,
-    // Mobile: always full width; desktop: flex 1
-    width: "100%",
     flex: 1,
     minWidth: 0,
   },
 
-  // ── Current month card ────────────────────────────────────────────────────
+  // ── Current month card ─────────────────────────────────────────────────────
   currentCard: {
-    border: "1px solid",
-    borderColor: SHIR_CHALLENGE_TOKENS.peachChip,
+    boxShadow: "0 1px 3px rgba(26,18,8,0.06)",
   },
-  currentCardNeutral: {
-    borderColor: "divider",
-  },
-  // Applied only when there is no previous month record
+  // When no previous card exists, cap width so a short card doesn't stretch awkwardly.
   currentCardAlone: {
     flex: "0 0 auto" as const,
+    width: "100%",
     maxWidth: { sm: 720 },
   },
 
-  cardHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: 1,
-    px: { xs: 2, sm: 2.5 },
-    py: 1.25,
-    bgcolor: SHIR_CHALLENGE_TOKENS.peachSurface,
-  },
-  cardHeaderNeutral: {
-    bgcolor: "action.hover",
-  },
-
-  // Month name shown in the current card header
-  cardHeaderMonth: {
-    typography: "body2",
-    fontWeight: 700,
-    color: "text.primary",
-  },
-
-  cardBody: {
-    px: { xs: 2, sm: 2.5 },
-    pt: 1.75,
-    pb: 2,
-    bgcolor: "background.paper",
-    borderTop: "1px solid",
-    borderColor: SHIR_CHALLENGE_TOKENS.peachChip,
-  },
-  cardBodyNeutral: {
-    borderColor: "divider",
-  },
-
-  // ── Data rows in current card ─────────────────────────────────────────────
-  row: {
-    display: "flex",
-    alignItems: "baseline",
-    gap: 1,
-    mb: 1,
-    "&:last-child": { mb: 0 },
-  },
-  rowLabel: {
+  // Month label as a caption at the top of the card body — replaces the tinted
+  // inner header that was duplicating the outer accordion's peach surface.
+  cardMonthLabel: {
     typography: "caption",
     color: "text.secondary",
     fontWeight: 600,
-    flexShrink: 0,
-    minWidth: 80,
     letterSpacing: "0.02em",
-  },
-  rowValue: {
-    typography: "body2",
-    color: "text.primary",
-    fontWeight: 600,
+    display: "block",
+    mb: 1.25,
   },
 
-  // ── Note ─────────────────────────────────────────────────────────────────
+  // Card body fills the full card (no separate inner header for the current card).
+  cardBody: {
+    px: { xs: 1.75, sm: 2 },
+    py: 1.75,
+    bgcolor: "background.paper",
+  },
+
+  // ── Stat blocks (active status) ───────────────────────────────────────────
+  // Label-above-value layout arranged in a flex-wrap row.
+  // Reads as a content card, not a data table.
+  statRow: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: 2.5,
+  },
+  statBlock: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: 0.4,
+    minWidth: 80,
+  },
+  statLabel: {
+    fontSize: "0.65rem",
+    fontWeight: 600,
+    color: "text.secondary",
+    letterSpacing: "0.07em",
+    textTransform: "uppercase" as const,
+    lineHeight: 1.3,
+  },
+  statValue: {
+    fontSize: "0.95rem",
+    fontWeight: 700,
+    color: "text.primary",
+    lineHeight: 1.2,
+  },
+
   note: {
     typography: "body2",
     color: "text.secondary",
-    mt: 1.5,
-    pt: 1.5,
+    mt: 1.25,
+    pt: 1.25,
     borderTop: "1px solid",
     borderColor: "divider",
     lineHeight: 1.7,
   },
 
-  // ── Previous month card ───────────────────────────────────────────────────
+  // ── Previous month card ────────────────────────────────────────────────────
   prevCard: {
-    border: "1px solid",
-    borderColor: "divider",
+    bgcolor: "background.paper",
   },
 
   prevCardHeader: {
     display: "flex",
     alignItems: "center",
     gap: 1,
-    px: { xs: 2, sm: 2.5 },
-    py: 1.25,
+    px: { xs: 1.75, sm: 2 },
+    py: 0.875,
     bgcolor: "action.hover",
+    borderBottom: "1px solid",
+    borderColor: "divider",
   },
 
   prevCardTitle: {
@@ -202,15 +220,10 @@ export const ShirChallengeStatusPanelStyle = {
   },
 
   prevCardBody: {
-    px: { xs: 2, sm: 2.5 },
-    pt: 1.75,
-    pb: 2,
-    bgcolor: "background.paper",
-    borderTop: "1px solid",
-    borderColor: "divider",
+    px: { xs: 1.75, sm: 2 },
+    py: 1.5,
   },
 
-  // ── Data rows in previous card ────────────────────────────────────────────
   prevRow: {
     display: "flex",
     alignItems: "baseline",
