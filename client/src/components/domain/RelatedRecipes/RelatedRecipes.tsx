@@ -20,7 +20,7 @@ export default function RelatedRecipes({ recipes }: Props) {
       <SectionHeader title={RelatedRecipesText.sectionTitle} sx={RelatedRecipesStyle.header} />
       <Grid container spacing={2}>
         {recipes.map((recipe) => (
-          <Grid key={recipe.id} size={{ xs: 6, sm: 4, md: 3 }}>
+          <Grid key={recipe.id} size={{ xs: 12, sm: 6, md: 3 }}>
             <RecipeCard recipe={recipe} small />
           </Grid>
         ))}
