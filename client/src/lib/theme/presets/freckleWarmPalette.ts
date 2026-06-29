@@ -4,16 +4,17 @@ export const freckleWarmLightPalette: PaletteOptions = {
   mode: "light",
 
   primary: {
-    main: "#B85B2A",
-    light: "#D9824D",
-    dark: "#7A3518",
+    main: "#C96A2E",
+    light: "#E6A36F",
+    dark: "#8F3F1F",
     contrastText: "#FFFFFF",
   },
 
+  // Shifted from honey-gold to cinnamon-brown for a richer freckle identity.
   secondary: {
-    main: "#E8A933",
-    light: "#F0C460",
-    dark: "#B97712",
+    main: "#A86A3D",
+    light: "#C8906A",
+    dark: "#7A4A28",
     contrastText: "#24160D",
   },
 
@@ -32,24 +33,23 @@ export const freckleWarmLightPalette: PaletteOptions = {
   },
 
   background: {
-    default: "#FFF7EF",
+    default: "#FFF8EE",
     paper: "#FFFFFF",
   },
 
   text: {
-    primary: "#24160D",
-    secondary: "#76563B",
+    primary: "#24160E",
+    secondary: "#765A45",
     disabled: "#BCA58C",
   },
 
-  divider: "#E6C9A9",
+  divider: "#E7CBB6",
 
-  // Warm-tinted interaction states so hovers/selections stay on-brand
-  // instead of defaulting to MUI's cool-gray overlays.
+  // Solid warm tints — more predictable than rgba across different surface colors.
   action: {
-    hover: "rgba(184, 91, 42, 0.06)",
-    selected: "rgba(184, 91, 42, 0.10)",
-    focus: "rgba(184, 91, 42, 0.14)",
+    hover: "#F6E8DD",
+    selected: "#F2DDD0",
+    focus: "rgba(201, 106, 46, 0.14)",
   },
 };
 

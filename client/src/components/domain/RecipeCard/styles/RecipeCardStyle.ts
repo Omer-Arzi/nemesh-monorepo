@@ -34,6 +34,7 @@ export const RecipeCardStyle = {
   },
 
   // ── No-image branded placeholder ─────────────────────────────────────────
+  // Hardcoded because no theme token maps to these placeholder-specific values.
   noImageState: {
     position: "absolute" as const,
     inset: 0,
@@ -42,12 +43,11 @@ export const RecipeCardStyle = {
     alignItems: "center",
     justifyContent: "center",
     gap: 0.75,
-    bgcolor: "action.selected",
+    bgcolor: "#F3E1D6",
   },
   noImageIcon: {
     fontSize: 34,
-    color: "primary.main",
-    opacity: 0.55,
+    color: "#D89573",
   },
   noImageText: {
     fontSize: "0.68rem",

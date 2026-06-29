@@ -55,10 +55,12 @@ export const ShirChallengeStatusPanelStyle = {
   },
 
   // ── Status chip (header only) ──────────────────────────────────────────────
+  // Active state uses honey yellow (warning.main) to signal "live / in progress"
+  // and introduce the accent color the peach surface family lacks.
   statusChip: {
     display: "inline-block",
-    bgcolor: SHIR_CHALLENGE_TOKENS.peachChip,
-    color: "primary.dark",
+    bgcolor: "warning.main",
+    color: "warning.contrastText",
     px: 1.25,
     py: 0.3,
     borderRadius: 1.5,
@@ -114,7 +116,10 @@ export const ShirChallengeStatusPanelStyle = {
   },
 
   // ── Current month card ─────────────────────────────────────────────────────
+  // Honey top-border accent signals this is the live/active card.
   currentCard: {
+    borderTopWidth: "2.5px",
+    borderTopColor: "warning.main",
     boxShadow: "0 1px 3px rgba(26,18,8,0.06)",
   },
   // When no previous card exists, cap width so a short card doesn't stretch awkwardly.

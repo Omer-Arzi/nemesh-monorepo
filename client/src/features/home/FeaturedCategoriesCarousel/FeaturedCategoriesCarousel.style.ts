@@ -1,5 +1,8 @@
 export const FeaturedCategoriesCarouselStyle = {
+  // Warm peach band breaks the page into distinct sections — sits between the
+  // hero (page-bg) and the white LatestRecipes section below it.
   root: {
+    bgcolor: "action.hover",
     borderTop: "1px solid",
     borderBottom: "1px solid",
     borderColor: "divider",
