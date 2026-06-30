@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { getRecipes, searchRecipes } from "@/lib/api/services/recipeService";
+import { getRecipes, searchRecipes, searchRecipesByIngredient } from "@/lib/api/services/recipeService";
 import { queryKeys } from "@/lib/query/keys";
 import { PAGINATION } from "@/constants";
 
@@ -14,6 +14,19 @@ export function useSearch(q: string) {
     queryKey: queryKeys.recipes.search(q),
     queryFn: () => searchRecipes(q),
     enabled: q.trim().length > 0,
+  });
+}
+
+/**
+ * Ingredient-intent search: recipes that actually contain this ingredient.
+ * Uses ILIKE substring matching — no fuzzy false positives.
+ * Triggered when the user clicks an ingredient suggestion.
+ */
+export function useIngredientSearch(ingredient: string) {
+  return useQuery({
+    queryKey: queryKeys.recipes.byIngredient(ingredient),
+    queryFn: () => searchRecipesByIngredient(ingredient),
+    enabled: ingredient.trim().length > 0,
   });
 }
 

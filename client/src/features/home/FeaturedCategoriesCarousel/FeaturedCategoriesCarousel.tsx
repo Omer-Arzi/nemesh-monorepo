@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import { PageContainer, SectionHeader, LoadingState, ErrorState } from "@/components/shared";
+import { PageContainer, SectionHeader, LoadingState, ErrorState, FreckleDust } from "@/components/shared";
 import { useCategories } from "@/features/category/hooks";
 import FeaturedCategoryCard from "../FeaturedCategoryCard";
 import { FeaturedCategoriesCarouselStyle } from "./FeaturedCategoriesCarousel.style";
@@ -137,6 +137,7 @@ export default function FeaturedCategoriesCarousel({ sectionTitle }: Props) {
 
   return (
     <Box sx={FeaturedCategoriesCarouselStyle.root}>
+      <FreckleDust placement="corners" density="low" />
       <PageContainer sx={{ py: 0, pb: 0 }}>
         <SectionHeader title={sectionTitle ?? FeaturedCategoriesCarouselText.sectionTitle} sx={{ mb: 2.5 }} />
 

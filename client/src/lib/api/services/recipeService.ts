@@ -260,6 +260,18 @@ export async function searchRecipes(q: string): Promise<RecipeSummary[]> {
 }
 
 /**
+ * Ingredient-intent search: returns recipes that actually contain the given
+ * ingredient name (ILIKE substring match on raw ingredient text). Does not
+ * use fuzzy matching — avoids false positives from pg_trgm on Hebrew words.
+ */
+export async function searchRecipesByIngredient(ingredient: string): Promise<RecipeSummary[]> {
+  const raw = await apiClient.get<{
+    data: StrapiData<StrapiRecipeSummaryAttrs>[];
+  }>(`/recipes/search?ingredient=${encodeURIComponent(ingredient)}`);
+  return (raw.data ?? []).map(mapRecipeSummary);
+}
+
+/**
  * Fetches the most recently published recipes sorted by createdAt descending.
  * Returns a summary projection — no pagination needed for small fixed sets.
  */

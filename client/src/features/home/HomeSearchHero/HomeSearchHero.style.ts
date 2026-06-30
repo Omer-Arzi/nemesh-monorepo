@@ -3,7 +3,10 @@ import type { Theme } from "@mui/material/styles";
 
 export const HomeSearchHeroStyle = {
   // ── No background image — gradient tint only ───────────────────────────────
+  // overflow is intentionally absent — the suggestions dropdown must be allowed
+  // to extend below this section's boundary.
   root: (theme: Theme) => ({
+    position: "relative" as const,
     width: "100%",
     py: { xs: 3, sm: 10, md: 14 },
     px: { xs: 2, sm: 4 },
@@ -11,11 +14,11 @@ export const HomeSearchHeroStyle = {
   }),
 
   // ── With a Strapi background image ────────────────────────────────────────
-  // position:relative + overflow:hidden contain the fill-mode NemeshImage.
-  // Padding matches the no-image root so layout does not shift.
+  // NemeshImage uses position:absolute + inset:0 so it stays within bounds
+  // without overflow:hidden. Keeping overflow visible lets the suggestions
+  // dropdown extend below the section boundary.
   rootWithImage: {
     position: "relative" as const,
-    overflow: "hidden" as const,
     width: "100%",
     py: { xs: 3, sm: 10, md: 14 },
     px: { xs: 2, sm: 4 },
@@ -51,6 +54,12 @@ export const HomeSearchHeroStyle = {
   form: {
     width: "100%",
     mt: 1,
+  },
+
+  // Wraps the TextField + dropdown. position:relative anchors the absolute dropdown.
+  searchWrapper: {
+    position: "relative" as const,
+    width: "100%",
   },
 
   // Pill-shaped unified search field — button lives inside as end-adornment

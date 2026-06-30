@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { SectionHeaderStyle } from "./styles/SectionHeaderStyle";
+import { FreckleDust } from "../FreckleDust";
 
 type Props = {
   title: string;
@@ -13,6 +14,7 @@ type Props = {
 export default function SectionHeader({ title, subtitle, action, sx }: Props) {
   return (
     <Box sx={{ ...SectionHeaderStyle.root, ...sx }}>
+      <FreckleDust placement="top-right" density="low" />
       <Box sx={SectionHeaderStyle.titleGroup}>
         <Typography variant="h5" component="h2" sx={SectionHeaderStyle.title}>
           {title}

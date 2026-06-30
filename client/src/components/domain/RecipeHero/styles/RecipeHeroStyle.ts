@@ -2,6 +2,8 @@ export const RecipeHeroStyle = {
   // background.paper (white) lifts the hero above the warm candlelight page.
   // mb: 3 softens the jump from the hero shadow into the recipe body below.
   root: {
+    position: "relative" as const,
+    overflow: "hidden" as const,
     bgcolor: "background.paper",
     borderTop: 4,
     borderBottom: 1,
