@@ -3,6 +3,7 @@
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
+import { FreckleDust } from "@/components/shared";
 import { FooterStyle } from "./styles/FooterStyle";
 
 /**
@@ -20,6 +21,7 @@ import { FooterStyle } from "./styles/FooterStyle";
 export default function Footer() {
   return (
     <Box component="footer" sx={FooterStyle.root}>
+      <FreckleDust placement="top-right" density="low" />
       <Container maxWidth="lg">
         {/* TODO: Replace with actual footer layout */}
         <Typography variant="body2" color="text.secondary" sx={FooterStyle.text}>

@@ -7,4 +7,8 @@ export const ResultsPageText = {
   browseError: "לא הצלחנו לטעון את המתכונים. אנא בדוק את החיבור ונסה שוב.",
   browseEmptyTitle: "עוד לא פרסמנו מתכונים",
   browseEmptyDescription: "חוזרים בקרוב עם דברים טובים מהמטבח.",
+  ingredientSectionTitle: (name: string) => `מתכונים עם ${name}`,
+  ingredientError: "החיפוש נכשל. אנא בדוק את החיבור ונסה שוב.",
+  ingredientEmptyTitle: "לא מצאנו מתכונים עם המרכיב הזה",
+  ingredientEmptyDescription: "ייתכן שהמרכיב לא קיים עדיין במתכונים שלנו.",
 } as const;

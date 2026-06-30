@@ -24,6 +24,8 @@ export const queryKeys = {
     detail: (slug: string) => ["recipes", "detail", slug] as const,
     /** Full-text search results for a query string. */
     search: (q: string) => ["recipes", "search", q] as const,
+    /** Ingredient-intent search — recipes that actually contain this ingredient. */
+    byIngredient: (ingredient: string) => ["recipes", "byIngredient", ingredient] as const,
     /** Related recipes for a given slug (server-scored, deterministic). */
     related: (slug: string) => ["recipes", "related", slug] as const,
     /** Recipes filtered by category slug. */
@@ -73,5 +75,9 @@ export const queryKeys = {
     /** Previous month record, keyed by the current month's start date. */
     previous: (currentMonthStart: string) =>
       ["shirChallengeMonth", "previous", currentMonthStart] as const,
+  },
+  suggestions: {
+    all: () => ["suggestions"] as const,
+    byQuery: (q: string) => ["suggestions", "byQuery", q] as const,
   },
 } as const;

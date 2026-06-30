@@ -16,11 +16,11 @@ import {
   SectionHeader,
 } from "@/components/shared";
 import { RecipeCard, RecipeGridSkeleton } from "@/components/domain";
-import { useInfiniteRecipes, useSearch } from "@/features/results/hooks";
+import { useInfiniteRecipes, useIngredientSearch, useSearch } from "@/features/results/hooks";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { ROUTES } from "@/constants";
 
-// ── Search results (finite list) ──────────────────────────────────────────────
+// ── Search results (free-text, finite list) ───────────────────────────────────
 
 function SearchResults({ q }: { q: string }) {
   const { data: recipes = [], isLoading, isError } = useSearch(q);
@@ -35,9 +35,7 @@ function SearchResults({ q }: { q: string }) {
   }
 
   if (isError) {
-    return (
-      <ErrorState description={ResultsPageText.searchError} />
-    );
+    return <ErrorState description={ResultsPageText.searchError} />;
   }
 
   return (
@@ -48,6 +46,56 @@ function SearchResults({ q }: { q: string }) {
           icon={<MenuBookOutlinedIcon fontSize="inherit" />}
           title={ResultsPageText.searchEmptyTitle}
           description={ResultsPageText.searchEmptyDescription}
+          action={
+            <Button
+              component={NextLink}
+              href={ROUTES.CATEGORIES}
+              variant="outlined"
+              size="small"
+            >
+              {ResultsPageText.searchEmptyAction}
+            </Button>
+          }
+        />
+      ) : (
+        <Grid container spacing={2}>
+          {recipes.map((recipe, index) => (
+            <Grid key={recipe.id} size={{ xs: 12, sm: 4, md: 3 }}>
+              <RecipeCard recipe={recipe} priority={index < 3} />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+    </PageContainer>
+  );
+}
+
+// ── Ingredient-intent results (exact substring match, no fuzzy) ───────────────
+
+function IngredientResults({ ingredient }: { ingredient: string }) {
+  const { data: recipes = [], isLoading, isError } = useIngredientSearch(ingredient);
+
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <SectionHeader title={ResultsPageText.ingredientSectionTitle(ingredient)} sx={{ mb: 3 }} />
+        <RecipeGridSkeleton count={8} />
+      </PageContainer>
+    );
+  }
+
+  if (isError) {
+    return <ErrorState description={ResultsPageText.ingredientError} />;
+  }
+
+  return (
+    <PageContainer>
+      <SectionHeader title={ResultsPageText.ingredientSectionTitle(ingredient)} sx={{ mb: 3 }} />
+      {recipes.length === 0 ? (
+        <EmptyState
+          icon={<MenuBookOutlinedIcon fontSize="inherit" />}
+          title={ResultsPageText.ingredientEmptyTitle}
+          description={ResultsPageText.ingredientEmptyDescription}
           action={
             <Button
               component={NextLink}
@@ -142,13 +190,16 @@ function BrowseResults() {
   );
 }
 
-// ── Router-aware shell — reads ?q from URL ─────────────────────────────────
+// ── Router-aware shell ────────────────────────────────────────────────────────
 
 function ResultsContent() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q")?.trim() ?? "";
+  const ingredient = searchParams.get("ingredient")?.trim() ?? "";
 
-  return q ? <SearchResults q={q} /> : <BrowseResults />;
+  if (ingredient) return <IngredientResults ingredient={ingredient} />;
+  if (q) return <SearchResults q={q} />;
+  return <BrowseResults />;
 }
 
 // ── Page export — Suspense required for useSearchParams ───────────────────────

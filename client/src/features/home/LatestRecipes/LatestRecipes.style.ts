@@ -1,5 +1,7 @@
 export const LatestRecipesStyle = {
   root: {
+    position: "relative" as const,
+    overflow: "hidden" as const,
     // Graduated vertical rhythm: compact on mobile (avoid hollow sections),
     // generous on desktop (wide screens benefit from more breathing room).
     py: { xs: 4, sm: 5, md: 6 },

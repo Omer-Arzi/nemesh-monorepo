@@ -2,6 +2,8 @@ export const FeaturedCategoriesCarouselStyle = {
   // surface.alt band creates a page rhythm — clearly distinct from the parchment
   // page background and the near-white cards in the sections around it.
   root: {
+    position: "relative" as const,
+    overflow: "hidden" as const,
     bgcolor: "surface.alt",
     borderTop: "1px solid",
     borderBottom: "1px solid",
