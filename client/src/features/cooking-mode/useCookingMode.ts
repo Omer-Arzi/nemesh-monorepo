@@ -55,7 +55,14 @@ export function useCookingMode(
     [recipeId],
   );
 
-  const toggleActive = useCallback(() => setIsActive((v) => !v), []);
+  const toggleActive = useCallback(() => {
+    if (isActive) {
+      // Deactivating: clear checked state so the next session starts clean.
+      NemeshStorage.remove({ feature: FEATURE, key: recipeId });
+      setState(null);
+    }
+    setIsActive((v) => !v);
+  }, [isActive, recipeId]);
 
   const toggleIngredient = useCallback(
     (key: string) => {
