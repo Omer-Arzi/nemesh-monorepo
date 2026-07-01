@@ -63,14 +63,6 @@ export const IngredientsBottomSheetStyle = {
     height: 22,
   },
 
-  cookingModeButton: {
-    fontSize: "0.78rem",
-    px: 1.25,
-    py: 0.5,
-    whiteSpace: "nowrap" as const,
-    borderRadius: 5,
-  },
-
   content: {
     flex: 1,
     overflowY: "auto" as const,

@@ -1,0 +1,71 @@
+export const CookingModeToolbarStyle = {
+  root: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap" as const,
+    gap: 2,
+    px: { xs: 2, md: 4 },
+    py: 2,
+    mx: 0,
+    borderTop: 1,
+    borderBottom: 1,
+    borderColor: "divider",
+    bgcolor: "background.default",
+  },
+  textBlock: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: 0.25,
+  },
+  title: {
+    fontWeight: 700,
+    fontSize: "0.95rem",
+    lineHeight: 1.3,
+  },
+  subtitle: {
+    fontSize: "0.82rem",
+    color: "text.secondary",
+    lineHeight: 1.4,
+  },
+  chips: {
+    display: "flex",
+    alignItems: "center",
+    gap: 0.75,
+    mt: 0.5,
+  },
+  progressChip: {
+    fontSize: "0.72rem",
+    height: 22,
+  },
+  chipSeparator: {
+    fontSize: "0.75rem",
+    color: "text.disabled",
+    lineHeight: 1,
+    userSelect: "none" as const,
+  },
+  actions: {
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+    flexShrink: 0,
+    flexWrap: "wrap" as const,
+  },
+  activateButton: {
+    fontSize: "0.85rem",
+    px: 2,
+    borderRadius: 5,
+    whiteSpace: "nowrap" as const,
+  },
+  deactivateButton: {
+    fontSize: "0.85rem",
+    px: 2,
+    borderRadius: 5,
+    whiteSpace: "nowrap" as const,
+  },
+  resetButton: {
+    fontSize: "0.82rem",
+    color: "text.secondary",
+    whiteSpace: "nowrap" as const,
+  },
+};
