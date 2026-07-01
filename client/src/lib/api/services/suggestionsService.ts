@@ -4,7 +4,7 @@ export type SearchSuggestion =
   | {
       type: "recipe";
       label: string;
-      subtitle: "מתכון";
+      subtitle: string;
       slug: string;
       score: number;
     }
