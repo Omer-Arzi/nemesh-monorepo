@@ -3,11 +3,8 @@
 import { useRef, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { IngredientSection } from "@/types/domain";
 import type { CookingModeIngredientProps } from "@/features/cooking-mode";
@@ -21,11 +18,7 @@ type CookingModeBase = Omit<CookingModeIngredientProps, "sectionIndex">;
 type Props = {
   ingredientSections?: IngredientSection[];
   sx?: SxProps<Theme>;
-  cookingMode?: CookingModeBase & {
-    toggleActive: () => void;
-    ingredientProgress: { checked: number; total: number };
-    reset: () => void;
-  };
+  cookingMode?: CookingModeBase;
 };
 
 function totalIngredientCount(ingredientSections: IngredientSection[] | undefined): number {
@@ -111,8 +104,6 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
         isActive: cookingMode.isActive,
         checkedKeys: cookingMode.checkedKeys,
         onToggle: cookingMode.onToggle,
-        toggleActive: cookingMode.toggleActive,
-        ingredientProgress: cookingMode.ingredientProgress,
       }
     : undefined;
 
@@ -175,38 +166,6 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
                     </Box>
                   )}
                 </Typography>
-                {cookingMode?.isActive && cookingMode.ingredientProgress.total > 0 && (
-                  <Chip
-                    label={StickyIngredientsSidebarText.progressLabel(cookingMode.ingredientProgress.checked, cookingMode.ingredientProgress.total)}
-                    size="small"
-                    color="success"
-                    variant="outlined"
-                    sx={StickyIngredientsSidebarStyle.progressChip}
-                  />
-                )}
-              </Box>
-              <Box sx={StickyIngredientsSidebarStyle.headerActions}>
-                {cookingMode?.isActive && (
-                  <Button
-                    size="small"
-                    variant="text"
-                    color="inherit"
-                    onClick={cookingMode.reset}
-                    sx={StickyIngredientsSidebarStyle.resetButton}
-                  >
-                    {StickyIngredientsSidebarText.resetButton}
-                  </Button>
-                )}
-                <Button
-                  size="small"
-                  variant={cookingMode?.isActive ? "contained" : "outlined"}
-                  color="primary"
-                  startIcon={<PlayCircleOutlinedIcon />}
-                  onClick={cookingMode?.toggleActive}
-                  sx={StickyIngredientsSidebarStyle.cookingModeButton}
-                >
-                  {StickyIngredientsSidebarText.cookingModeButton}
-                </Button>
               </Box>
             </Box>
             <IngredientSectionList

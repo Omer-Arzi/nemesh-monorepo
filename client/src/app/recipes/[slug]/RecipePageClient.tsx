@@ -10,6 +10,7 @@ import {
   PreparationStepsSection,
   RecipeTipsSection,
   RelatedRecipes,
+  CookingModeToolbar,
 } from "@/components/domain";
 import { useRecipe, useRelatedRecipes } from "@/features/recipe/hooks";
 import { useCookingMode } from "@/features/cooking-mode";
@@ -50,6 +51,14 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
 
       <RecipeTipsSection tips={recipe.tips} />
 
+      <CookingModeToolbar
+        isActive={cookingMode.isActive}
+        onToggle={cookingMode.toggleActive}
+        onReset={cookingMode.reset}
+        ingredientProgress={cookingMode.ingredientProgress}
+        stepProgress={cookingMode.stepProgress}
+      />
+
       <RecipeDetailLayout
         sidebar={
           <StickyIngredientsSidebar
@@ -58,9 +67,6 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
               isActive: cookingMode.isActive,
               checkedKeys: cookingMode.checkedIngredientKeys,
               onToggle: cookingMode.toggleIngredient,
-              toggleActive: cookingMode.toggleActive,
-              ingredientProgress: cookingMode.ingredientProgress,
-              reset: cookingMode.reset,
             }}
           />
         }
@@ -72,8 +78,6 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
               isActive: cookingMode.isActive,
               checkedKeys: cookingMode.checkedStepKeys,
               onToggle: cookingMode.toggleStep,
-              stepProgress: cookingMode.stepProgress,
-              reset: cookingMode.reset,
             }}
           />
         </Section>

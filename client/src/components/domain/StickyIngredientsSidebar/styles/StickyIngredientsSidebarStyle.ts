@@ -36,28 +36,6 @@ export const StickyIngredientsSidebarStyle = {
   headerTitle: {
     fontWeight: 600,
   },
-  headerActions: {
-    display: "flex",
-    alignItems: "center",
-    gap: 0.5,
-    flexShrink: 0,
-  },
-  progressChip: {
-    fontSize: "0.72rem",
-    height: 22,
-    mt: 0.75,
-  },
-  cookingModeButton: {
-    fontSize: "0.75rem",
-    px: 1.25,
-    py: 0.5,
-    whiteSpace: "nowrap" as const,
-    borderRadius: 5,
-  },
-  resetButton: {
-    fontSize: "0.75rem",
-    color: "text.secondary",
-  },
   count: {
     fontWeight: "normal",
     color: "text.secondary",

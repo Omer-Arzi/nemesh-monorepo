@@ -4,10 +4,7 @@ import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import CloseIcon from "@mui/icons-material/Close";
-import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
 import type { IngredientSection } from "@/types/domain";
 import type { CookingModeIngredientProps } from "@/features/cooking-mode";
 import IngredientSectionList from "../IngredientSectionList";
@@ -21,10 +18,7 @@ type Props = {
   onClose: () => void;
   ingredientSections: IngredientSection[];
   count: number;
-  cookingMode?: CookingModeBase & {
-    toggleActive: () => void;
-    ingredientProgress: { checked: number; total: number };
-  };
+  cookingMode?: CookingModeBase;
 };
 
 export default function IngredientsBottomSheet({
@@ -57,28 +51,9 @@ export default function IngredientsBottomSheet({
               </Box>
             )}
           </Typography>
-          {cookingMode?.isActive && cookingMode.ingredientProgress.total > 0 && (
-            <Chip
-              label={IngredientsBottomSheetText.progressLabel(cookingMode.ingredientProgress.checked, cookingMode.ingredientProgress.total)}
-              size="small"
-              color="success"
-              variant="outlined"
-              sx={IngredientsBottomSheetStyle.progressChip}
-            />
-          )}
         </Box>
 
         <Box sx={IngredientsBottomSheetStyle.headerEnd}>
-          <Button
-            size="small"
-            variant={cookingMode?.isActive ? "contained" : "outlined"}
-            color={cookingMode?.isActive ? "primary" : "inherit"}
-            startIcon={<PlayCircleOutlinedIcon />}
-            onClick={cookingMode?.toggleActive}
-            sx={IngredientsBottomSheetStyle.cookingModeButton}
-          >
-            {IngredientsBottomSheetText.cookingModeButton}
-          </Button>
           <IconButton onClick={onClose} size="small" aria-label={IngredientsBottomSheetText.closeAriaLabel}>
             <CloseIcon />
           </IconButton>
