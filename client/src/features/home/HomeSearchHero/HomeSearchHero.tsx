@@ -131,7 +131,8 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
               fullWidth
               autoComplete="off"
               sx={HomeSearchHeroStyle.searchField}
-              slotProps={{
+              slotProps
+              ={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">

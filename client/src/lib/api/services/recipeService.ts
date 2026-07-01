@@ -225,7 +225,7 @@ export async function getRecipes(
   params: PaginationParams = {}
 ): Promise<PaginatedResult<Recipe>> {
   const { page = 1, pageSize = 20 } = params;
-  const qs = `${LIST_POPULATE}&pagination[page]=${page}&pagination[pageSize]=${pageSize}&status=published`;
+  const qs = `${LIST_POPULATE}&sort[0]=publishedAt:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}&status=published`;
   const raw = await apiClient.get<StrapiList<StrapiRecipeAttrs>>(`/recipes?${qs}`);
   return {
     items: raw.data.map(mapRecipe),
@@ -307,6 +307,7 @@ export async function getRecipesByCategory(
   const qs =
     `${LIST_POPULATE}` +
     `&filters[categories][slug][$eq]=${encodeURIComponent(categorySlug)}` +
+    `&sort[0]=publishedAt:desc` +
     `&pagination[page]=${page}&pagination[pageSize]=${pageSize}` +
     `&status=published`;
   const raw = await apiClient.get<StrapiList<StrapiRecipeSummaryAttrs>>(`/recipes?${qs}`);
@@ -333,6 +334,7 @@ export async function getRecipesByTag(
   const qs =
     `${LIST_POPULATE}` +
     `&filters[tags][slug][$eq]=${encodeURIComponent(tagSlug)}` +
+    `&sort[0]=publishedAt:desc` +
     `&pagination[page]=${page}&pagination[pageSize]=${pageSize}` +
     `&status=published`;
   const raw = await apiClient.get<StrapiList<StrapiRecipeSummaryAttrs>>(`/recipes?${qs}`);
