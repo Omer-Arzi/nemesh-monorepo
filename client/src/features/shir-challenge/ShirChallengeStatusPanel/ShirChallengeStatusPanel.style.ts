@@ -51,7 +51,7 @@ export const ShirChallengeStatusPanelStyle = {
     bgcolor: "warning.main",
     color: "warning.contrastText",
     border: "1px solid",
-    borderColor: "warning.main",
+    borderColor: "white",
     px: 1,
     py: 0.2,
     borderRadius: 1.5,
