@@ -13,6 +13,7 @@ export const IngredientListStyle = {
     gap: 1,
     cursor: "pointer",
     userSelect: "none" as const,
+    touchAction: "manipulation" as const,
     transition: "background-color 0.12s ease",
     borderRadius: 1,
     px: 0.5,

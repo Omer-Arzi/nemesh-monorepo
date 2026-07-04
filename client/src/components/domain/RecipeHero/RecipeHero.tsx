@@ -145,7 +145,7 @@ export default function RecipeHero({
             image={image}
             fill
             priority
-            sizes="(max-width: 900px) 0vw, 50vw"
+            sizes="(max-width: 900px) 100vw, 50vw"
             objectFit="cover"
             fallback={
               <Box sx={RecipeHeroStyle.noImageState}>

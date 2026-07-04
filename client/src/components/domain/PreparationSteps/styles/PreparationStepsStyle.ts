@@ -15,9 +15,9 @@ export const PreparationStepsStyle = {
   stepClickable: {
     cursor: "pointer",
     userSelect: "none" as const,
+    touchAction: "manipulation" as const,
     borderRadius: 2,
     px: 0.5,
-    mx: -0.5,
     transition: "background-color 0.12s ease",
     "&:active": { bgcolor: "action.hover" },
   },

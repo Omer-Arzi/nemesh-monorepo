@@ -145,7 +145,6 @@ export const RecipeHeroStyle = {
     bgcolor: "background.paper",
     border: 1,
     borderColor: "divider",
-    display: { xs: "none", md: "block" },
     // Warm inset shadow gives the image depth and a premium framed quality.
     boxShadow: "inset 0 0 0 1px rgba(193, 123, 60, 0.10)",
   },
