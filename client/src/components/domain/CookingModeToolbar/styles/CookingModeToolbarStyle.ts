@@ -1,7 +1,8 @@
 export const CookingModeToolbarStyle = {
   root: {
     display: "flex",
-    alignItems: "center",
+    flexDirection: { xs: "column", md: "row" } as const,
+    alignItems: { xs: "stretch", md: "center" },
     justifyContent: "space-between",
     flexWrap: "wrap" as const,
     gap: 2,
@@ -31,6 +32,7 @@ export const CookingModeToolbarStyle = {
   chips: {
     display: "flex",
     alignItems: "center",
+    flexWrap: "wrap" as const,
     gap: 0.75,
     mt: 0.5,
   },
@@ -46,10 +48,15 @@ export const CookingModeToolbarStyle = {
   },
   actions: {
     display: "flex",
-    alignItems: "center",
+    flexDirection: { xs: "column", md: "row" } as const,
+    alignItems: { xs: "flex-start", md: "center" },
     gap: 1,
-    flexShrink: 0,
     flexWrap: "wrap" as const,
+  },
+  buttonsRow: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: 1,
   },
   activateButton: {
     fontSize: "0.85rem",
@@ -67,5 +74,18 @@ export const CookingModeToolbarStyle = {
     fontSize: "0.82rem",
     color: "text.secondary",
     whiteSpace: "nowrap" as const,
+  },
+  wakeLockToggle: {
+    gap: 0.25,
+    ml: 0,
+    mr: 0,
+    "& .MuiFormControlLabel-label": {
+      fontSize: "0.82rem",
+      color: "text.secondary",
+    },
+    "& .MuiSwitch-switchBase:not(.Mui-checked) .MuiSwitch-thumb": {
+      border: "1.5px solid",
+      borderColor: "primary.dark",
+    },
   },
 };

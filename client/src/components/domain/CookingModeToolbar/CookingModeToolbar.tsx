@@ -1,11 +1,15 @@
 "use client";
 
+import { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
 import StopCircleOutlinedIcon from "@mui/icons-material/StopCircleOutlined";
+import { useScreenWakeLock } from "@/hooks/useScreenWakeLock";
 import { CookingModeToolbarStyle } from "./styles/CookingModeToolbarStyle";
 
 const text = {
@@ -15,6 +19,7 @@ const text = {
   activeTitle: "מצב בישול פעיל",
   deactivateButton: "כבה מצב בישול",
   resetButton: "אפס סימונים",
+  wakeLockLabel: "מסך דולק",
   ingredientLabel: (checked: number, total: number) => `${checked} מתוך ${total} מצרכים`,
   stepLabel: (checked: number, total: number) => `${checked} מתוך ${total} שלבים`,
 } as const;
@@ -35,6 +40,11 @@ export default function CookingModeToolbar({
   stepProgress,
 }: Props) {
   const hasProgress = ingredientProgress.total > 0 || stepProgress.total > 0;
+  const { isSupported: wakeLockSupported, isEnabled: wakeLockEnabled, enable: enableWakeLock, disable: disableWakeLock } = useScreenWakeLock();
+
+  useEffect(() => {
+    if (!isActive) disableWakeLock();
+  }, [isActive, disableWakeLock]);
 
   return (
     <Box sx={CookingModeToolbarStyle.root}>
@@ -68,28 +78,44 @@ export default function CookingModeToolbar({
       </Box>
 
       <Box sx={CookingModeToolbarStyle.actions}>
-        {isActive && (
+        {isActive && wakeLockSupported && (
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={wakeLockEnabled}
+                onChange={(e) => { e.target.checked ? enableWakeLock() : disableWakeLock(); }}
+              />
+            }
+            label={text.wakeLockLabel}
+            labelPlacement="start"
+            sx={CookingModeToolbarStyle.wakeLockToggle}
+          />
+        )}
+        <Box sx={CookingModeToolbarStyle.buttonsRow}>
           <Button
             size="small"
-            variant="text"
-            color="inherit"
-            onClick={onReset}
-            sx={CookingModeToolbarStyle.resetButton}
+            variant={isActive ? "outlined" : "contained"}
+            color="primary"
+            startIcon={isActive ? <StopCircleOutlinedIcon /> : <PlayCircleOutlinedIcon />}
+            onClick={onToggle}
+            aria-pressed={isActive}
+            sx={isActive ? CookingModeToolbarStyle.deactivateButton : CookingModeToolbarStyle.activateButton}
           >
-            {text.resetButton}
+            {isActive ? text.deactivateButton : text.activateButton}
           </Button>
-        )}
-        <Button
-          size="small"
-          variant={isActive ? "outlined" : "contained"}
-          color="primary"
-          startIcon={isActive ? <StopCircleOutlinedIcon /> : <PlayCircleOutlinedIcon />}
-          onClick={onToggle}
-          aria-pressed={isActive}
-          sx={isActive ? CookingModeToolbarStyle.deactivateButton : CookingModeToolbarStyle.activateButton}
-        >
-          {isActive ? text.deactivateButton : text.activateButton}
-        </Button>
+          {isActive && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="inherit"
+              onClick={onReset}
+              sx={CookingModeToolbarStyle.resetButton}
+            >
+              {text.resetButton}
+            </Button>
+          )}
+        </Box>
       </Box>
     </Box>
   );
