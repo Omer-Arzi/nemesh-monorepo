@@ -61,6 +61,35 @@ export interface RecipeRecipeTip extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedFooterLink extends Struct.ComponentSchema {
+  collectionName: 'components_shared_footer_links';
+  info: {
+    description: 'Exactly one of page or externalUrl must be set. customLabel overrides page.title when present.';
+    displayName: 'FooterLink';
+  };
+  attributes: {
+    customLabel: Schema.Attribute.String;
+    externalUrl: Schema.Attribute.String;
+    openInNewTab: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    page: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::content-page.content-page'
+    >;
+  };
+}
+
+export interface SharedFooterSection extends Struct.ComponentSchema {
+  collectionName: 'components_shared_footer_sections';
+  info: {
+    description: 'A titled group of footer links';
+    displayName: 'FooterSection';
+  };
+  attributes: {
+    links: Schema.Attribute.Component<'shared.footer-link', true>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
@@ -69,6 +98,8 @@ declare module '@strapi/strapi' {
       'recipe.preparation-step': RecipePreparationStep;
       'recipe.recipe-ingredient': RecipeRecipeIngredient;
       'recipe.recipe-tip': RecipeRecipeTip;
+      'shared.footer-link': SharedFooterLink;
+      'shared.footer-section': SharedFooterSection;
     }
   }
 }

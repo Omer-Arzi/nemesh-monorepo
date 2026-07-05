@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_shared_footer_sections",
+  "info": {
+    "displayName": "FooterSection",
+    "description": "A titled group of footer links"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "links": {
+      "type": "component",
+      "component": "shared.footer-link",
+      "repeatable": true
+    }
+  }
+}
