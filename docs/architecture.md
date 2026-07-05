@@ -31,6 +31,7 @@ nemesh/
 │   │   │   ├── category/        # Category hooks
 │   │   │   ├── cooking-mode/    # Client-only cooking mode state
 │   │   │   ├── home/            # Home page feature blocks (carousel, search hero, etc.)
+│   │   │   ├── page/            # Static page + footer hooks (usePage, useFooter)
 │   │   │   ├── recipe/          # Recipe detail hooks
 │   │   │   ├── results/         # Browse/search results hooks
 │   │   │   ├── shir-challenge/  # Shir Challenge page feature (single type + special UI)
@@ -329,9 +330,89 @@ Peach accent palette defined in `features/shir-challenge/ShirChallenge.tokens.ts
 
 ---
 
-## 14. Safety Notes
+## 15. Static Pages CMS
+
+Static informational pages (e.g. privacy policy, about, terms) are managed through a `page` Strapi collection type and rendered by `app/[slug]/page.tsx`.
+
+### Strapi collection type — `page`
+
+Located at `server/src/api/page/`. Each document is a standalone content page.
+
+| Field         | Type              | Notes                              |
+|---------------|-------------------|------------------------------------|
+| `title`       | string (required) | Page title; also used for SEO fallback |
+| `slug`        | uid (required)    | URL path segment under `/`         |
+| `description` | text              | Lead paragraph shown below title   |
+| `content`     | blocks            | Strapi rich-text blocks editor     |
+| `seo`         | component         | `shared.seo` — metaTitle + metaDescription |
+
+SEO component defined in `server/src/components/shared/seo.json`.
+
+### Route — `app/[slug]/page.tsx`
+
+A Next.js **server component**. Named segments (`/categories/`, `/recipes/`, `/results/`, `/tags/`) take priority over this dynamic segment.
+
+- Uses `React.cache()` to deduplicate the fetch between `generateMetadata` and the page component.
+- Falls back to `notFound()` if the slug doesn't resolve.
+- `generateStaticParams` pre-builds slugs at build time; a fetch failure returns `[]` (graceful degradation).
+
+### BlockRenderer — `src/components/shared/BlockRenderer/`
+
+Renders Strapi Blocks JSON (`BlockNode[]`) to MUI components. No third-party renderer dependency.
+
+Supported block types: `paragraph`, `heading` (h1–h6), `list` (ordered/unordered), `quote`, `code`, `image`.
+Supported inline types: `text` (bold/italic/underline/strikethrough/code), `link`.
+
+### Feature boundary — `src/features/page/`
+
+- `hooks.ts` — `usePage(slug)` and `useFooter()` hooks using TanStack Query.
+- Query keys: `queryKeys.pages.*` and `queryKeys.footer.*`.
+
+### Permissions (Strapi admin)
+
+After creating the content types, enable:
+- `page` → find, findOne (Public role)
+- `footer` → find (Public role)
+
+---
+
+## 16. Footer CMS
+
+The site footer is driven by a `footer` Strapi single type, populated via `useFooter()` in `src/features/page/hooks.ts`.
+
+### Strapi single type — `footer`
+
+Located at `server/src/api/footer/`. One document controls all footer content.
+
+| Field           | Type                                     | Notes                                   |
+|-----------------|------------------------------------------|-----------------------------------------|
+| `sections`      | component (page.footer-section, repeatable) | Column groups of links                |
+| `copyrightText` | text                                     | Falls back to `© YYYY נמש` if empty    |
+
+Components:
+
+**`page.footer-section`** (`server/src/components/page/footer-section.json`):
+- `title` — string (required)
+- `links` — `page.footer-link` (repeatable)
+
+**`page.footer-link`** (`server/src/components/page/footer-link.json`):
+- `label` — string (required)
+- `page` — many-to-one relation to `page` collection (for internal links)
+- `externalUrl` — string (for external links)
+
+When `page` is set, the link renders as an internal Next.js link (`/slug`). When only `externalUrl` is set, it renders as an external link (`target="_blank"`).
+
+### Footer component — `src/components/layout/Footer/`
+
+Dynamic component using TanStack Query (`useFooter`, `staleTime: 10 min`). Renders gracefully with copyright-only fallback when data is unavailable or still loading.
+
+---
+
+## 17. Safety Notes
 
 - **Strapi component schema changes are risky.** Renaming or removing a component field without a DB backup can cause silent data loss. Always export/backup before schema changes.
 - **Do not run destructive migrations casually.** Migration scripts in `server/scripts/` are one-time operations; verify on a backup first.
 - **Do not remove or rename component fields** (e.g. `ingredientSections`, `preparationSections`) without confirming the DB state and updating any migration/backfill scripts.
 - **Keep this document updated** when the canonical data model changes — see the Architecture Documentation Rule in `CLAUDE.md`.
+- **Strapi single type `footer`** — deleting all sections in the admin does not delete the document; it returns an empty sections array. The footer renders gracefully in this case.
+- **`app/[slug]/` catch-all route** — any new named segment at the root level (e.g. `/about/`) must be added as a directory under `app/` **before** a `Page` with that slug is published, otherwise the dynamic segment may shadow intended behavior during ISR.

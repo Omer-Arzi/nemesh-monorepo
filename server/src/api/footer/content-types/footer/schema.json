@@ -1,0 +1,23 @@
+{
+  "kind": "singleType",
+  "collectionName": "footers",
+  "info": {
+    "singularName": "footer",
+    "pluralName": "footers",
+    "displayName": "Footer",
+    "description": "Site-wide footer — sections and navigation links"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "sections": {
+      "type": "component",
+      "component": "shared.footer-section",
+      "repeatable": true
+    },
+    "copyrightText": {
+      "type": "text"
+    }
+  }
+}

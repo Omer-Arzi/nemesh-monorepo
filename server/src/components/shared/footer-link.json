@@ -1,0 +1,25 @@
+{
+  "collectionName": "components_shared_footer_links",
+  "info": {
+    "displayName": "FooterLink",
+    "description": "Exactly one of page or externalUrl must be set. customLabel overrides page.title when present."
+  },
+  "options": {},
+  "attributes": {
+    "customLabel": {
+      "type": "string"
+    },
+    "page": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::content-page.content-page"
+    },
+    "externalUrl": {
+      "type": "string"
+    },
+    "openInNewTab": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
