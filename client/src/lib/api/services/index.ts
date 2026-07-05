@@ -4,3 +4,5 @@ export { getTags, getTagBySlug } from "./tagService";
 export { getHomepage } from "./homepageService";
 export { getShirChallengePage } from "./shirChallengePageService";
 export { getCurrentChallengeMonth, getPreviousChallengeMonth } from "./shirChallengeMonthService";
+export { getPageBySlug, getPageSlugs } from "./pageService";
+export { getFooter } from "./footerService";
