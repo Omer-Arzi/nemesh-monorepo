@@ -168,3 +168,103 @@ export type ShirChallengeMonth = BaseEntity & {
   monthlyChallengeNote: string | null;
   myProgressStatus: MyProgressStatus | null;
 };
+
+// ─── Strapi Blocks (rich text editor) ────────────────────────────────────────
+
+export type BlockTextNode = {
+  type: "text";
+  text: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+  code?: boolean;
+};
+
+export type BlockLinkNode = {
+  type: "link";
+  url: string;
+  children: BlockTextNode[];
+};
+
+export type BlockInlineNode = BlockTextNode | BlockLinkNode;
+
+export type BlockListItemNode = {
+  type: "list-item";
+  children: BlockInlineNode[];
+};
+
+export type BlockParagraphNode = {
+  type: "paragraph";
+  children: BlockInlineNode[];
+};
+
+export type BlockHeadingNode = {
+  type: "heading";
+  level: 1 | 2 | 3 | 4 | 5 | 6;
+  children: BlockInlineNode[];
+};
+
+export type BlockListNode = {
+  type: "list";
+  format: "ordered" | "unordered";
+  children: BlockListItemNode[];
+};
+
+export type BlockQuoteNode = {
+  type: "quote";
+  children: BlockInlineNode[];
+};
+
+export type BlockCodeNode = {
+  type: "code";
+  children: BlockTextNode[];
+};
+
+export type BlockImageNode = {
+  type: "image";
+  image: {
+    url: string;
+    alternativeText: string | null;
+    width: number;
+    height: number;
+  };
+  children: BlockTextNode[];
+};
+
+export type BlockNode =
+  | BlockParagraphNode
+  | BlockHeadingNode
+  | BlockListNode
+  | BlockQuoteNode
+  | BlockCodeNode
+  | BlockImageNode;
+
+// ─── Static pages ─────────────────────────────────────────────────────────────
+
+export type Page = BaseEntity & {
+  title: string;
+  slug: string;
+  summary: string | null;
+  content: BlockNode[];
+};
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+
+export type FooterLink = {
+  /** Overrides page.title when present. Required when externalUrl is set. */
+  customLabel: string | null;
+  page: { slug: string; title: string } | null;
+  externalUrl: string | null;
+  openInNewTab: boolean;
+};
+
+export type FooterSection = {
+  title: string;
+  links: FooterLink[];
+};
+
+export type FooterData = {
+  sections: FooterSection[];
+  copyrightText: string | null;
+};

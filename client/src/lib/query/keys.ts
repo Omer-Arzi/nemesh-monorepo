@@ -80,4 +80,15 @@ export const queryKeys = {
     all: () => ["suggestions"] as const,
     byQuery: (q: string) => ["suggestions", "byQuery", q] as const,
   },
+
+  pages: {
+    all: () => ["pages"] as const,
+    detail: (slug: string) => ["pages", "detail", slug] as const,
+    slugs: () => ["pages", "slugs"] as const,
+  },
+
+  footer: {
+    all: () => ["footer"] as const,
+    detail: () => ["footer", "detail"] as const,
+  },
 } as const;

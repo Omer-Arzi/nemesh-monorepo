@@ -19,3 +19,4 @@ export { default as NemeshImage } from "./NemeshImage";
 export type { NemeshImageProps } from "./NemeshImage";
 export { FreckleDust } from "./FreckleDust";
 export type { FrecklePlacement, FreckleDensity } from "./FreckleDust";
+export { BlockRenderer } from "./BlockRenderer";
