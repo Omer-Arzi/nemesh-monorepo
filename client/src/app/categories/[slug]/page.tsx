@@ -32,11 +32,12 @@ export default function CategoryPage() {
       {/* ── Category header ──────────────────────────────────────────── */}
       <Box sx={{ mb: 3, textAlign: "center" }}>
         {category.image ? (
-          <Box sx={{ overflow: "hidden", maxHeight: 280, borderRadius: 3, mb: 3 }}>
+          <Box sx={{ position: "relative", height: 280, borderRadius: 3, mb: 3, overflow: "hidden" }}>
             <NemeshImage
               image={category.image}
-              style={{ width: "100%", height: "auto" }}
+              fill
               objectFit="cover"
+              objectPosition="center 60%"
               sizes="(max-width: 600px) 100vw, 800px"
             />
           </Box>
