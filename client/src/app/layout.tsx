@@ -4,6 +4,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import RootProviders from "@/providers";
 import AppShell from "@/components/layout/AppShell";
 import { getActiveThemeKey } from "@/lib/api/services/siteSettingService";
+import { GoogleAnalyticsScript } from "@/lib/analytics";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -41,6 +42,7 @@ export default async function RootLayout({
         <RootProviders activePresetKey={activePresetKey ?? undefined}>
           <AppShell>{children}</AppShell>
         </RootProviders>
+        <GoogleAnalyticsScript />
         <SpeedInsights />
       </body>
     </html>
