@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { RecipePageText } from "./consts";
 import { Section, LoadingState, ErrorState } from "@/components/shared";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/components/domain";
 import { useRecipe, useRelatedRecipes } from "@/features/recipe/hooks";
 import { useCookingMode } from "@/features/cooking-mode";
+import { analytics } from "@/lib/analytics";
 import type { Recipe, RecipeSummary } from "@/types/domain";
 
 // ── RecipeContent ────────────────────────────────────────────────────────────
@@ -36,6 +37,29 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
   );
 
   const cookingMode = useCookingMode(recipe.id, totalIngredients, totalSteps);
+
+  // Track recipe view once on mount.
+  useEffect(() => {
+    analytics.trackRecipeView({
+      recipe_id: recipe.id,
+      recipe_name: recipe.title,
+      recipe_slug: recipe.slug,
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Track cooking mode start/exit. The ref skips the initial false state.
+  const cookingModeMountedRef = useRef(false);
+  useEffect(() => {
+    if (!cookingModeMountedRef.current) {
+      cookingModeMountedRef.current = true;
+      return;
+    }
+    if (cookingMode.isActive) {
+      analytics.trackCookingModeStart({ recipe_id: recipe.id, recipe_name: recipe.title });
+    } else {
+      analytics.trackCookingModeExit({ recipe_id: recipe.id, recipe_name: recipe.title });
+    }
+  }, [cookingMode.isActive]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
