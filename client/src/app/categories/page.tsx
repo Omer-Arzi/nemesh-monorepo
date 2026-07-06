@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import { PageContainer, SectionHeader, LoadingState, ErrorState, EmptyState } from "@/components/shared";
 import { CategoriesPageText } from "./consts";
 import { CollectionCard } from "@/components/domain";
 import { useCategories } from "@/features/category/hooks";
 import { useTags } from "@/features/tag/hooks";
+import { analytics } from "@/lib/analytics";
 import { ROUTES } from "@/constants";
 import type { Tag } from "@/types/domain";
 
@@ -20,6 +22,10 @@ function findShirChallenge(tags: Tag[]): Tag | null {
 export default function CategoriesPage() {
   const { data: categories = [], isLoading: categoriesLoading, isError: categoriesError } = useCategories();
   const { data: tags = [], isLoading: tagsLoading } = useTags();
+
+  useEffect(() => {
+    analytics.trackPageView({ page_id: "categories", page_name: "קטגוריות" });
+  }, []);
 
   const isLoading = categoriesLoading || tagsLoading;
 

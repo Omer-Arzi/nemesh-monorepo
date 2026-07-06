@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense, useRef, useCallback } from "react";
+import { Suspense, useRef, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { analytics } from "@/lib/analytics";
 import { ResultsPageText } from "./consts";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -196,6 +197,10 @@ function ResultsContent() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q")?.trim() ?? "";
   const ingredient = searchParams.get("ingredient")?.trim() ?? "";
+
+  useEffect(() => {
+    analytics.trackPageView({ page_id: "results", page_name: "תוצאות" });
+  }, []);
 
   if (ingredient) return <IngredientResults ingredient={ingredient} />;
   if (q) return <SearchResults q={q} />;

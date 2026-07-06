@@ -1,9 +1,9 @@
 /*
  * Ga4AnalyticsAdapter
  *
- * This is the only place in the codebase that may reference window.gtag,
- * GA4 event names, or GA4 parameter shapes. All other code calls the
- * semantic methods below.
+ * This is the only place in the codebase that may reference window.gtag or
+ * call GA4 directly. All event names and parameter names come from
+ * analyticsDefinitions.ts — do not add raw strings here.
  *
  * ── Configuration ─────────────────────────────────────────────────────────────
  *
@@ -22,11 +22,7 @@
  *
  * ── Events sent ───────────────────────────────────────────────────────────────
  *
- *   page_view           generic page visit
- *   recipe_view         recipe detail page opened
- *   category_view       category browse page opened
- *   cooking_mode_start  user entered cooking mode
- *   cooking_mode_exit   user left cooking mode
+ *   See AnalyticsEvents in analyticsDefinitions.ts for the full list.
  *
  * ── Custom dimensions to register in GA4 ──────────────────────────────────────
  *
@@ -45,6 +41,8 @@
  *   Category Slug    Event   category_slug
  */
 
+import { AnalyticsEvents, AnalyticsParams } from "./analyticsDefinitions";
+
 // Augment the browser Window so TypeScript accepts window.gtag.
 declare global {
   interface Window {
@@ -62,19 +60,19 @@ export type PageViewParams = {
 };
 
 export type RecipeViewParams = {
-  recipe_id: string | number;
+  recipe_id: string;
   recipe_name: string;
   recipe_slug?: string;
 };
 
 export type CategoryViewParams = {
-  category_id: string | number;
+  category_id: string;
   category_name: string;
   category_slug?: string;
 };
 
 export type CookingModeParams = {
-  recipe_id: string | number;
+  recipe_id: string;
   recipe_name: string;
 };
 
@@ -106,40 +104,46 @@ class Ga4AnalyticsAdapter {
   }
 
   trackPageView(params: PageViewParams): void {
-    this.send("page_view", {
-      page_id: params.page_id,
-      page_name: params.page_name,
-      ...(params.page_path !== undefined && { page_path: params.page_path }),
+    this.send(AnalyticsEvents.pageView, {
+      [AnalyticsParams.pageId]: params.page_id,
+      [AnalyticsParams.pageName]: params.page_name,
+      ...(params.page_path !== undefined && {
+        [AnalyticsParams.pagePath]: params.page_path,
+      }),
     });
   }
 
   trackRecipeView(params: RecipeViewParams): void {
-    this.send("recipe_view", {
-      recipe_id: String(params.recipe_id),
-      recipe_name: params.recipe_name,
-      ...(params.recipe_slug !== undefined && { recipe_slug: params.recipe_slug }),
+    this.send(AnalyticsEvents.recipeView, {
+      [AnalyticsParams.recipeId]: params.recipe_id,
+      [AnalyticsParams.recipeName]: params.recipe_name,
+      ...(params.recipe_slug !== undefined && {
+        [AnalyticsParams.recipeSlug]: params.recipe_slug,
+      }),
     });
   }
 
   trackCategoryView(params: CategoryViewParams): void {
-    this.send("category_view", {
-      category_id: String(params.category_id),
-      category_name: params.category_name,
-      ...(params.category_slug !== undefined && { category_slug: params.category_slug }),
+    this.send(AnalyticsEvents.categoryView, {
+      [AnalyticsParams.categoryId]: params.category_id,
+      [AnalyticsParams.categoryName]: params.category_name,
+      ...(params.category_slug !== undefined && {
+        [AnalyticsParams.categorySlug]: params.category_slug,
+      }),
     });
   }
 
   trackCookingModeStart(params: CookingModeParams): void {
-    this.send("cooking_mode_start", {
-      recipe_id: String(params.recipe_id),
-      recipe_name: params.recipe_name,
+    this.send(AnalyticsEvents.cookingModeStart, {
+      [AnalyticsParams.recipeId]: params.recipe_id,
+      [AnalyticsParams.recipeName]: params.recipe_name,
     });
   }
 
   trackCookingModeExit(params: CookingModeParams): void {
-    this.send("cooking_mode_exit", {
-      recipe_id: String(params.recipe_id),
-      recipe_name: params.recipe_name,
+    this.send(AnalyticsEvents.cookingModeExit, {
+      [AnalyticsParams.recipeId]: params.recipe_id,
+      [AnalyticsParams.recipeName]: params.recipe_name,
     });
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import { CategoryPageText } from "./consts";
@@ -10,12 +11,22 @@ import RestaurantIcon from "@mui/icons-material/Restaurant";
 import { PageContainer, LoadingState, ErrorState, EmptyState, SectionHeader, NemeshImage } from "@/components/shared";
 import { RecipeCard, RecipeGridSkeleton } from "@/components/domain";
 import { useCategory, useRecipesByCategory } from "@/features/category/hooks";
+import { analytics } from "@/lib/analytics";
 
 export default function CategoryPage() {
   const { slug } = useParams<{ slug: string }>();
 
   const { data: category, isLoading: categoryLoading, isError: categoryError } = useCategory(slug);
   const { data: recipesResult, isLoading: recipesLoading } = useRecipesByCategory(slug);
+
+  useEffect(() => {
+    if (!category) return;
+    analytics.trackCategoryView({
+      category_id: category.id,
+      category_name: category.name,
+      category_slug: slug,
+    });
+  }, [category?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (categoryLoading) {
     return <LoadingState label={CategoryPageText.loading} minHeight={400} />;
