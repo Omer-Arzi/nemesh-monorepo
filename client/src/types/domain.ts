@@ -247,6 +247,9 @@ export type Page = BaseEntity & {
   slug: string;
   summary: string | null;
   content: BlockNode[];
+  showInFooter: boolean;
+  footerSection: string | null;
+  footerOrder: number | null;
 };
 
 // ─── Footer ───────────────────────────────────────────────────────────────────

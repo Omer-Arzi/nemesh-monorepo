@@ -85,6 +85,7 @@ export const queryKeys = {
     all: () => ["pages"] as const,
     detail: (slug: string) => ["pages", "detail", slug] as const,
     slugs: () => ["pages", "slugs"] as const,
+    footerPages: () => ["pages", "footer"] as const,
   },
 
   footer: {

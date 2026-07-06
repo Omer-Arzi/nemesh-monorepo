@@ -27,6 +27,16 @@
     "content": {
       "type": "blocks",
       "required": true
+    },
+    "showInFooter": {
+      "type": "boolean",
+      "default": false
+    },
+    "footerSection": {
+      "type": "string"
+    },
+    "footerOrder": {
+      "type": "integer"
     }
   }
 }
