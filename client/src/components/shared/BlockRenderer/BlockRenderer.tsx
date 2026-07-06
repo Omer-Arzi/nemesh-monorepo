@@ -50,12 +50,33 @@ function renderListItem(node: BlockListItemNode, idx: number): React.ReactNode {
 
 function renderBlock(block: BlockNode, idx: number): React.ReactNode {
   switch (block.type) {
-    case "paragraph":
+    case "paragraph": {
+      const first = block.children[0];
+
+      // Empty paragraph — render as a deliberate vertical gap instead of a
+      // zero-content Typography whose height is unpredictable across browsers.
+      if (block.children.length === 1 && first.type === "text" && first.text === "") {
+        return <Box key={idx} sx={BlockRendererStyle.paragraphSpacer} aria-hidden />;
+      }
+
+      // Paragraph whose sole child starts with "* " — was typed as a Markdown-style
+      // bullet in the Blocks editor instead of using the list tool. Render it as a
+      // visual list item so bullets are displayed correctly rather than as raw "* text".
+      if (block.children.length === 1 && first.type === "text" && first.text.startsWith("* ")) {
+        const bulletNode: BlockTextNode = { ...first, text: first.text.slice(2) };
+        return (
+          <Typography key={idx} component="p" sx={BlockRendererStyle.fakeBulletItem}>
+            {renderTextNode(bulletNode, 0)}
+          </Typography>
+        );
+      }
+
       return (
         <Typography key={idx} variant="body1" sx={BlockRendererStyle.paragraph}>
           {block.children.map((child, i) => renderInlineNode(child, i))}
         </Typography>
       );
+    }
 
     case "heading": {
       const variantMap = {
