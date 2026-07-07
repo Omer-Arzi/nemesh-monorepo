@@ -261,6 +261,44 @@ A rejected origin returns an empty (or missing) `Access-Control-Allow-Origin` he
 
 ---
 
+## SEO — Sitemap and Robots
+
+The client generates `sitemap.xml` and `robots.txt` automatically via Next.js App Router conventions.
+
+### How it works
+
+| File | Route | Description |
+|---|---|---|
+| `client/src/app/sitemap.ts` | `/sitemap.xml` | Server-rendered sitemap. Fetches all published recipes and categories from Strapi at request time (or build time with SSG). |
+| `client/src/app/robots.ts` | `/robots.txt` | Allows all user agents, points crawlers at `/sitemap.xml`. |
+
+The sitemap includes:
+- `/` — homepage (priority 1.0, changeFrequency daily)
+- `/categories` — category listing (priority 0.8, weekly)
+- All recipe pages via `recipe.slug` (priority 0.9, weekly, lastModified from `updatedAt`)
+- All category pages via `category.slug` (priority 0.7, weekly)
+
+If the Strapi fetch fails, the sitemap degrades gracefully and returns only the static URLs.
+
+### Required environment variable (Vercel)
+
+```
+NEXT_PUBLIC_SITE_URL=https://nemesh-food.com
+```
+
+Without this, the sitemap URL base falls back to `https://nemesh-food.com` (hardcoded fallback) — still correct for production, but set the env var explicitly so staging/preview builds can override it.
+
+### Verifying after deploy
+
+```
+https://nemesh-food.com/sitemap.xml   → should return XML with all recipe and category URLs
+https://nemesh-food.com/robots.txt    → should list Sitemap: https://nemesh-food.com/sitemap.xml
+```
+
+Then go to **Google Search Console → Sitemaps → Add a new sitemap** and enter `sitemap.xml`.
+
+---
+
 ## Next manual steps before data export/import
 
 These are for a future session — do not do them yet:
