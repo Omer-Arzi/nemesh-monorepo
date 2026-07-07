@@ -25,10 +25,11 @@ const heebo = Heebo({
  */
 export const metadata: Metadata = {
   title: {
-    default: "Nemesh",
+    default: "Nemesh | נמש – אתר מתכונים פרטי",
     template: "%s | Nemesh",
   },
-  description: "Nemesh", // TODO: replace with product description
+  description:
+    "נמש הוא אתר מתכונים פרטי עם מתכונים מקוריים, קינוחים, גלידות ביתיות, מנות עיקריות ועוד. חפשו מתכונים לפי קטגוריה, מרכיבים או השראה.",
 };
 
 export default async function RootLayout({
