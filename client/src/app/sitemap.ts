@@ -2,10 +2,7 @@ import type { MetadataRoute } from "next";
 import { getRecipes } from "@/lib/api/services/recipeService";
 import { getCategories } from "@/lib/api/services/categoryService";
 import { ROUTES } from "@/constants";
-
-function getSiteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://nemesh-food.com").replace(/\/$/, "");
-}
+import { getSiteUrl } from "@/lib/seo";
 
 // Walks all pages of getRecipes so every published recipe appears in the sitemap.
 async function fetchAllRecipes() {

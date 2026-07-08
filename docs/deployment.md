@@ -297,6 +297,18 @@ https://nemesh-food.com/robots.txt    → should list Sitemap: https://nemesh-fo
 
 Then go to **Google Search Console → Sitemaps → Add a new sitemap** and enter `sitemap.xml`.
 
+### Structured data (JSON-LD)
+
+| Schema type | Where generated | Pages |
+|---|---|---|
+| `WebSite` | `src/lib/seo/structuredData.ts` → `app/page.tsx` | Homepage only |
+| `Recipe` | `src/lib/seo/structuredData.ts` → `app/recipes/[slug]/page.tsx` | Every recipe detail page |
+| `BreadcrumbList` | `src/lib/seo/structuredData.ts` → `app/recipes/[slug]/page.tsx` | Every recipe detail page |
+
+Rendered via `src/components/seo/StructuredData/` — a server component that injects a `<script type="application/ld+json">` tag. Optional fields are omitted if missing or not an absolute URL. No fake ratings or reviews are emitted.
+
+**To test:** paste any recipe URL into the [Google Rich Results Test](https://search.google.com/test/rich-results) and verify Recipe + BreadcrumbList are detected.
+
 ---
 
 ## Next manual steps before data export/import

@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
 import { getRecipeBySlug } from "@/lib/api/services/recipeService";
 import RecipePageClient from "./RecipePageClient";
-
-// Place a 1200×630px image at this path in /public for sharing fallback.
-const DEFAULT_OG_IMAGE = "/images/branding/og-default.jpg";
-const SITE_NAME = "Nemesh";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildRecipeSchema, buildBreadcrumbSchema, getSiteUrl, SITE_NAME, DEFAULT_OG_IMAGE } from "@/lib/seo";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
-
-function getSiteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -59,5 +53,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function RecipePage({ params }: Props) {
   const { slug } = await params;
-  return <RecipePageClient slug={slug} />;
+  // getRecipeBySlug is deduplicated by Next.js fetch cache — no extra network call
+  // on top of the generateMetadata call above.
+  const recipe = await getRecipeBySlug(slug).catch(() => null);
+
+  return (
+    <>
+      {recipe && (
+        <>
+          <StructuredData data={buildRecipeSchema(recipe)} />
+          <StructuredData data={buildBreadcrumbSchema(recipe)} />
+        </>
+      )}
+      <RecipePageClient slug={slug} />
+    </>
+  );
 }

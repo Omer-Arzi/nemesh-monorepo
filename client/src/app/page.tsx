@@ -3,6 +3,8 @@ import HomeSearchHero from "@/features/home/HomeSearchHero";
 import LatestRecipes from "@/features/home/LatestRecipes";
 import FeaturedCategoriesCarousel from "@/features/home/FeaturedCategoriesCarousel";
 import { PageViewTracker } from "@/lib/analytics";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildWebSiteSchema } from "@/lib/seo/structuredData";
 
 export default async function HomePage() {
   // Fetched server-side so the first HTML already contains either the Strapi
@@ -11,6 +13,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <StructuredData data={buildWebSiteSchema()} />
       <PageViewTracker page_id="home" page_name="דף הבית" />
       <HomeSearchHero
         title={homepage?.heroTitle ?? null}
