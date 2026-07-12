@@ -20,3 +20,5 @@ export type { NemeshImageProps } from "./NemeshImage";
 export { FreckleDust } from "./FreckleDust";
 export type { FrecklePlacement, FreckleDensity } from "./FreckleDust";
 export { BlockRenderer } from "./BlockRenderer";
+export { default as SiteLogo } from "./SiteLogo";
+export type { SiteLogoVariant } from "./SiteLogo";

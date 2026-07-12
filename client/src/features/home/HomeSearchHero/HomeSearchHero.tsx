@@ -8,7 +8,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
 import type { Image } from "@/types/domain";
-import { NemeshImage, FreckleDust } from "@/components/shared";
+import { NemeshImage, FreckleDust, SiteLogo } from "@/components/shared";
 import { SearchSuggestions } from "@/features/home/SearchSuggestions";
 import { useHomeSearch } from "./useHomeSearch";
 import { HomeSearchHeroStyle } from "./HomeSearchHero.style";
@@ -44,12 +44,7 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
 
       <Stack sx={[HomeSearchHeroStyle.inner, hasImage && HomeSearchHeroStyle.innerOnImage]}>
         {/* Desktop-only hero logo — desktop navbar is hidden on homepage */}
-        <Box
-          component="img"
-          src="/images/branding/logo.svg"
-          alt=""
-          sx={HomeSearchHeroStyle.heroLogo(hasImage)}
-        />
+        <SiteLogo variant="desktop" alt="" sx={HomeSearchHeroStyle.heroLogo(hasImage)} />
 
         <Typography variant="h3" component="h1" sx={HomeSearchHeroStyle.headline}>
           {headline}

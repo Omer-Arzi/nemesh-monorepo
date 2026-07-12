@@ -11,9 +11,7 @@ import { SearchSuggestions } from "@/features/home/SearchSuggestions";
 import { useHomeSearch } from "@/features/home/HomeSearchHero/useHomeSearch";
 import { HomeStickyHeaderStyle } from "./HomeStickyHeader.style";
 import { HomeSearchHeroText } from "@/features/home/HomeSearchHero/HomeSearchHero.consts";
-
-// Using logo.svg — update to logo-mobile.svg here too once the asset is confirmed icon-only.
-const COMPACT_LOGO_SRC = "/images/branding/logo.svg";
+import { SiteLogo } from "@/components/shared";
 
 type Props = {
   visible: boolean;
@@ -41,12 +39,7 @@ export default function HomeStickyHeader({ visible }: Props) {
         tabIndex={visible ? 0 : -1}
         sx={HomeStickyHeaderStyle.logoLink}
       >
-        <Box
-          component="img"
-          src={COMPACT_LOGO_SRC}
-          alt=""
-          sx={HomeStickyHeaderStyle.logo}
-        />
+        <SiteLogo variant="desktop" alt="" sx={HomeStickyHeaderStyle.logo} />
       </Box>
 
       {/* Compact search — fills remaining width */}

@@ -18,6 +18,20 @@
         "freckleWarm"
       ],
       "default": "classic"
+    },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images", "files"],
+      "pluginOptions": {}
+    },
+    "mobileLogo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images", "files"],
+      "pluginOptions": {}
     }
   }
 }

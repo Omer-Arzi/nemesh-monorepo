@@ -9,6 +9,7 @@
  *  1. EmotionRegistry  — must be outermost to capture all Emotion styles
  *  2. MuiProvider      — depends on Emotion cache being set up
  *  3. QueryProvider    — independent; outermost for data concerns
+ *  4. BrandingProvider — inside QueryProvider; logo data is layout-level
  *
  * TODO: Add an AuthProvider here once authentication is implemented.
  */
@@ -17,22 +18,30 @@
 import EmotionRegistry from "./EmotionRegistry";
 import MuiProvider from "./MuiProvider";
 import QueryProvider from "./QueryProvider";
+import { BrandingProvider } from "./BrandingProvider";
 import type { ThemePresetKey } from "@/lib/theme/themePresets";
+import type { SiteBranding } from "@/types/domain";
 
 export default function RootProviders({
   children,
   activePresetKey,
+  branding,
 }: {
   children: React.ReactNode;
   activePresetKey?: ThemePresetKey;
+  branding?: SiteBranding;
 }) {
   return (
     <EmotionRegistry>
       <MuiProvider activePresetKey={activePresetKey}>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <BrandingProvider branding={branding ?? { logo: null, mobileLogo: null }}>
+            {children}
+          </BrandingProvider>
+        </QueryProvider>
       </MuiProvider>
     </EmotionRegistry>
   );
 }
 
-export { EmotionRegistry, MuiProvider, QueryProvider };
+export { EmotionRegistry, MuiProvider, QueryProvider, BrandingProvider };

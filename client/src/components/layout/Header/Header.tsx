@@ -13,8 +13,7 @@ import { RAIL_NAV_ITEMS } from "../navConfig";
 import NavDrawer from "../NavDrawer";
 import { useScrolled } from "@/hooks/useScrolled";
 import { HeaderStyle, HEADER } from "./styles/HeaderStyle";
-
-const MOBILE_LOGO_SRC = "/images/branding/logo-mobile.svg";
+import { SiteLogo } from "@/components/shared";
 
 /**
  * Site-wide sticky header.
@@ -89,12 +88,7 @@ export default function Header() {
               aria-label="Nemesh — דף הבית"
               sx={HeaderStyle.mobileLogoLink}
             >
-              <Box
-                component="img"
-                src={MOBILE_LOGO_SRC}
-                alt=""
-                sx={HeaderStyle.mobileLogo}
-              />
+              <SiteLogo variant="mobile" alt="" sx={HeaderStyle.mobileLogo} />
             </Box>
           </Box>
 
@@ -107,12 +101,7 @@ export default function Header() {
               aria-label="Nemesh — דף הבית"
               sx={HeaderStyle.logoLink}
             >
-              <Box
-                component="img"
-                src="/images/branding/logo.svg"
-                alt=""
-                sx={HeaderStyle.logo(compact)}
-              />
+              <SiteLogo variant="desktop" alt="" sx={HeaderStyle.logo(compact)} />
             </Box>
           </Box>
 
