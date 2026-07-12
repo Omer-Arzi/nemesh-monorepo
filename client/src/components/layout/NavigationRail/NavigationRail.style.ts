@@ -1,9 +1,12 @@
 import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
+import { HEADER } from "../Header/styles/HeaderStyle";
 
 export const RAIL_WIDTH = 240;
 export const RAIL_COLLAPSED_WIDTH = 64;
-export const APP_HEADER_HEIGHT = 64;
+// Sidebar sticks at the compact header height: when this threshold is crossed,
+// the AppBar has already animated to its compact size, so they stay flush.
+export const APP_HEADER_HEIGHT = HEADER.DESKTOP_COMPACT_HEIGHT;
 
 const TOGGLE_SIZE = 28;
 

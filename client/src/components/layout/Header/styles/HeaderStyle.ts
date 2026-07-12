@@ -1,31 +1,36 @@
 // ─── Dimension constants ───────────────────────────────────────────────────────
 
 export const HEADER = {
-  // AppBar heights (px)
-  HEIGHT: 96,
-  HEIGHT_COMPACT: 64,
-  HEIGHT_MOBILE: 60,       // fixed — no scroll-shrinking on mobile
+  // Desktop AppBar heights (px)
+  DESKTOP_HEIGHT: 96,
+  DESKTOP_COMPACT_HEIGHT: 64,
+
+  // Mobile AppBar height (px) — fixed, no scroll-shrinking on mobile
+  MOBILE_HEIGHT: 64,
 
   // Desktop logo heights (px)
-  LOGO_HEIGHT: 82,         // initial
-  LOGO_HEIGHT_COMPACT: 52, // after scroll threshold
+  DESKTOP_LOGO_HEIGHT: 78,         // initial
+  DESKTOP_COMPACT_LOGO_HEIGHT: 50, // after scroll threshold
 
   // Mobile logo height (px) — used with placeholder until logo-mobile.svg exists
-  LOGO_HEIGHT_MOBILE: 36,
+  MOBILE_LOGO_HEIGHT: 36,
 
   // px of scrollY before compact state activates (desktop only)
   SCROLL_THRESHOLD: 32,
+
+  // Transition duration in ms — shared by AppBar and logo
+  TRANSITION_DURATION: 250,
 } as const;
 
 // ─── Motion helpers ────────────────────────────────────────────────────────────
 
 const APPBAR_MOTION = {
-  transition: "height 250ms ease-out, box-shadow 250ms ease-out",
+  transition: `height ${HEADER.TRANSITION_DURATION}ms ease-out, box-shadow ${HEADER.TRANSITION_DURATION}ms ease-out`,
   "@media (prefers-reduced-motion: reduce)": { transition: "none" },
 } as const;
 
 const LOGO_MOTION = {
-  transition: "height 250ms ease-out",
+  transition: `height ${HEADER.TRANSITION_DURATION}ms ease-out`,
   "@media (prefers-reduced-motion: reduce)": { transition: "none" },
 } as const;
 
@@ -35,8 +40,8 @@ export const HeaderStyle = {
   /** AppBar root — height animates on desktop only. Mobile is fixed. */
   appBar: (compact: boolean) => ({
     height: {
-      xs: HEADER.HEIGHT_MOBILE,
-      md: compact ? HEADER.HEIGHT_COMPACT : HEADER.HEIGHT,
+      xs: HEADER.MOBILE_HEIGHT,
+      md: compact ? HEADER.DESKTOP_COMPACT_HEIGHT : HEADER.DESKTOP_HEIGHT,
     },
     borderBottom: compact ? 0 : 1,
     borderColor: "divider",
@@ -124,7 +129,7 @@ export const HeaderStyle = {
   /** Desktop logo <img> — height animates, width auto-scales from aspect ratio. */
   logo: (compact: boolean) => ({
     display: "block",
-    height: compact ? HEADER.LOGO_HEIGHT_COMPACT : HEADER.LOGO_HEIGHT,
+    height: compact ? HEADER.DESKTOP_COMPACT_LOGO_HEIGHT : HEADER.DESKTOP_LOGO_HEIGHT,
     width: "auto",
     ...LOGO_MOTION,
   }),
@@ -150,7 +155,7 @@ export const HeaderStyle = {
   /** Mobile logo <img> — fixed size, no animation. */
   mobileLogo: {
     display: "block",
-    height: HEADER.LOGO_HEIGHT_MOBILE,
+    height: HEADER.MOBILE_LOGO_HEIGHT,
     width: "auto",
   },
 

@@ -12,11 +12,14 @@ import { RAIL_NAV_ITEMS } from "../navConfig";
 import NavDrawer from "../NavDrawer";
 import { useScrolled } from "@/hooks/useScrolled";
 import { HeaderStyle, HEADER } from "./styles/HeaderStyle";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import theme from "@/lib/theme/theme";
 
 // TODO: Replace with a dedicated mobile logo once /public/images/branding/logo-mobile.svg exists.
 // The mobile logo should be optimised for ~36px height (icon-only or compact wordmark).
 // Until then the full desktop logo is used as a size-appropriate placeholder.
-const MOBILE_LOGO_SRC = "/images/branding/logo.svg";
+const MOBILE_LOGO_SRC = "/images/branding/logo-mobile.svg";
+const DESKTOP_LOGO_SRC = "/images/branding/logo.svg";
 
 /**
  * Site-wide sticky header.
@@ -35,16 +38,20 @@ const MOBILE_LOGO_SRC = "/images/branding/logo.svg";
  *   - Header height is fixed (no scroll shrinking on mobile)
  *
  * Scroll behaviour (desktop only):
- *   - scrollY ≤ 32px: 96px header, 82px logo
- *   - scrollY > 32px: 64px header, 52px logo
+ *   - scrollY ≤ 32px: 96px header, 78px logo
+ *   - scrollY > 32px: 64px header, 50px logo
  *   Transitions: 250ms ease-out; disabled for prefers-reduced-motion.
  */
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const compact = useScrolled(HEADER.SCROLL_THRESHOLD);
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+  // const chosenLogo = isMobile ? MOBILE_LOGO_SRC : DESKTOP_LOGO_SRC;
+  const chosenLogo = DESKTOP_LOGO_SRC;
+  
 
   return (
     <>
@@ -82,7 +89,7 @@ export default function Header() {
             >
               <Box
                 component="img"
-                src={MOBILE_LOGO_SRC}
+                src={chosenLogo}
                 alt=""
                 sx={HeaderStyle.mobileLogo}
               />
