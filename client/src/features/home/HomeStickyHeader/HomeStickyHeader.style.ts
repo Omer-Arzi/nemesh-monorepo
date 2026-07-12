@@ -52,6 +52,10 @@ export const HomeStickyHeaderStyle = {
   searchArea: {
     flex: 1,
     minWidth: 0,
+    // Cap width on wider viewports so the header doesn't feel overfilled.
+    // At md (≥900px) the search fills available space; at lg (≥1200px) it's
+    // capped and the remaining space on the RTL end (physical left) stays empty.
+    maxWidth: { lg: 720 },
     position: "relative" as const,
   },
 
@@ -62,11 +66,15 @@ export const HomeStickyHeaderStyle = {
       boxShadow: `0 1px 4px ${alpha(theme.palette.common.black, 0.06)}`,
       pl: 1.5,
       pr: 1,
-      "& fieldset": { border: "none" },
-      "&:hover fieldset": { border: "none" },
+      // Resting: warm-cream border matches the divider token (#EDE4D5).
+      "& fieldset": { border: `1px solid ${theme.palette.divider}` },
+      // Hover: warm walnut tint — noticeably darker but still soft.
+      "&:hover fieldset": {
+        border: `1px solid ${alpha(theme.palette.text.secondary, 0.45)}`,
+      },
+      // Focus: brand primary, 2px to match MUI convention.
       "&.Mui-focused fieldset": {
-        border: "1px solid",
-        borderColor: "primary.main",
+        border: `2px solid ${theme.palette.primary.main}`,
       },
     },
     "& .MuiOutlinedInput-input": {
