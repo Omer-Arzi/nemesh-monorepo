@@ -14,12 +14,12 @@ export const NavigationRailStyle = {
   // Sticky positioning shell: width animates, stays on screen while page scrolls.
   // Sits in a RTL flex row → naturally lands on the physical right side.
   // overflow:visible lets the toggle button poke out over the content.
-  outer: (open: boolean) => ({
+  outer: (open: boolean, stickyTop: number = APP_HEADER_HEIGHT) => ({
     // Hidden on mobile — Header's hamburger + NavDrawer handle mobile navigation.
     display: { xs: "none", md: "block" },
     position: "sticky",
-    top: APP_HEADER_HEIGHT,
-    height: `calc(100vh - ${APP_HEADER_HEIGHT}px)`,
+    top: stickyTop,
+    height: `calc(100vh - ${stickyTop}px)`,
     alignSelf: "flex-start",
     flexShrink: 0,
     width: open ? RAIL_WIDTH : RAIL_COLLAPSED_WIDTH,

@@ -37,6 +37,18 @@ export const HomeSearchHeroStyle = {
     zIndex: 1,
   },
 
+  // Desktop-only logo inside the hero (shown when the AppShell navbar is hidden).
+  // drop-shadow adds contrast against arbitrary admin background images.
+  heroLogo: (hasImage: boolean) => ({
+    display: { xs: "none", md: "block" },
+    height: 96,
+    width: "auto",
+    mb: 1,
+    filter: hasImage
+      ? "drop-shadow(0 2px 12px rgba(0,0,0,0.22))"
+      : undefined,
+  }),
+
   headline: {
     fontSize: { xs: "1.25rem", sm: "2.25rem" },
     fontWeight: { xs: 700, sm: 800 },

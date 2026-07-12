@@ -1,6 +1,7 @@
 "use client";
 
 import Box from "@mui/material/Box";
+import { usePathname } from "next/navigation";
 import Footer from "../Footer";
 import Header from "../Header";
 import NavigationRail from "../NavigationRail";
@@ -29,6 +30,10 @@ type Props = {
 export default function AppShell({ children }: Props) {
   const navRailOpen = useUiStore((s) => s.navRailOpen);
   const toggleNavRail = useUiStore((s) => s.toggleNavRail);
+  const pathname = usePathname();
+  // On the homepage the AppShell Header is hidden on desktop, so the sidebar
+  // should start at the top of the viewport (no gap above it).
+  const railStickyTop = pathname === "/" ? 0 : undefined;
 
   return (
     <Box sx={AppShellStyle.root}>
@@ -36,7 +41,7 @@ export default function AppShell({ children }: Props) {
 
       <Box sx={AppShellStyle.body}>
         {/* RTL flex: first child lands on the physical right side */}
-        <NavigationRail open={navRailOpen} onToggle={toggleNavRail} />
+        <NavigationRail open={navRailOpen} onToggle={toggleNavRail} stickyTop={railStickyTop} />
 
         <Box sx={AppShellStyle.content}>
           <Box component="main" sx={AppShellStyle.main}>

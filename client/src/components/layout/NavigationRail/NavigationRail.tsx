@@ -12,13 +12,15 @@ import { NavigationRailStyle } from "./NavigationRail.style";
 type Props = {
   open: boolean;
   onToggle: () => void;
+  /** Sticky top offset in px. Defaults to APP_HEADER_HEIGHT. Pass 0 on pages without a visible top header. */
+  stickyTop?: number;
 };
 
-export default function NavigationRail({ open, onToggle }: Props) {
+export default function NavigationRail({ open, onToggle, stickyTop }: Props) {
   const { handleSurpriseMe, loading: surpriseLoading } = useSurpriseMe();
 
   return (
-    <Box sx={NavigationRailStyle.outer(open)}>
+    <Box sx={NavigationRailStyle.outer(open, stickyTop)}>
       {/* Visual panel surface: background, border, shadow, clips nav content */}
       <Box sx={(theme) => NavigationRailStyle.panel(theme)}>
         {/* Always RAIL_WIDTH wide — panel clips it from the left as it collapses */}

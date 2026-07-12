@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -11,10 +9,8 @@ import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
 import type { Image } from "@/types/domain";
 import { NemeshImage, FreckleDust } from "@/components/shared";
-import { ROUTES } from "@/constants";
-import type { SearchSuggestion } from "@/lib/api/services/suggestionsService";
 import { SearchSuggestions } from "@/features/home/SearchSuggestions";
-import { useSearchSuggestions } from "./useSearchSuggestions";
+import { useHomeSearch } from "./useHomeSearch";
 import { HomeSearchHeroStyle } from "./HomeSearchHero.style";
 import { HomeSearchHeroText } from "./HomeSearchHero.consts";
 
@@ -25,77 +21,11 @@ type Props = {
 };
 
 export default function HomeSearchHero({ title, subtitle, backgroundImage }: Props) {
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const router = useRouter();
-
-  const { suggestions } = useSearchSuggestions(query);
-  const showDropdown = open && suggestions.length > 0;
+  const search = useHomeSearch();
 
   const headline = title ?? HomeSearchHeroText.headline;
   const subtitleText = subtitle ?? HomeSearchHeroText.subtitle;
   const hasImage = Boolean(backgroundImage);
-
-  // Open dropdown when suggestions arrive; close when query is too short.
-  useEffect(() => {
-    if (suggestions.length > 0) setOpen(true);
-  }, [suggestions.length]);
-
-  useEffect(() => {
-    if (query.trim().length < 2) {
-      setOpen(false);
-      setActiveIndex(-1);
-    }
-  }, [query]);
-
-  // Reset active index whenever the suggestion list changes.
-  useEffect(() => {
-    setActiveIndex(-1);
-  }, [suggestions]);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const q = query.trim();
-    if (!q) return;
-    setOpen(false);
-    router.push(`${ROUTES.RESULTS}?q=${encodeURIComponent(q)}`);
-  }
-
-  function handleSelect(s: SearchSuggestion) {
-    setOpen(false);
-    setActiveIndex(-1);
-    if (s.type === "recipe") {
-      router.push(ROUTES.RECIPE(s.slug));
-    } else {
-      router.push(`${ROUTES.RESULTS}?ingredient=${encodeURIComponent(s.canonicalName)}`);
-    }
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (!showDropdown) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIndex((i) => Math.min(i + 1, suggestions.length - 1));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((i) => Math.max(i - 1, -1));
-    } else if (e.key === "Escape") {
-      setOpen(false);
-      setActiveIndex(-1);
-    } else if (e.key === "Enter" && activeIndex >= 0) {
-      e.preventDefault();
-      handleSelect(suggestions[activeIndex]);
-    }
-  }
-
-  function handleWrapperBlur(e: React.FocusEvent<HTMLDivElement>) {
-    // Close only when focus leaves the entire wrapper (not just moving to the dropdown).
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setOpen(false);
-      setActiveIndex(-1);
-    }
-  }
 
   return (
     <Box component="section" sx={hasImage ? HomeSearchHeroStyle.rootWithImage : HomeSearchHeroStyle.root}>
@@ -113,6 +43,14 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
       {!hasImage && <FreckleDust placement="bottom-left" density="low" />}
 
       <Stack sx={[HomeSearchHeroStyle.inner, hasImage && HomeSearchHeroStyle.innerOnImage]}>
+        {/* Desktop-only hero logo — desktop navbar is hidden on homepage */}
+        <Box
+          component="img"
+          src="/images/branding/logo.svg"
+          alt=""
+          sx={HomeSearchHeroStyle.heroLogo(hasImage)}
+        />
+
         <Typography variant="h3" component="h1" sx={HomeSearchHeroStyle.headline}>
           {headline}
         </Typography>
@@ -121,12 +59,12 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
           {subtitleText}
         </Typography>
 
-        <Box component="form" onSubmit={handleSubmit} sx={HomeSearchHeroStyle.form}>
-          <Box sx={HomeSearchHeroStyle.searchWrapper} onBlur={handleWrapperBlur}>
+        <Box component="form" onSubmit={search.handleSubmit} sx={HomeSearchHeroStyle.form}>
+          <Box sx={HomeSearchHeroStyle.searchWrapper} onBlur={search.handleWrapperBlur}>
             <TextField
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
+              value={search.query}
+              onChange={(e) => search.setQuery(e.target.value)}
+              onKeyDown={search.handleKeyDown}
               placeholder={HomeSearchHeroText.placeholder}
               fullWidth
               autoComplete="off"
@@ -156,11 +94,11 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
               }}
             />
 
-            {showDropdown && (
+            {search.showDropdown && (
               <SearchSuggestions
-                suggestions={suggestions}
-                activeIndex={activeIndex}
-                onSelect={handleSelect}
+                suggestions={search.suggestions}
+                activeIndex={search.activeIndex}
+                onSelect={search.handleSelect}
               />
             )}
           </Box>

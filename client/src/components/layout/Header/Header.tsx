@@ -7,19 +7,14 @@ import Toolbar from "@mui/material/Toolbar";
 import MenuIcon from "@mui/icons-material/Menu";
 import NextLink from "next/link";
 import { useCallback, useState } from "react";
+import { usePathname } from "next/navigation";
 import { ROUTES } from "@/constants";
 import { RAIL_NAV_ITEMS } from "../navConfig";
 import NavDrawer from "../NavDrawer";
 import { useScrolled } from "@/hooks/useScrolled";
 import { HeaderStyle, HEADER } from "./styles/HeaderStyle";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import theme from "@/lib/theme/theme";
 
-// TODO: Replace with a dedicated mobile logo once /public/images/branding/logo-mobile.svg exists.
-// The mobile logo should be optimised for ~36px height (icon-only or compact wordmark).
-// Until then the full desktop logo is used as a size-appropriate placeholder.
 const MOBILE_LOGO_SRC = "/images/branding/logo-mobile.svg";
-const DESKTOP_LOGO_SRC = "/images/branding/logo.svg";
 
 /**
  * Site-wide sticky header.
@@ -31,13 +26,17 @@ const DESKTOP_LOGO_SRC = "/images/branding/logo.svg";
  *   AppBar (= 50% of the viewport) regardless of sidebar open/closed state or
  *   any future asymmetric side controls.
  *
+ *   On the homepage the entire desktop AppBar is hidden (display:{md:'none'}).
+ *   The homepage hero shows the logo instead, and HomeStickyHeader takes over
+ *   after the hero scrolls past.
+ *
  * Mobile layout (xs–sm):
  *   - sideStart (physical right in RTL): hamburger trigger
- *   - sideEnd (physical left in RTL): mobile logo (not centered)
+ *   - sideEnd (physical left in RTL): mobile logo
  *   - Absolute logo layer hidden
  *   - Header height is fixed (no scroll shrinking on mobile)
  *
- * Scroll behaviour (desktop only):
+ * Scroll behaviour (desktop, non-homepage only):
  *   - scrollY ≤ 32px: 96px header, 78px logo
  *   - scrollY > 32px: 64px header, 50px logo
  *   Transitions: 250ms ease-out; disabled for prefers-reduced-motion.
@@ -45,13 +44,11 @@ const DESKTOP_LOGO_SRC = "/images/branding/logo.svg";
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const compact = useScrolled(HEADER.SCROLL_THRESHOLD);
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const pathname = usePathname();
+  const isHomepage = pathname === "/";
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
-  // const chosenLogo = isMobile ? MOBILE_LOGO_SRC : DESKTOP_LOGO_SRC;
-  const chosenLogo = DESKTOP_LOGO_SRC;
-  
 
   return (
     <>
@@ -60,7 +57,12 @@ export default function Header() {
         position="sticky"
         color="inherit"
         elevation={0}
-        sx={HeaderStyle.appBar(compact)}
+        sx={{
+          ...HeaderStyle.appBar(compact),
+          // Homepage desktop: hidden — the hero + HomeStickyHeader take over.
+          // Mobile always shows so the hamburger and nav drawer remain accessible.
+          ...(isHomepage && { display: { md: "none" } }),
+        }}
       >
         <Toolbar sx={HeaderStyle.toolbar} disableGutters>
 
@@ -89,7 +91,7 @@ export default function Header() {
             >
               <Box
                 component="img"
-                src={chosenLogo}
+                src={MOBILE_LOGO_SRC}
                 alt=""
                 sx={HeaderStyle.mobileLogo}
               />
