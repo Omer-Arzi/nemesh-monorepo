@@ -1,5 +1,5 @@
 import { getHomepage } from "@/lib/api/services";
-import HomeSearchHero from "@/features/home/HomeSearchHero";
+import HomeHeroSection from "@/features/home/HomeHeroSection";
 import LatestRecipes from "@/features/home/LatestRecipes";
 import FeaturedCategoriesCarousel from "@/features/home/FeaturedCategoriesCarousel";
 import { PageViewTracker } from "@/lib/analytics";
@@ -15,7 +15,7 @@ export default async function HomePage() {
     <>
       <StructuredData data={buildWebSiteSchema()} />
       <PageViewTracker page_id="home" page_name="דף הבית" />
-      <HomeSearchHero
+      <HomeHeroSection
         title={homepage?.heroTitle ?? null}
         subtitle={homepage?.heroSubtitle ?? null}
         backgroundImage={homepage?.heroBackgroundImage ?? null}

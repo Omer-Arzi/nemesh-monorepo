@@ -126,6 +126,19 @@ export type IngredientCatalogItem = BaseEntity & {
   notes: string | null;
 };
 
+// ─── Site branding ────────────────────────────────────────────────────────────
+
+/**
+ * Admin-managed logo assets from the site-setting single type.
+ * Both fields are optional — components fall back to the local bundled logos.
+ */
+export type SiteBranding = {
+  /** Desktop / default / full logo. Fallback: /images/branding/logo.svg */
+  logo: Image | null;
+  /** Mobile-specific logo. Fallback: /images/branding/logo-mobile.svg */
+  mobileLogo: Image | null;
+};
+
 // ─── Homepage ─────────────────────────────────────────────────────────────────
 
 /**

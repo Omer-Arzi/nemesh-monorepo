@@ -3,7 +3,7 @@ import { Heebo } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import RootProviders from "@/providers";
 import AppShell from "@/components/layout/AppShell";
-import { getActiveThemeKey } from "@/lib/api/services/siteSettingService";
+import { getSiteSettings } from "@/lib/api/services/siteSettingService";
 import { GoogleAnalyticsScript } from "@/lib/analytics";
 
 const heebo = Heebo({
@@ -35,12 +35,12 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const activePresetKey = await getActiveThemeKey();
+  const { activeThemeKey, branding } = await getSiteSettings();
 
   return (
     <html lang="he" dir="rtl" className={heebo.variable}>
       <body>
-        <RootProviders activePresetKey={activePresetKey ?? undefined}>
+        <RootProviders activePresetKey={activeThemeKey ?? undefined} branding={branding}>
           <AppShell>{children}</AppShell>
         </RootProviders>
         <GoogleAnalyticsScript />

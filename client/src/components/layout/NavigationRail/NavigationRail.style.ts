@@ -1,9 +1,12 @@
 import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
+import { HEADER } from "../Header/styles/HeaderStyle";
 
 export const RAIL_WIDTH = 240;
 export const RAIL_COLLAPSED_WIDTH = 64;
-export const APP_HEADER_HEIGHT = 64;
+// Sidebar sticks at the compact header height: when this threshold is crossed,
+// the AppBar has already animated to its compact size, so they stay flush.
+export const APP_HEADER_HEIGHT = HEADER.DESKTOP_COMPACT_HEIGHT;
 
 const TOGGLE_SIZE = 28;
 
@@ -11,17 +14,26 @@ export const NavigationRailStyle = {
   // Sticky positioning shell: width animates, stays on screen while page scrolls.
   // Sits in a RTL flex row → naturally lands on the physical right side.
   // overflow:visible lets the toggle button poke out over the content.
-  outer: (open: boolean) => ({
+  outer: (open: boolean, stickyTop: number = APP_HEADER_HEIGHT) => ({
     // Hidden on mobile — Header's hamburger + NavDrawer handle mobile navigation.
     display: { xs: "none", md: "block" },
     position: "sticky",
-    top: APP_HEADER_HEIGHT,
-    height: `calc(100vh - ${APP_HEADER_HEIGHT}px)`,
+    top: stickyTop,
+    height: `calc(100vh - ${stickyTop}px)`,
     alignSelf: "flex-start",
     flexShrink: 0,
     width: open ? RAIL_WIDTH : RAIL_COLLAPSED_WIDTH,
     overflow: "visible",
-    transition: "width 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+    // top/height transition is synchronized with DesktopCompactHeader's enter/exit
+    // so sidebar and header move together as a unit.
+    transition: [
+      "width 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+      `top ${HEADER.COMPACT_TRANSITION_DURATION}ms ${HEADER.COMPACT_TRANSITION_EASING}`,
+      `height ${HEADER.COMPACT_TRANSITION_DURATION}ms ${HEADER.COMPACT_TRANSITION_EASING}`,
+    ].join(", "),
+    "@media (prefers-reduced-motion: reduce)": {
+      transition: "width 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+    },
     // Without zIndex the main content (later in DOM) stacks on top, hiding the toggle button
     zIndex: 10,
   }),

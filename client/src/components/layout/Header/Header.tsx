@@ -4,7 +4,6 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 import NextLink from "next/link";
 import { useCallback, useState } from "react";
@@ -12,26 +11,21 @@ import { ROUTES } from "@/constants";
 import { RAIL_NAV_ITEMS } from "../navConfig";
 import NavDrawer from "../NavDrawer";
 import { HeaderStyle } from "./styles/HeaderStyle";
+import { SiteLogo } from "@/components/shared";
 
 /**
- * Site-wide sticky header.
+ * Mobile-only site header (visible below md breakpoint).
  *
- * Layout regions:
- *  - Left:   Site identity (wordmark placeholder) — TODO: replace with logo
- *  - Centre: Desktop navigation links (hidden on mobile)
- *  - Right:  Mobile hamburger trigger (hidden on desktop)
+ * Layout:
+ *   - sideStart (physical right in RTL): hamburger — opens the mobile NavDrawer
+ *   - sideEnd   (physical left  in RTL): mobile logo
  *
- * Responsive behaviour:
- *  - ≥ md:  Horizontal nav links visible; hamburger hidden
- *  - < md:  Nav links hidden; hamburger opens NavDrawer from the right
- *
- * Uses position="sticky" so the header scrolls with the page until it
- * reaches the top, then stays fixed — no body padding-top required.
+ * Desktop navigation is handled by the persistent DesktopCompactHeader in
+ * AppShell (logo + search) and the NavigationRail sidebar.
  */
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Stable references so NavDrawer's dependency array stays clean.
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
@@ -42,39 +36,43 @@ export default function Header() {
         position="sticky"
         color="inherit"
         elevation={0}
-        sx={HeaderStyle.appBar}
+        sx={{
+          ...HeaderStyle.appBar(false),
+          // Desktop navigation is provided by DesktopCompactHeader — hide AppBar there.
+          display: { md: "none" },
+        }}
       >
-        <Toolbar sx={HeaderStyle.toolbar}>
-          {/* ── Site identity ─────────────────────────────────── */}
-          {/* TODO: Replace wordmark with SVG logo once branding is finalised */}
-          <Box component={NextLink} href={ROUTES.HOME} sx={HeaderStyle.wordmark}>
-            <Typography variant="h6" sx={HeaderStyle.wordmarkText}>
-              Nemesh
-            </Typography>
+        <Toolbar sx={HeaderStyle.toolbar} disableGutters>
+
+          {/* ── sideStart: physical right in RTL ── */}
+          <Box sx={HeaderStyle.sideStart}>
+            <IconButton
+              aria-label="Open navigation menu"
+              aria-expanded={drawerOpen}
+              aria-controls="mobile-nav-drawer"
+              onClick={openDrawer}
+              sx={HeaderStyle.hamburger}
+            >
+              <MenuIcon />
+            </IconButton>
           </Box>
 
-          {/* Spacer pushes hamburger to the right on mobile */}
-          <Box sx={HeaderStyle.spacer} />
+          {/* ── sideEnd: physical left in RTL ── */}
+          <Box sx={HeaderStyle.sideEnd}>
+            <Box
+              component={NextLink}
+              href={ROUTES.HOME}
+              aria-label="Nemesh — דף הבית"
+              sx={HeaderStyle.mobileLogoLink}
+            >
+              <SiteLogo variant="mobile" alt="" sx={HeaderStyle.mobileLogo} />
+            </Box>
+          </Box>
 
-          {/* ── Mobile menu trigger ───────────────────────────── */}
-          <IconButton
-            aria-label="Open navigation menu"
-            aria-expanded={drawerOpen}
-            aria-controls="mobile-nav-drawer"
-            onClick={openDrawer}
-            sx={HeaderStyle.hamburger}
-          >
-            <MenuIcon />
-          </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* Mobile drawer — rendered outside AppBar so it overlays the page */}
-      <NavDrawer
-        open={drawerOpen}
-        onClose={closeDrawer}
-        items={RAIL_NAV_ITEMS}
-      />
+      <NavDrawer open={drawerOpen} onClose={closeDrawer} items={RAIL_NAV_ITEMS} />
     </>
   );
 }
