@@ -25,7 +25,7 @@ export default {
   /**
    * On approval, dispatch to the correct handler based on matchType:
    *   canonical → create a new IngredientCatalogItem
-   *   variant   → add normalizedText to selectedIngredient.variants
+   *   variant   → add the approved ingredientName to selectedIngredient.variants
    */
   async afterUpdate(event: { result: any; state: any }) {
     const { result, state } = event;
@@ -71,7 +71,14 @@ export default {
         return;
       }
 
-      await handleVariantApproval(strapi, candidate.normalizedText, selectedIngredient);
+      // Use the ingredientName from the update result — the exact value
+      // submitted/persisted by this approval action — not a re-derived read.
+      // normalizedText is a matching key (final Hebrew letters stripped) and
+      // must not be used as the human-facing variant value.
+      const approvedVariantText =
+        typeof result.ingredientName === 'string' ? result.ingredientName.trim() : '';
+
+      await handleVariantApproval(strapi, approvedVariantText, selectedIngredient);
       return;
     }
 
