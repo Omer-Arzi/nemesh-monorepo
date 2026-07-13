@@ -9,8 +9,8 @@ import { BlockRenderer, NemeshImage } from "@/components/shared";
 import type { Image, BlockNode } from "@/types/domain";
 import { HomepageAboutStyle } from "./HomepageAbout.style";
 
-const COLLAPSED_HEIGHT_MOBILE = 360;
-const COLLAPSED_HEIGHT_DESKTOP_FALLBACK = 480;
+const COLLAPSED_HEIGHT_MOBILE = 300;
+const COLLAPSED_HEIGHT_DESKTOP_FALLBACK = 360;
 
 type Props = {
   title: string;
@@ -86,7 +86,7 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
 
   return (
     <Box sx={HomepageAboutStyle.card}>
-      <Typography variant="h2" sx={HomepageAboutStyle.title}>
+      <Typography variant="h4" sx={HomepageAboutStyle.title}>
         {title}
       </Typography>
 

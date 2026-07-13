@@ -1,23 +1,25 @@
 export const HomepageAboutStyle = {
-  // Section band — matches LatestRecipes white treatment for visual continuity.
+  // Section band — compact vertical rhythm; this is a secondary homepage element.
   section: {
-    py: { xs: 4, sm: 5, md: 6 },
+    py: { xs: 3, sm: 3.5, md: 4 },
     bgcolor: "background.paper",
   },
 
-  // Single editorial card: restrained radius, warm border, broad soft shadow.
-  // Not a MUI Card — a plain Box so we avoid the heavy Material card aesthetic.
+  // Editorial card: constrained max width so it reads as a focused inset
+  // rather than a full-width content band. Centred within the PageContainer.
   card: {
-    borderRadius: "24px",
+    maxWidth: "1040px",
+    mx: "auto",
+    borderRadius: "20px",
     border: "1px solid",
     borderColor: "divider",
-    boxShadow: "0 4px 40px rgba(26, 18, 8, 0.06), 0 1px 8px rgba(26, 18, 8, 0.03)",
+    boxShadow: "0 4px 32px rgba(26, 18, 8, 0.05), 0 1px 6px rgba(26, 18, 8, 0.03)",
     bgcolor: "background.paper",
-    p: { xs: 2.5, md: 4 },
+    p: { xs: 2, md: 3 },
   },
 
   title: {
-    mb: { xs: 2, md: 2.5 },
+    mb: { xs: 1.5, md: 2 },
     fontWeight: 700,
     color: "text.primary",
   },
@@ -41,7 +43,7 @@ export const HomepageAboutStyle = {
     },
   },
 
-  // Floated image wrapper.
+  // Floated image wrapper — fixed width on desktop keeps the card compact.
   // float: inline-end is a logical CSS value; in RTL context (dir="rtl" on
   // <html>) it resolves to physical left — placing the image on the left with
   // text wrapping to its right.  stylis-plugin-rtl does not flip logical values,
@@ -49,13 +51,15 @@ export const HomepageAboutStyle = {
   imageWrapper: {
     display: "block" as const,
     position: "relative" as const,
-    width: { xs: "100%", md: "40%" },
+    // Fixed 280px on desktop — stays compact and predictable regardless of card width.
+    // 4:5 ratio makes this 280×350px; collapsed height ≈ 350px on desktop.
+    width: { xs: "100%", md: "280px" },
     aspectRatio: "4/5",
     float: { xs: "none", md: "inline-end" },
     // marginInlineStart in RTL = physical margin-right = gap between image and text.
-    marginInlineStart: { xs: 0, md: "24px" },
+    marginInlineStart: { xs: 0, md: "20px" },
     mb: { xs: 2, md: 0 },
-    borderRadius: "16px",
+    borderRadius: "12px",
     border: "1px solid",
     borderColor: "divider",
     overflow: "hidden" as const,
@@ -70,7 +74,7 @@ export const HomepageAboutStyle = {
     bottom: 0,
     left: 0,
     right: 0,
-    height: 88,
+    height: 80,
     pointerEvents: "none" as const,
     zIndex: 1,
     transition: "opacity 280ms ease",
@@ -83,7 +87,7 @@ export const HomepageAboutStyle = {
   expandControls: {
     display: "flex",
     justifyContent: "center",
-    mt: 2,
+    mt: 1.5,
   },
 
   // Semantic <button> styled to feel like a branded text link with a pill hover.
