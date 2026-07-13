@@ -1,8 +1,11 @@
 import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
-import { HEADER } from "@/components/layout/Header/styles/HeaderStyle";
+import { HEADER } from "../Header/styles/HeaderStyle";
 
-export const HomeStickyHeaderStyle = {
+const D = HEADER.COMPACT_TRANSITION_DURATION;
+const E = HEADER.COMPACT_TRANSITION_EASING;
+
+export const DesktopCompactHeaderStyle = {
   root: (visible: boolean) => ({
     display: { xs: "none", md: "flex" },
     position: "fixed",
@@ -18,14 +21,14 @@ export const HomeStickyHeaderStyle = {
     alignItems: "center",
     px: 3,
     gap: 2,
-    // Appearance transition — opacity + slight upward slide
     opacity: visible ? 1 : 0,
     visibility: visible ? "visible" : "hidden",
     transform: visible ? "translateY(0)" : "translateY(-6px)",
-    transition:
-      "opacity 180ms ease-out, transform 180ms ease-out, visibility 0ms linear 180ms",
+    // Exit: opacity+transform animate, then visibility snaps to hidden after D ms.
+    // Enter: visibility snaps to visible immediately, opacity+transform animate.
+    transition: `opacity ${D}ms ${E}, transform ${D}ms ${E}, visibility 0ms linear ${D}ms`,
     ...(visible && {
-      transition: "opacity 180ms ease-out, transform 180ms ease-out",
+      transition: `opacity ${D}ms ${E}, transform ${D}ms ${E}`,
     }),
     "@media (prefers-reduced-motion: reduce)": { transition: "none" },
   }),
@@ -53,8 +56,6 @@ export const HomeStickyHeaderStyle = {
     flex: 1,
     minWidth: 0,
     // Cap width on wider viewports so the header doesn't feel overfilled.
-    // At md (≥900px) the search fills available space; at lg (≥1200px) it's
-    // capped and the remaining space on the RTL end (physical left) stays empty.
     maxWidth: { lg: 720 },
     position: "relative" as const,
   },
@@ -66,13 +67,10 @@ export const HomeStickyHeaderStyle = {
       boxShadow: `0 1px 4px ${alpha(theme.palette.common.black, 0.06)}`,
       pl: 1.5,
       pr: 1,
-      // Resting: warm-cream border matches the divider token (#EDE4D5).
       "& fieldset": { border: `1px solid ${theme.palette.divider}` },
-      // Hover: warm walnut tint — noticeably darker but still soft.
       "&:hover fieldset": {
         border: `1px solid ${alpha(theme.palette.text.secondary, 0.45)}`,
       },
-      // Focus: brand primary, 2px to match MUI convention.
       "&.Mui-focused fieldset": {
         border: `2px solid ${theme.palette.primary.main}`,
       },
