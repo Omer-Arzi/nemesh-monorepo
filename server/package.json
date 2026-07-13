@@ -16,7 +16,8 @@
     "import:recipes": "tsx scripts/import-recipes/import-recipes.ts",
     "backfill:ingredient-candidates": "tsx scripts/backfill-ingredient-candidates.ts",
     "migrate:ingredient-sections": "tsx scripts/migrate-ingredient-sections.ts",
-    "restore:recipe-sections": "tsx scripts/restore-recipe-sections.ts"
+    "restore:recipe-sections": "tsx scripts/restore-recipe-sections.ts",
+    "test": "tsx --test src/**/*.test.ts"
   },
   "dependencies": {
     "@strapi/plugin-cloud": "5.42.0",

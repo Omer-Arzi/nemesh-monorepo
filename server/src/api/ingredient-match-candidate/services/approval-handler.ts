@@ -38,18 +38,30 @@ export async function handleCanonicalApproval(
 
 /**
  * Called when a candidate is approved with matchType 'variant' and a selectedIngredient.
- * Adds the normalizedText to the ingredient's variants array if not already present.
+ * Adds the approved variant text (sourced from the candidate's ingredientName at the
+ * time of approval — not normalizedText, which is a lossy matching key) to the
+ * ingredient's variants array if not already present.
  *
  * Rules:
- *   - No duplicates
+ *   - No duplicates (exact string match)
+ *   - Empty / whitespace-only text is rejected
  *   - Existing variants are never removed
  *   - Only runs on explicit admin approval
  */
 export async function handleVariantApproval(
   strapi: Core.Strapi,
-  normalizedText: string,
+  variantText: string,
   selectedIngredient: { documentId: string }
 ): Promise<void> {
+  const trimmedVariantText = variantText.trim();
+
+  if (!trimmedVariantText) {
+    strapi.log.warn(
+      `[approval-handler] Empty ingredientName submitted for variant approval of ${selectedIngredient.documentId} — skipping variant update`
+    );
+    return;
+  }
+
   const ingredient = await strapi.documents(CATALOG_UID).findOne({
     documentId: selectedIngredient.documentId,
   });
@@ -65,19 +77,19 @@ export async function handleVariantApproval(
     ? ingredient.variants
     : []) as string[];
 
-  if (currentVariants.includes(normalizedText)) {
+  if (currentVariants.includes(trimmedVariantText)) {
     strapi.log.info(
-      `[approval-handler] "${normalizedText}" already in variants of ${ingredient.canonicalName} — skipping`
+      `[approval-handler] "${trimmedVariantText}" already in variants of ${ingredient.canonicalName} — skipping`
     );
     return;
   }
 
   await strapi.documents(CATALOG_UID).update({
     documentId: selectedIngredient.documentId,
-    data: { variants: [...currentVariants, normalizedText] },
+    data: { variants: [...currentVariants, trimmedVariantText] },
   });
 
   strapi.log.info(
-    `[approval-handler] Added "${normalizedText}" to variants of "${ingredient.canonicalName}"`
+    `[approval-handler] Added "${trimmedVariantText}" to variants of "${ingredient.canonicalName}"`
   );
 }
