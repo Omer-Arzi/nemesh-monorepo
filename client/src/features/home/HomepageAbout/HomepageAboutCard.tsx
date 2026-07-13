@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useId } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useId } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -35,12 +35,12 @@ type Props = {
  * Mobile:
  *   No float — imageWrapper stacks above textClipper.
  *
- * Measurement:
- *   contentRef is on textClipper (text-only). collapsedHeight ≈ image
- *   height so the collapsed text area matches the image's visual height.
- *   fullHeight = textClipper.scrollHeight. Both recalculate on resize
- *   via ResizeObserver. collapsedHeight===0 before first measurement →
- *   height:"auto" avoids hydration mismatch.
+ * Flash prevention:
+ *   collapsedHeight starts at COLLAPSED_HEIGHT_DESKTOP_FALLBACK so SSR and
+ *   the initial client render emit the same height (no hydration mismatch).
+ *   useLayoutEffect fires before the first browser paint and corrects to the
+ *   real measured value. transitionActive starts false so the initial
+ *   correction is an instant snap rather than a 320ms animation.
  */
 export default function HomepageAboutCard({ title, body, image }: Props) {
   const bodyId = useId();
@@ -50,9 +50,17 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
   const imageRef = useRef<HTMLDivElement>(null);
 
   const [expanded, setExpanded] = useState(false);
-  const [collapsedHeight, setCollapsedHeight] = useState(0);
+  // Starts at the desktop fallback so SSR and initial client render agree:
+  // both output height:360px. useLayoutEffect corrects to the measured value
+  // before the first browser paint, so the user never sees this fallback height.
+  const [collapsedHeight, setCollapsedHeight] = useState(COLLAPSED_HEIGHT_DESKTOP_FALLBACK);
   const [fullHeight, setFullHeight] = useState(0);
   const [hasOverflow, setHasOverflow] = useState(false);
+  // Transition is disabled until after the first measurement so the initial
+  // height correction (360px → measured px) is an instant snap, not an animation.
+  // Set inside measure() rather than directly in an effect body to avoid the
+  // react-hooks/set-state-in-effect lint rule.
+  const [transitionActive, setTransitionActive] = useState(false);
 
   const theme = useTheme();
   const mdBreakpoint = theme.breakpoints.values.md;
@@ -76,8 +84,22 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
     setFullHeight(full);
     // 8px buffer avoids showing the control when content is only marginally taller.
     setHasOverflow(full > collapsed + 8);
+    // Enable transition now that a real measurement exists. Idempotent on resize.
+    setTransitionActive(true);
   }, [mdBreakpoint]);
 
+  // Pre-paint measurement: runs synchronously after DOM commit, before the browser
+  // paints. Corrects collapsedHeight from the SSR fallback to the measured value
+  // so the user never sees the uncollapsed text. useLayoutEffect is a no-op on
+  // the server so SSR still outputs the stable initial state (360px); client
+  // hydration matches; then this effect fires and corrects before first paint.
+  // Empty deps is intentional — first-mount pre-paint pass only; subsequent
+  // recalculation is handled by the ResizeObserver below.
+  useLayoutEffect(() => {
+    measure();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Subsequent resize recalculation via ResizeObserver (asynchronous, post-paint).
   useEffect(() => {
     const obs = new ResizeObserver(measure);
     if (contentRef.current) obs.observe(contentRef.current);
@@ -88,9 +110,19 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
   const cardBg = theme.palette.background.paper;
   const fadeGradient = `linear-gradient(to top, ${cardBg} 0%, ${cardBg}CC 35%, transparent 100%)`;
 
-  // collapsedHeight===0 → not yet measured. Use "auto" to match SSR output.
-  const textClipperHeight =
-    collapsedHeight === 0 ? "auto" : expanded ? `${fullHeight}px` : `${collapsedHeight}px`;
+  // Pre-measurement (!transitionActive): constrained at the fallback height —
+  //   text is safely collapsed and transition is suppressed.
+  // Post-measurement, no overflow: "auto" removes the clip; short text is shown
+  //   fully without a button or fade.
+  // Post-measurement, overflow: pixel height — collapses or expands with the
+  //   320ms CSS transition.
+  const textClipperHeight = !transitionActive
+    ? `${COLLAPSED_HEIGHT_DESKTOP_FALLBACK}px`
+    : !hasOverflow
+    ? "auto"
+    : expanded
+    ? `${fullHeight}px`
+    : `${collapsedHeight}px`;
 
   return (
     <Box sx={HomepageAboutStyle.card}>
@@ -127,16 +159,27 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
          * image visually, satisfying the "text continues below" requirement.
          *
          * The fade lives here so it covers only the text area, not the image.
+         *
+         * transition is suppressed while !transitionActive so the initial
+         * height correction (fallback → measured) is an instant snap. CSS
+         * guarantees no animation when the before-change style had
+         * transition:none, even if transition:320ms is set in the same commit.
          */}
         <Box
           id={bodyId}
           ref={contentRef}
-          sx={{ ...HomepageAboutStyle.textClipper, height: textClipperHeight }}
+          sx={{
+            ...HomepageAboutStyle.textClipper,
+            height: textClipperHeight,
+            ...(!transitionActive && { transition: "none" }),
+          }}
         >
           <BlockRenderer blocks={body} />
 
-          {/* Fade — absolute inside textClipper. Covers only the text bottom. */}
-          {hasOverflow && (
+          {/* Fade — absolute inside textClipper, covers only the text bottom.
+              Gated on transitionActive so it is hidden until measurement
+              confirms real overflow. */}
+          {hasOverflow && transitionActive && (
             <Box
               aria-hidden
               sx={{
@@ -152,8 +195,10 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
       {/*
        * expandControls — outside imageAndTextArea and outside textClipper.
        * Always fully visible; never inside a clipped or overflow-hidden region.
+       * Gated on transitionActive so it is hidden until measurement confirms
+       * real overflow.
        */}
-      {hasOverflow && (
+      {hasOverflow && transitionActive && (
         <Box sx={HomepageAboutStyle.expandControls}>
           <Box
             component="button"
