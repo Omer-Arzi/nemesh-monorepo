@@ -8,11 +8,19 @@
  *   Settings → Users & Permissions → Roles → Public → homepage → find ✓
  */
 import type { StrapiSingle, StrapiData } from "@/types/api";
-import type { HomePage } from "@/types/domain";
+import type { HomePage, HomepageAbout } from "@/types/domain";
+import type { BlockNode } from "@/types/domain";
 import { apiClient } from "../client";
 import { mapImage, type StrapiMediaRaw } from "../mappers";
 
 // ─── Internal Strapi wire types ────────────────────────────────────────────
+
+type StrapiAboutSection = {
+  id?: number;
+  title: string;
+  body: BlockNode[] | null;
+  image: StrapiMediaRaw | null;
+};
 
 type StrapiHomepageAttrs = {
   heroTitle: string | null;
@@ -20,9 +28,21 @@ type StrapiHomepageAttrs = {
   heroBackgroundImage: StrapiMediaRaw | null;
   latestRecipesTitle: string | null;
   featuredCategoriesTitle: string | null;
+  about: StrapiAboutSection | null;
 };
 
-// ─── Mapper ───────────────────────────────────────────────────────────────
+// ─── Mappers ──────────────────────────────────────────────────────────────
+
+function mapAbout(raw: StrapiAboutSection | null | undefined): HomepageAbout | null {
+  if (!raw) return null;
+  const image = mapImage(raw.image);
+  if (!image) return null;
+  return {
+    title: raw.title,
+    body: raw.body ?? [],
+    image,
+  };
+}
 
 function mapHomepage(raw: StrapiData<StrapiHomepageAttrs>): HomePage {
   return {
@@ -31,6 +51,7 @@ function mapHomepage(raw: StrapiData<StrapiHomepageAttrs>): HomePage {
     heroBackgroundImage: mapImage(raw.heroBackgroundImage),
     latestRecipesTitle: raw.latestRecipesTitle ?? null,
     featuredCategoriesTitle: raw.featuredCategoriesTitle ?? null,
+    about: mapAbout(raw.about),
   };
 }
 
@@ -39,7 +60,7 @@ function mapHomepage(raw: StrapiData<StrapiHomepageAttrs>): HomePage {
 export async function getHomepage(): Promise<HomePage | null> {
   try {
     const raw = await apiClient.get<StrapiSingle<StrapiHomepageAttrs>>(
-      "/homepage?populate[heroBackgroundImage]=true"
+      "/homepage?populate[heroBackgroundImage]=true&populate[about][populate][image]=true"
     );
     return mapHomepage(raw.data);
   } catch (err) {

@@ -142,6 +142,16 @@ export type SiteBranding = {
 // ─── Homepage ─────────────────────────────────────────────────────────────────
 
 /**
+ * Content for the expandable About section on the homepage.
+ * All three fields are required — if any is absent the section is suppressed.
+ */
+export type HomepageAbout = {
+  title: string;
+  body: BlockNode[];
+  image: Image;
+};
+
+/**
  * Editable homepage content from the homepage single type.
  * All fields are optional — components fall back to their built-in defaults
  * when a field is null (not yet filled in Strapi).
@@ -152,6 +162,7 @@ export type HomePage = {
   heroBackgroundImage: Image | null;
   latestRecipesTitle: string | null;
   featuredCategoriesTitle: string | null;
+  about: HomepageAbout | null;
 };
 
 // ─── Shir Challenge ───────────────────────────────────────────────────────────
