@@ -22,8 +22,8 @@ export default async function HomePage() {
         backgroundImage={homepage?.heroBackgroundImage ?? null}
       />
       <HomepageAbout about={homepage?.about ?? null} />
-      <LatestRecipes sectionTitle={homepage?.latestRecipesTitle ?? null} />
       <FeaturedCategoriesCarousel sectionTitle={homepage?.featuredCategoriesTitle ?? null} />
+      <LatestRecipes sectionTitle={homepage?.latestRecipesTitle ?? null} />
     </>
   );
 }
