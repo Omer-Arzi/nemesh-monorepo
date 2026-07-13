@@ -3,15 +3,19 @@
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import Typography from "@mui/material/Typography";
+import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
+import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { ROUTES } from "@/constants";
 import type { RailNavItem } from "../navConfig";
 import NavigationItem from "../NavigationItem";
 import { useSurpriseMe } from "@/hooks/useSurpriseMe";
+import { SiteLogo } from "@/components/shared";
 import { NavDrawerStyle } from "./styles/NavDrawerStyle";
 
 type Props = {
@@ -56,10 +60,25 @@ export default function NavDrawer({ open, onClose, items }: Props) {
       slotProps={{ paper: { sx: NavDrawerStyle.paper } }}
     >
       <Box role="navigation" aria-label="Mobile navigation" sx={NavDrawerStyle.nav}>
+
+        {/* Branded drawer header: logo (RTL start = physical right) + close button */}
         <Box sx={NavDrawerStyle.drawerHeader}>
-          <Typography variant="overline" color="text.secondary">
-            תפריט
-          </Typography>
+          <Box
+            component={NextLink}
+            href={ROUTES.HOME}
+            aria-label="Nemesh — דף הבית"
+            sx={NavDrawerStyle.logoLink}
+          >
+            <SiteLogo variant="mobile" alt="" sx={NavDrawerStyle.logo} />
+          </Box>
+
+          <IconButton
+            onClick={onClose}
+            aria-label="סגירת תפריט"
+            size="small"
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
         </Box>
 
         <Divider />
