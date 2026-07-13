@@ -9,7 +9,7 @@ export interface HomeAboutSection extends Struct.ComponentSchema {
   attributes: {
     body: Schema.Attribute.Blocks & Schema.Attribute.Required;
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
-    title: Schema.Attribute.String & Schema.Attribute.Required;
+    title: Schema.Attribute.String;
   };
 }
 

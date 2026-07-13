@@ -63,10 +63,11 @@ function hasTextSelection(): boolean {
  *   No float — imageWrapper stacks above textClipper.
  *
  * Fade:
- *   An ::after pseudo-element with a gradient background is anchored to the
- *   bottom of textClipper and clipped by its overflow:hidden. Its opacity
- *   transitions between 0 (expanded / short content) and 1 (collapsed with
- *   overflow), giving a smooth fade on both expand and collapse.
+ *   A CSS mask-image gradient is applied directly to textClipper when it is
+ *   collapsed and overflowing. The mask keeps the bottom FADE_ZONE_PX of the
+ *   element transparent. Because the gradient is in percentage units it always
+ *   sits at the current visible bottom throughout the height animation — no
+ *   separate overlay element, no z-index conflict, no opacity timing lag.
  *
  * Flash prevention:
  *   collapsedHeight starts at COLLAPSED_HEIGHT_DESKTOP_FALLBACK so SSR and
@@ -97,11 +98,6 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
 
   const theme = useTheme();
   const mdBreakpoint = theme.breakpoints.values.md;
-  const cardBg = theme.palette.background.paper;
-  // Gradient runs from fully-opaque cardBg at the bottom to transparent at the
-  // top of the FADE_ZONE_PX band.  Uses the card's actual background so the
-  // overlay blends correctly in both light and dark themes.
-  const fadeGradient = `linear-gradient(to top, ${cardBg} 0%, ${cardBg}CC 35%, transparent 100%)`;
 
   const measure = useCallback(() => {
     if (!contentRef.current || !imageRef.current) return;
@@ -181,8 +177,11 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
   // Text area is clickable-to-toggle whenever overflow is confirmed.
   const clickable = hasOverflow && transitionActive;
 
-  // ::after fade is visible only when collapsed+overflow; transparent otherwise.
-  const fadeOpacity = !expanded && hasOverflow && transitionActive ? 1 : 0;
+  // CSS mask applied to textClipper when collapsed+overflow. The mask gradient
+  // keeps the bottom FADE_ZONE_PX transparent at all times, including during the
+  // height animation, so text always fades rather than hard-clips.
+  const showMask = !expanded && hasOverflow && transitionActive;
+  const maskValue = `linear-gradient(to bottom, #000 0%, #000 calc(100% - ${FADE_ZONE_PX}px), transparent 100%)`;
 
   return (
     <Box sx={HomepageAboutStyle.card}>
@@ -226,10 +225,11 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
          * extends below image level before fading. In expanded state text flows
          * freely past the image and the full scrollHeight is used.
          *
-         * ::after is an absolutely-positioned gradient overlay anchored to the
-         * element bottom. overflow:hidden clips it at the current height
-         * boundary, so it always appears at the visual foot of the text area.
-         * Its opacity transitions smoothly on expand and collapse.
+         * CSS mask-image is applied directly to this element when
+         * collapsed+overflow. The gradient goes opaque→transparent over the
+         * bottom FADE_ZONE_PX, so at any instant during the height animation
+         * the fade lives exactly at the current visible bottom edge — no
+         * separate overlay, no stacking-context fights, no timing lag.
          *
          * Click handler toggles the section when overflow is confirmed; skips
          * clicks from interactive descendants and text-selection drags. Active
@@ -246,26 +246,10 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
             height: textClipperHeight,
             ...(!transitionActive && { transition: "none" }),
             ...(clickable && { cursor: "pointer" }),
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: FADE_ZONE_PX,
-              background: fadeGradient,
-              pointerEvents: "none",
-              opacity: fadeOpacity,
-              // Suppress the opacity transition during initialisation so
-              // the SSR opacity:0 → measured opacity:1 snap is instant
-              // rather than a visible 280ms animation on first page load.
-              // After the first measurement (transitionActive=true) the
-              // transition is re-enabled for smooth expand/collapse.
-              transition: transitionActive ? "opacity 280ms ease" : "none",
-              "@media (prefers-reduced-motion: reduce)": {
-                transition: "none",
-              },
-            },
+            ...(showMask && {
+              WebkitMaskImage: maskValue,
+              maskImage: maskValue,
+            }),
           }}
         >
           <BlockRenderer blocks={body} />
