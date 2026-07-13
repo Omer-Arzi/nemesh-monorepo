@@ -256,7 +256,12 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
               background: fadeGradient,
               pointerEvents: "none",
               opacity: fadeOpacity,
-              transition: "opacity 280ms ease",
+              // Suppress the opacity transition during initialisation so
+              // the SSR opacity:0 → measured opacity:1 snap is instant
+              // rather than a visible 280ms animation on first page load.
+              // After the first measurement (transitionActive=true) the
+              // transition is re-enabled for smooth expand/collapse.
+              transition: transitionActive ? "opacity 280ms ease" : "none",
               "@media (prefers-reduced-motion: reduce)": {
                 transition: "none",
               },
