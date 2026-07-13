@@ -28,6 +28,11 @@
     },
     "featuredCategoriesTitle": {
       "type": "string"
+    },
+    "about": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home.about-section"
     }
   }
 }

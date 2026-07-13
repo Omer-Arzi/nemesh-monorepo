@@ -1,5 +1,6 @@
 import { getHomepage } from "@/lib/api/services";
 import HomeHeroSection from "@/features/home/HomeHeroSection";
+import HomepageAbout from "@/features/home/HomepageAbout";
 import LatestRecipes from "@/features/home/LatestRecipes";
 import FeaturedCategoriesCarousel from "@/features/home/FeaturedCategoriesCarousel";
 import { PageViewTracker } from "@/lib/analytics";
@@ -20,6 +21,7 @@ export default async function HomePage() {
         subtitle={homepage?.heroSubtitle ?? null}
         backgroundImage={homepage?.heroBackgroundImage ?? null}
       />
+      <HomepageAbout about={homepage?.about ?? null} />
       <LatestRecipes sectionTitle={homepage?.latestRecipesTitle ?? null} />
       <FeaturedCategoriesCarousel sectionTitle={homepage?.featuredCategoriesTitle ?? null} />
     </>

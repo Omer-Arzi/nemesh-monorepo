@@ -1,5 +1,18 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface HomeAboutSection extends Struct.ComponentSchema {
+  collectionName: 'components_home_about_sections';
+  info: {
+    description: 'Expandable about section shown on the homepage between the hero and latest recipes';
+    displayName: 'About Section';
+  };
+  attributes: {
+    body: Schema.Attribute.Blocks & Schema.Attribute.Required;
+    image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    title: Schema.Attribute.String;
+  };
+}
+
 export interface RecipeIngredientSection extends Struct.ComponentSchema {
   collectionName: 'components_recipe_ingredient_sections';
   info: {
@@ -93,6 +106,7 @@ export interface SharedFooterSection extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'home.about-section': HomeAboutSection;
       'recipe.ingredient-section': RecipeIngredientSection;
       'recipe.preparation-section': RecipePreparationSection;
       'recipe.preparation-step': RecipePreparationStep;
