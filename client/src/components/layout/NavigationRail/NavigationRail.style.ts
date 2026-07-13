@@ -24,7 +24,16 @@ export const NavigationRailStyle = {
     flexShrink: 0,
     width: open ? RAIL_WIDTH : RAIL_COLLAPSED_WIDTH,
     overflow: "visible",
-    transition: "width 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+    // top/height transition is synchronized with DesktopCompactHeader's enter/exit
+    // so sidebar and header move together as a unit.
+    transition: [
+      "width 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+      `top ${HEADER.COMPACT_TRANSITION_DURATION}ms ${HEADER.COMPACT_TRANSITION_EASING}`,
+      `height ${HEADER.COMPACT_TRANSITION_DURATION}ms ${HEADER.COMPACT_TRANSITION_EASING}`,
+    ].join(", "),
+    "@media (prefers-reduced-motion: reduce)": {
+      transition: "width 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+    },
     // Without zIndex the main content (later in DOM) stacks on top, hiding the toggle button
     zIndex: 10,
   }),

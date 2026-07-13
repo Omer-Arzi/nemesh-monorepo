@@ -20,6 +20,11 @@ export const HEADER = {
 
   // Transition duration in ms — shared by AppBar and logo
   TRANSITION_DURATION: 250,
+
+  // Compact header and sidebar enter/exit transition — shared token used by
+  // DesktopCompactHeader visibility animation and NavigationRail top/height.
+  COMPACT_TRANSITION_DURATION: 180,
+  COMPACT_TRANSITION_EASING: "ease-out",
 } as const;
 
 // ─── Motion helpers ────────────────────────────────────────────────────────────
