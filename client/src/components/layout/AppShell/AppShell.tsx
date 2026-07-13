@@ -7,6 +7,7 @@ import Header from "../Header";
 import NavigationRail from "../NavigationRail";
 import { useUiStore } from "@/stores/uiStore";
 import { AppShellStyle } from "./styles/AppShellStyle";
+import { HEADER } from "../Header/styles/HeaderStyle";
 
 type Props = {
   children: React.ReactNode;
@@ -30,10 +31,15 @@ type Props = {
 export default function AppShell({ children }: Props) {
   const navRailOpen = useUiStore((s) => s.navRailOpen);
   const toggleNavRail = useUiStore((s) => s.toggleNavRail);
+  const homeStickyHeaderVisible = useUiStore((s) => s.homeStickyHeaderVisible);
   const pathname = usePathname();
-  // On the homepage the AppShell Header is hidden on desktop, so the sidebar
-  // should start at the top of the viewport (no gap above it).
-  const railStickyTop = pathname === "/" ? 0 : undefined;
+  const isHomepage = pathname === "/";
+  // On the homepage the AppShell Header is hidden on desktop.
+  // When the homepage sticky header is covering the viewport top, offset the
+  // sidebar by its exact height so the first nav item stays fully visible.
+  const railStickyTop = isHomepage
+    ? (homeStickyHeaderVisible ? HEADER.DESKTOP_COMPACT_HEIGHT : 0)
+    : undefined;
 
   return (
     <Box sx={AppShellStyle.root}>

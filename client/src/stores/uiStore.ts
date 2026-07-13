@@ -23,6 +23,9 @@ type UiState = {
   toggleColorMode: () => void;
   navRailOpen: boolean;
   toggleNavRail: () => void;
+  /** True while the homepage fixed sticky header is covering the top of the viewport. */
+  homeStickyHeaderVisible: boolean;
+  setHomeStickyHeaderVisible: (visible: boolean) => void;
 };
 
 export const useUiStore = createStore<UiState>("ui", (set) => ({
@@ -33,4 +36,6 @@ export const useUiStore = createStore<UiState>("ui", (set) => ({
     })),
   navRailOpen: true,
   toggleNavRail: () => set((state) => ({ navRailOpen: !state.navRailOpen })),
+  homeStickyHeaderVisible: false,
+  setHomeStickyHeaderVisible: (visible: boolean) => set({ homeStickyHeaderVisible: visible }),
 }));

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import type { Image } from "@/types/domain";
 import HomeSearchHero from "@/features/home/HomeSearchHero";
 import HomeStickyHeader from "@/features/home/HomeStickyHeader";
+import { useUiStore } from "@/stores/uiStore";
 
 type Props = {
   title?: string | null;
@@ -24,6 +25,7 @@ type Props = {
 export default function HomeHeroSection({ title, subtitle, backgroundImage }: Props) {
   const [heroPassed, setHeroPassed] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const setHomeStickyHeaderVisible = useUiStore((s) => s.setHomeStickyHeaderVisible);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -34,18 +36,20 @@ export default function HomeHeroSection({ title, subtitle, backgroundImage }: Pr
         // Distinguish "sentinel above viewport" (scrolled past) from
         // "sentinel below viewport" (page loaded without scrolling but hero
         // is taller than the viewport).
-        if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
-          setHeroPassed(true);
-        } else {
-          setHeroPassed(false);
-        }
+        const next = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+        setHeroPassed(next);
+        setHomeStickyHeaderVisible(next);
       },
       { threshold: 0 }
     );
 
     obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+    return () => {
+      obs.disconnect();
+      // Reset when leaving the homepage so AppShell doesn't carry stale offset.
+      setHomeStickyHeaderVisible(false);
+    };
+  }, [setHomeStickyHeaderVisible]);
 
   return (
     <>
