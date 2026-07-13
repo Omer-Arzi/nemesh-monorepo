@@ -20,6 +20,10 @@ const COLLAPSED_HEIGHT_DESKTOP_FALLBACK = 400;
 // zone, reducing the perceived dead space between the fade and the button.
 const EXPAND_CONTROLS_HEIGHT = 33;
 const CONTROLS_GAP = 4;
+// The bottom zone of the collapsed textClipper faded out by the CSS mask.
+// Kept as a constant so the mask gradient and the collapsed height reserve
+// stay consistent without hard-coding the same number in two places.
+const FADE_ZONE_PX = 56;
 
 type Props = {
   title: string | null;
@@ -35,7 +39,7 @@ function isInteractiveTarget(target: EventTarget | null): boolean {
 }
 
 // Returns true when the user has an active text selection at click time.
-// Prevents expansion after drag-to-select gestures.
+// Prevents toggling after drag-to-select gestures.
 function hasTextSelection(): boolean {
   const sel = typeof window !== "undefined" ? window.getSelection() : null;
   return !!sel && sel.toString().trim().length > 0;
@@ -58,6 +62,12 @@ function hasTextSelection(): boolean {
  *
  * Mobile:
  *   No float — imageWrapper stacks above textClipper.
+ *
+ * Fade:
+ *   A CSS mask-image gradient applied directly on the textClipper fades
+ *   the bottom FADE_ZONE_PX when collapsed+overflow. Removed when expanded.
+ *   No separate overlay element — the mask fades the actual text pixels
+ *   independent of the background colour.
  *
  * Flash prevention:
  *   collapsedHeight starts at COLLAPSED_HEIGHT_DESKTOP_FALLBACK so SSR and
@@ -135,23 +145,20 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
     return () => obs.disconnect();
   }, [measure]);
 
-  // Expand when the user clicks the collapsed text body. Guards:
-  //   • Only fires when collapsed and overflow is confirmed.
-  //   • Skips clicks that originated from interactive descendants (links, buttons)
-  //     so rich-text links continue to work normally.
-  //   • Skips when the user has an active text selection to avoid expanding
-  //     after drag-to-select gestures.
+  // Toggle expanded state when the user clicks the text body. Guards:
+  //   • Active in both collapsed and expanded states when overflow is confirmed.
+  //   • Skips clicks from interactive descendants (links, buttons) so rich-text
+  //     links continue to open normally.
+  //   • Skips when the user has an active text selection to avoid toggling after
+  //     drag-to-select gestures.
   const handleTextAreaClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (isInteractiveTarget(e.target)) return;
       if (hasTextSelection()) return;
-      setExpanded(true);
+      setExpanded((prev) => !prev);
     },
     [],
   );
-
-  const cardBg = theme.palette.background.paper;
-  const fadeGradient = `linear-gradient(to top, ${cardBg} 0%, ${cardBg}CC 35%, transparent 100%)`;
 
   // Pre-measurement (!transitionActive): constrained at the fallback height —
   //   text is safely collapsed and transition is suppressed.
@@ -167,14 +174,19 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
     ? `${fullHeight}px`
     : `${collapsedHeight}px`;
 
-  // Text area is clickable-to-expand only while collapsed and overflow is confirmed.
-  const clickable = !expanded && hasOverflow && transitionActive;
+  // Text area is clickable-to-toggle whenever overflow is confirmed.
+  const clickable = hasOverflow && transitionActive;
+
+  // CSS mask that fades the bottom FADE_ZONE_PX of the clipped text to
+  // transparent. Applied only when collapsed+overflow so the expanded view
+  // has no masking and the full text remains readable.
+  const collapsedMask = `linear-gradient(to bottom, #000 0%, #000 calc(100% - ${FADE_ZONE_PX}px), transparent 100%)`;
 
   return (
     <Box sx={HomepageAboutStyle.card}>
       {/*
        * Title is optional. When absent: no heading, no spacing, body starts
-       * at the top of the card content. Component="h2" keeps heading hierarchy
+       * at the top of the card content. component="h2" keeps heading hierarchy
        * correct regardless of the visual variant used.
        */}
       {title && (
@@ -212,8 +224,13 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
          * extends below image level before fading. In expanded state text flows
          * freely past the image and the full scrollHeight is used.
          *
-         * Click handler expands the section when collapsed and overflow exists,
-         * but skips clicks from interactive descendants and text-selection drags.
+         * The CSS mask fades the last FADE_ZONE_PX to transparent when collapsed
+         * and overflow exists. The mask is removed when expanded so the full text
+         * remains unmasked. No separate overlay element is used.
+         *
+         * Click handler toggles the section when overflow is confirmed; skips
+         * clicks from interactive descendants and text-selection drags. Active
+         * in both collapsed and expanded states.
          * transition is suppressed while !transitionActive so the initial
          * height correction (fallback → measured) is an instant snap.
          */}
@@ -226,29 +243,19 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
             height: textClipperHeight,
             ...(!transitionActive && { transition: "none" }),
             ...(clickable && { cursor: "pointer" }),
+            ...(!expanded && hasOverflow && transitionActive && {
+              WebkitMaskImage: collapsedMask,
+              maskImage: collapsedMask,
+            }),
           }}
         >
           <BlockRenderer blocks={body} />
-
-          {/* Fade — absolute inside textClipper, covers only the text bottom.
-              Gated on transitionActive so it is hidden until measurement
-              confirms real overflow. */}
-          {hasOverflow && transitionActive && (
-            <Box
-              aria-hidden
-              sx={{
-                ...HomepageAboutStyle.fade,
-                background: fadeGradient,
-                opacity: expanded ? 0 : 1,
-              }}
-            />
-          )}
         </Box>
       </Box>
 
       {/*
        * expandControls — outside imageAndTextArea and outside textClipper.
-       * Always fully visible; never inside a clipped or overflow-hidden region.
+       * Always fully visible; never inside a clipped or masked region.
        * Gated on transitionActive so it is hidden until measurement confirms
        * real overflow.
        */}

@@ -61,33 +61,17 @@ export const HomepageAboutStyle = {
   // Only text content is clipped — the image is a sibling, not a child.
   //
   // height is set dynamically from measured text scrollHeight:
-  //   collapsed → approximately image rendered height
+  //   collapsed → image height + controls row height
   //   expanded  → full text scrollHeight
   //
-  // position:relative anchors the fade overlay inside this element.
+  // A CSS mask-image gradient is applied inline when collapsed+overflow so the
+  // last FADE_ZONE_PX of visible text fades to transparent. The mask is removed
+  // when expanded so no clipping occurs on the full text view.
   textClipper: {
-    position: "relative" as const,
     overflow: "hidden" as const,
     // Height transition animates text expansion/collapse.
     // CSS cannot animate auto→px so the initial snap (pre-measurement) is instant.
     transition: "height 320ms ease-in-out",
-    "@media (prefers-reduced-motion: reduce)": {
-      transition: "none",
-    },
-  },
-
-  // Gradient fade — positioned inside textClipper so it covers only the text area.
-  // Does not extend over the image, card border, or card shadow.
-  // The gradient colour is injected from theme.palette.background.paper at runtime.
-  fade: {
-    position: "absolute" as const,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 56,
-    pointerEvents: "none" as const,
-    zIndex: 1,
-    transition: "opacity 280ms ease",
     "@media (prefers-reduced-motion: reduce)": {
       transition: "none",
     },
