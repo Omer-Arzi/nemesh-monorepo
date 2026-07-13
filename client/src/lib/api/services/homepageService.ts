@@ -17,7 +17,7 @@ import { mapImage, type StrapiMediaRaw } from "../mappers";
 
 type StrapiAboutSection = {
   id?: number;
-  title: string;
+  title: string | null;
   body: BlockNode[] | null;
   image: StrapiMediaRaw | null;
 };
@@ -38,7 +38,7 @@ function mapAbout(raw: StrapiAboutSection | null | undefined): HomepageAbout | n
   const image = mapImage(raw.image);
   if (!image) return null;
   return {
-    title: raw.title,
+    title: raw.title?.trim() || null,
     body: raw.body ?? [],
     image,
   };

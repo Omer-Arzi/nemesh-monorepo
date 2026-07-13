@@ -84,7 +84,7 @@ export const HomepageAboutStyle = {
     bottom: 0,
     left: 0,
     right: 0,
-    height: 72,
+    height: 56,
     pointerEvents: "none" as const,
     zIndex: 1,
     transition: "opacity 280ms ease",
@@ -95,10 +95,12 @@ export const HomepageAboutStyle = {
 
   // Centred row that holds the expand/collapse button.
   // Outside imageAndTextArea — always fully visible, never clipped.
+  // mt: 0.5 (4px) — the collapsed textClipper height already reserves space for
+  // this row, so only a minimal gap is needed to separate it from the fade.
   expandControls: {
     display: "flex",
     justifyContent: "center",
-    mt: 1.5,
+    mt: 0.5,
   },
 
   // Semantic <button> styled to feel like a branded text link with a pill hover.

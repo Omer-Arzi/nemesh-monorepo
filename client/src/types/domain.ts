@@ -143,10 +143,11 @@ export type SiteBranding = {
 
 /**
  * Content for the expandable About section on the homepage.
- * All three fields are required — if any is absent the section is suppressed.
+ * body and image are required — the section is suppressed if either is absent.
+ * title is optional; the section renders without a heading when it is absent.
  */
 export type HomepageAbout = {
-  title: string;
+  title: string | null;
   body: BlockNode[];
   image: Image;
 };
