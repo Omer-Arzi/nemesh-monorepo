@@ -21,25 +21,32 @@ type Props = {
 /**
  * Expandable About card — client component.
  *
- * Layout:
- *   Desktop (RTL): image floats to physical left (float: inline-end in RTL),
- *   text wraps to its right initially, then continues beneath the image when
- *   expanded.  Uses CSS overflow:hidden on the clipping container for both
- *   height clipping and BFC float containment.
+ * Structural contract:
+ *   The outer card and imageWrapper are never clipped. Only textClipper
+ *   (text body) receives overflow:hidden + animated height.
  *
- *   Mobile: vertical stack — no float.
+ * Desktop layout (RTL):
+ *   imageAndTextArea has display:flow-root (BFC). imageWrapper floats
+ *   inline-end (physical left in RTL). textClipper is a BFC block that
+ *   sits beside the float (physical right). Text in textClipper extends
+ *   taller than the float in the expanded state, creating the "text
+ *   continues beneath the image" visual behaviour.
  *
- * Height measurement:
- *   collapsed height ≈ rendered image height on desktop (measured via
- *   ResizeObserver after mount); fixed 360px on mobile.  collapsedHeight===0
- *   before first measurement — the component renders height:"auto" in that
- *   state so SSR HTML and the initial client render are identical (no hydration
- *   mismatch).  The snap to measured height is instant because CSS cannot
- *   animate auto → px.
+ * Mobile:
+ *   No float — imageWrapper stacks above textClipper.
+ *
+ * Measurement:
+ *   contentRef is on textClipper (text-only). collapsedHeight ≈ image
+ *   height so the collapsed text area matches the image's visual height.
+ *   fullHeight = textClipper.scrollHeight. Both recalculate on resize
+ *   via ResizeObserver. collapsedHeight===0 before first measurement →
+ *   height:"auto" avoids hydration mismatch.
  */
 export default function HomepageAboutCard({ title, body, image }: Props) {
   const bodyId = useId();
+  // textClipper — only the text area is measured and clipped.
   const contentRef = useRef<HTMLDivElement>(null);
+  // imageWrapper — measured for collapsedHeight; never inside the clip boundary.
   const imageRef = useRef<HTMLDivElement>(null);
 
   const [expanded, setExpanded] = useState(false);
@@ -55,16 +62,19 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
 
     const isMobile = window.innerWidth < mdBreakpoint;
     const imgH = imageRef.current.getBoundingClientRect().height;
+    // On desktop: collapse text to ≈ image height so the initial visible area
+    // matches the image's visual footprint. On mobile: fixed height.
     const collapsed = isMobile
       ? COLLAPSED_HEIGHT_MOBILE
       : imgH > 10
       ? imgH
       : COLLAPSED_HEIGHT_DESKTOP_FALLBACK;
 
+    // scrollHeight of textClipper only — image is outside the measurement boundary.
     const full = contentRef.current.scrollHeight;
     setCollapsedHeight(collapsed);
     setFullHeight(full);
-    // 8px buffer prevents showing the button when content is only marginally taller.
+    // 8px buffer avoids showing the control when content is only marginally taller.
     setHasOverflow(full > collapsed + 8);
   }, [mdBreakpoint]);
 
@@ -75,13 +85,11 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
     return () => obs.disconnect();
   }, [measure]);
 
-  // Card background for the fade gradient — must match HomepageAboutStyle.card.
   const cardBg = theme.palette.background.paper;
   const fadeGradient = `linear-gradient(to top, ${cardBg} 0%, ${cardBg}CC 35%, transparent 100%)`;
 
-  // collapsedHeight===0 means not yet measured (SSR / pre-hydration).
-  // Use height:"auto" in that state so the server HTML and first client render match.
-  const contentHeight =
+  // collapsedHeight===0 → not yet measured. Use "auto" to match SSR output.
+  const textClipperHeight =
     collapsedHeight === 0 ? "auto" : expanded ? `${fullHeight}px` : `${collapsedHeight}px`;
 
   return (
@@ -90,48 +98,61 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
         {title}
       </Typography>
 
-      <Box sx={HomepageAboutStyle.contentOuter}>
-        {/* Clipping container: overflow:hidden clips height AND contains the float. */}
+      {/*
+       * imageAndTextArea — display:flow-root BFC.
+       * Contains the float and grows to the full image height automatically.
+       * No overflow restriction: card border and shadow are always intact.
+       */}
+      <Box sx={HomepageAboutStyle.imageAndTextArea}>
+        {/*
+         * imageWrapper — floated inline-end (physical left in RTL).
+         * Sibling of textClipper, never inside it.
+         * The image is always fully visible regardless of the collapsed state.
+         */}
+        <Box ref={imageRef} sx={HomepageAboutStyle.imageWrapper}>
+          <NemeshImage
+            image={image}
+            fill
+            objectFit="cover"
+            alt={image.alt || title}
+            sizes="(max-width: 899px) 100vw, 280px"
+            priority
+          />
+        </Box>
+
+        {/*
+         * textClipper — the ONLY element that owns overflow:hidden + height.
+         * As a BFC block it sits beside the float (physical right in RTL).
+         * When expanded and taller than the float, text extends beneath the
+         * image visually, satisfying the "text continues below" requirement.
+         *
+         * The fade lives here so it covers only the text area, not the image.
+         */}
         <Box
           id={bodyId}
           ref={contentRef}
-          sx={{ ...HomepageAboutStyle.contentInner, height: contentHeight }}
+          sx={{ ...HomepageAboutStyle.textClipper, height: textClipperHeight }}
         >
-          {/* Image — floated to physical left on desktop (inline-end in RTL). */}
-          <Box ref={imageRef} sx={HomepageAboutStyle.imageWrapper}>
-            <NemeshImage
-              image={image}
-              fill
-              objectFit="cover"
-              alt={image.alt || title}
-              sizes="(max-width: 899px) 100vw, 40vw"
-              priority
-            />
-          </Box>
-
-          {/* Rich-text body. Clipped when collapsed; flows beneath the float when expanded. */}
           <BlockRenderer blocks={body} />
 
-          {/* Explicit clearfix — ensures scrollHeight reliably includes the float
-              height on all browsers even if the BFC from overflow:hidden behaves
-              slightly differently across engines. */}
-          <Box component="span" aria-hidden sx={{ display: "block", clear: "both" }} />
+          {/* Fade — absolute inside textClipper. Covers only the text bottom. */}
+          {hasOverflow && (
+            <Box
+              aria-hidden
+              sx={{
+                ...HomepageAboutStyle.fade,
+                background: fadeGradient,
+                opacity: expanded ? 0 : 1,
+              }}
+            />
+          )}
         </Box>
-
-        {/* Fade overlay — fades into the card background, visible only when truncated. */}
-        {hasOverflow && (
-          <Box
-            aria-hidden
-            sx={{
-              ...HomepageAboutStyle.fade,
-              background: fadeGradient,
-              opacity: expanded ? 0 : 1,
-            }}
-          />
-        )}
       </Box>
 
-      {/* Expand/collapse control — rendered only when there is actual overflow. */}
+      {/*
+       * expandControls — outside imageAndTextArea and outside textClipper.
+       * Always fully visible; never inside a clipped or overflow-hidden region.
+       */}
       {hasOverflow && (
         <Box sx={HomepageAboutStyle.expandControls}>
           <Box

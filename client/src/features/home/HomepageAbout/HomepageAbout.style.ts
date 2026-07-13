@@ -7,6 +7,7 @@ export const HomepageAboutStyle = {
 
   // Editorial card: constrained max width so it reads as a focused inset
   // rather than a full-width content band. Centred within the PageContainer.
+  // No overflow restriction — the card must never clip its own border or shadow.
   card: {
     maxWidth: "1040px",
     mx: "auto",
@@ -24,35 +25,23 @@ export const HomepageAboutStyle = {
     color: "text.primary",
   },
 
-  // Relative anchor for the absolute-positioned fade overlay.
-  contentOuter: {
-    position: "relative" as const,
+  // Outer layout container.
+  // display:flow-root creates a BFC: it contains the floated imageWrapper so the
+  // card grows to encompass the full image height automatically, without an
+  // explicit clearfix.  No overflow restriction — never clips image or border.
+  imageAndTextArea: {
+    display: "flow-root" as const,
   },
 
-  // Clipping container. overflow:hidden establishes a BFC, which both clips
-  // content to the measured height AND contains the floated image so it is
-  // included in scrollHeight without a separate clearfix.
-  contentInner: {
-    overflow: "hidden" as const,
-    // Height is set dynamically from measured values; transition animates the
-    // collapse/expand. CSS cannot animate auto → px, so the initial snap from
-    // "auto" (SSR) to the measured collapsed height is instant by design.
-    transition: "height 320ms ease-in-out",
-    "@media (prefers-reduced-motion: reduce)": {
-      transition: "none",
-    },
-  },
-
-  // Floated image wrapper — fixed width on desktop keeps the card compact.
-  // float: inline-end is a logical CSS value; in RTL context (dir="rtl" on
-  // <html>) it resolves to physical left — placing the image on the left with
-  // text wrapping to its right.  stylis-plugin-rtl does not flip logical values,
-  // so this is safe with the project's RTL setup.
+  // Floated image wrapper — fixed width on desktop, outside the text-clip boundary.
+  // float: inline-end is a logical CSS value; in RTL context (dir="rtl" on <html>)
+  // it resolves to physical left.  stylis-plugin-rtl does not flip logical values.
+  // The image is a sibling of textClipper, never inside it — it is never clipped.
   imageWrapper: {
     display: "block" as const,
     position: "relative" as const,
-    // Fixed 280px on desktop — stays compact and predictable regardless of card width.
-    // 4:5 ratio makes this 280×350px; collapsed height ≈ 350px on desktop.
+    // Fixed 280px on desktop keeps the card compact. 4:5 ratio → 280×350px.
+    // On mobile: full-width, stacked above the text.
     width: { xs: "100%", md: "280px" },
     aspectRatio: "4/5",
     float: { xs: "none", md: "inline-end" },
@@ -66,15 +55,36 @@ export const HomepageAboutStyle = {
     flexShrink: 0,
   },
 
-  // Gradient fade at the bottom of the clipping container — visible only when
-  // content is truncated. The gradient colour is injected in the component from
-  // theme.palette.background.paper so it fades into the actual card background.
+  // Text-only clipping container.
+  // overflow:hidden establishes a BFC. As a BFC block beside the float it sits
+  // to the physical right of imageWrapper (text start in RTL) without overlapping.
+  // Only text content is clipped — the image is a sibling, not a child.
+  //
+  // height is set dynamically from measured text scrollHeight:
+  //   collapsed → approximately image rendered height
+  //   expanded  → full text scrollHeight
+  //
+  // position:relative anchors the fade overlay inside this element.
+  textClipper: {
+    position: "relative" as const,
+    overflow: "hidden" as const,
+    // Height transition animates text expansion/collapse.
+    // CSS cannot animate auto→px so the initial snap (pre-measurement) is instant.
+    transition: "height 320ms ease-in-out",
+    "@media (prefers-reduced-motion: reduce)": {
+      transition: "none",
+    },
+  },
+
+  // Gradient fade — positioned inside textClipper so it covers only the text area.
+  // Does not extend over the image, card border, or card shadow.
+  // The gradient colour is injected from theme.palette.background.paper at runtime.
   fade: {
     position: "absolute" as const,
     bottom: 0,
     left: 0,
     right: 0,
-    height: 80,
+    height: 72,
     pointerEvents: "none" as const,
     zIndex: 1,
     transition: "opacity 280ms ease",
@@ -84,6 +94,7 @@ export const HomepageAboutStyle = {
   },
 
   // Centred row that holds the expand/collapse button.
+  // Outside imageAndTextArea — always fully visible, never clipped.
   expandControls: {
     display: "flex",
     justifyContent: "center",
@@ -115,7 +126,7 @@ export const HomepageAboutStyle = {
     },
   },
 
-  // Chevron icon — rotation is applied dynamically from state.
+  // Chevron icon — rotation applied dynamically from state.
   expandIcon: {
     fontSize: "1.125rem",
     transition: "transform 280ms ease-in-out",
