@@ -64,10 +64,10 @@ export const HomepageAboutStyle = {
   //   collapsed → image height + controls row height
   //   expanded  → full text scrollHeight
   //
-  // A CSS mask-image gradient is applied inline when collapsed+overflow so the
-  // last FADE_ZONE_PX of visible text fades to transparent. The mask is removed
-  // when expanded so no clipping occurs on the full text view.
+  // position:relative anchors the ::after pseudo-element fade overlay so it
+  // is clipped by overflow:hidden at the element's current height boundary.
   textClipper: {
+    position: "relative" as const,
     overflow: "hidden" as const,
     // Height transition animates text expansion/collapse.
     // CSS cannot animate auto→px so the initial snap (pre-measurement) is instant.
