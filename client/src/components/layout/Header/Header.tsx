@@ -32,6 +32,7 @@ export default function Header() {
   return (
     <>
       <AppBar
+        data-debug="mobile-header"
         component="header"
         position="sticky"
         color="inherit"
