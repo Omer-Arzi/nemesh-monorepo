@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { Image } from "@/types/domain";
 import HomeSearchHero from "@/features/home/HomeSearchHero";
-import { useUiStore } from "@/stores/uiStore";
+import { useHomeHeroVisibility } from "@/providers/HomeHeroVisibilityProvider";
 
 type Props = {
   title?: string | null;
@@ -28,16 +28,11 @@ type Props = {
  */
 export default function HomeHeroSection({ title, subtitle, backgroundImage }: Props) {
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const setHomeHeroVisible = useUiStore((s) => s.setHomeHeroVisible);
+  const { setHomeHeroVisible } = useHomeHeroVisibility();
 
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
-
-    // eslint-disable-next-line no-console
-    console.log("%c[layout-debug]%c HomeHeroSection MOUNT — creating IntersectionObserver", "color:#ff9800;font-weight:bold", "color:inherit", {
-      t: Math.round(performance.now()),
-    });
 
     const obs = new IntersectionObserver(
       ([entry]) => {
@@ -46,14 +41,6 @@ export default function HomeHeroSection({ title, subtitle, backgroundImage }: Pr
         // is taller than the viewport).
         const heroPassed = !entry.isIntersecting && entry.boundingClientRect.top < 0;
         // hero visible = hero has not fully scrolled past
-        // eslint-disable-next-line no-console
-        console.log("%c[layout-debug]%c HomeHeroSection IO callback", "color:#ff9800;font-weight:bold", "color:inherit", {
-          t: Math.round(performance.now()),
-          isIntersecting: entry.isIntersecting,
-          boundingTop: entry.boundingClientRect.top,
-          heroPassed,
-          settingHomeHeroVisibleTo: !heroPassed,
-        });
         setHomeHeroVisible(!heroPassed);
       },
       { threshold: 0 }
@@ -64,13 +51,7 @@ export default function HomeHeroSection({ title, subtitle, backgroundImage }: Pr
     // unmount so the shell keeps showing the compact header during navigation
     // away from a scrolled homepage.  AppShell ignores isHomeHeroVisible on
     // non-home routes (route context always wins there).
-    return () => {
-      // eslint-disable-next-line no-console
-      console.log("%c[layout-debug]%c HomeHeroSection UNMOUNT — disconnecting IntersectionObserver", "color:#ff9800;font-weight:bold", "color:inherit", {
-        t: Math.round(performance.now()),
-      });
-      obs.disconnect();
-    };
+    return () => obs.disconnect();
   }, [setHomeHeroVisible]);
 
   return (
