@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { Image } from "@/types/domain";
 import HomeSearchHero from "@/features/home/HomeSearchHero";
-import { useUiStore } from "@/stores/uiStore";
+import { useHomeHeroVisibility } from "@/providers/HomeHeroVisibilityProvider";
 
 type Props = {
   title?: string | null;
@@ -28,7 +28,7 @@ type Props = {
  */
 export default function HomeHeroSection({ title, subtitle, backgroundImage }: Props) {
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const setHomeHeroVisible = useUiStore((s) => s.setHomeHeroVisible);
+  const { setHomeHeroVisible } = useHomeHeroVisibility();
 
   useEffect(() => {
     const el = sentinelRef.current;

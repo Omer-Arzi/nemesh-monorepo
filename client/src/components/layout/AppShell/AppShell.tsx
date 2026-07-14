@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import { usePathname } from "next/navigation";
 import Footer from "../Footer";
@@ -7,6 +8,7 @@ import Header from "../Header";
 import NavigationRail from "../NavigationRail";
 import DesktopCompactHeader from "../DesktopCompactHeader";
 import { useUiStore } from "@/stores/uiStore";
+import { HomeHeroVisibilityProvider } from "@/providers/HomeHeroVisibilityProvider";
 import { AppShellStyle } from "./styles/AppShellStyle";
 import { HEADER } from "../Header/styles/HeaderStyle";
 
@@ -44,7 +46,11 @@ type Props = {
 export default function AppShell({ children }: Props) {
   const navRailOpen = useUiStore((s) => s.navRailOpen);
   const toggleNavRail = useUiStore((s) => s.toggleNavRail);
-  const isHomeHeroVisible = useUiStore((s) => s.isHomeHeroVisible);
+  // Owned locally (not in the global store) so every server render — build,
+  // ISR revalidation, or otherwise — starts from a deterministic `true`.
+  // A useState initializer runs fresh per component instance; there is no
+  // module-scoped object here for a reused server process to have mutated.
+  const [isHomeHeroVisible, setHomeHeroVisible] = useState(true);
   const pathname = usePathname();
   const isHomepage = pathname === "/";
 
@@ -80,7 +86,15 @@ export default function AppShell({ children }: Props) {
 
         <Box sx={AppShellStyle.content}>
           <Box component="main" sx={AppShellStyle.main}>
-            {children}
+            {/* Exposes the locally-owned hero-visibility state down to
+                HomeHeroSection (rendered inside children on the homepage)
+                without going through global module-scoped state. */}
+            <HomeHeroVisibilityProvider
+              isHomeHeroVisible={isHomeHeroVisible}
+              setHomeHeroVisible={setHomeHeroVisible}
+            >
+              {children}
+            </HomeHeroVisibilityProvider>
           </Box>
           <Footer />
         </Box>

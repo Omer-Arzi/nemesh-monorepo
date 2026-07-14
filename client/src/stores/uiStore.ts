@@ -23,14 +23,6 @@ type UiState = {
   toggleColorMode: () => void;
   navRailOpen: boolean;
   toggleNavRail: () => void;
-  /**
-   * True while the homepage hero is visible in the viewport.
-   * Initialised to true (hero assumed visible) so the compact header is hidden
-   * on homepage first render.  Set by HomeHeroSection's IntersectionObserver.
-   * Ignored on non-home routes — route context takes precedence.
-   */
-  isHomeHeroVisible: boolean;
-  setHomeHeroVisible: (visible: boolean) => void;
 };
 
 export const useUiStore = createStore<UiState>("ui", (set) => ({
@@ -41,6 +33,4 @@ export const useUiStore = createStore<UiState>("ui", (set) => ({
     })),
   navRailOpen: true,
   toggleNavRail: () => set((state) => ({ navRailOpen: !state.navRailOpen })),
-  isHomeHeroVisible: true,
-  setHomeHeroVisible: (visible: boolean) => set({ isHomeHeroVisible: visible }),
 }));
