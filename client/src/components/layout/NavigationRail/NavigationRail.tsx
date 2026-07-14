@@ -9,6 +9,7 @@ import { RAIL_NAV_ITEMS } from "../navConfig";
 import NavigationItem from "../NavigationItem";
 import { useSurpriseMe } from "@/hooks/useSurpriseMe";
 import { NavigationRailStyle } from "./NavigationRail.style";
+import { classesMissingCss } from "@/lib/debug/layoutDebug";
 
 type Props = {
   open: boolean;
@@ -33,6 +34,7 @@ export default function NavigationRail({ open, onToggle, stickyTop }: Props) {
       const el = outerRef.current;
       if (!el) return;
       const cs = getComputedStyle(el);
+      const missing = classesMissingCss(el);
       // eslint-disable-next-line no-console
       console.log(`%c[layout-debug]%c NavigationRail computed (post-paint)`, "color:#4caf50;font-weight:bold", "color:inherit", {
         openProp: open,
@@ -42,7 +44,16 @@ export default function NavigationRail({ open, onToggle, stickyTop }: Props) {
         top: cs.top,
         width: cs.width,
         transform: cs.transform,
+        className: el.className,
+        classesMissingCss: missing,
       });
+      if (missing.length > 0) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          "[layout-debug] NavigationRail: class present on element but NO matching CSS rule found in any <style data-emotion> tag",
+          missing
+        );
+      }
     });
     return () => cancelAnimationFrame(raf);
   }, [open, stickyTop]);

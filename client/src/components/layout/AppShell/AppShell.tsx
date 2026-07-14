@@ -10,6 +10,7 @@ import DesktopCompactHeader from "../DesktopCompactHeader";
 import { useUiStore } from "@/stores/uiStore";
 import { AppShellStyle } from "./styles/AppShellStyle";
 import { HEADER } from "../Header/styles/HeaderStyle";
+import { snapshotEmotionStyles } from "@/lib/debug/layoutDebug";
 
 // TEMP DEBUG — layout bug investigation. Remove before commit.
 function debugLog(tag: string, data: Record<string, unknown>) {
@@ -146,6 +147,11 @@ export default function AppShell({ children }: Props) {
         rail: describe(railEl),
         compactHeader: describe(compactHeaderEl),
         mobileHeader: describe(mobileHeaderEl),
+        // Compare tagCount/totalLength/classCount across a "broken" vs
+        // "fixed" log to see whether new Emotion CSS was actually inserted
+        // in between (growth = new rule landed; no growth = nothing changed
+        // at the stylesheet level, so the fix must come from elsewhere).
+        emotionSnapshot: snapshotEmotionStyles(),
       });
     });
     return () => cancelAnimationFrame(raf);

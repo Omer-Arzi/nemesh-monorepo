@@ -12,6 +12,7 @@ import { useHomeSearch } from "@/features/home/HomeSearchHero/useHomeSearch";
 import { DesktopCompactHeaderStyle } from "./DesktopCompactHeader.style";
 import { HomeSearchHeroText } from "@/features/home/HomeSearchHero/HomeSearchHero.consts";
 import { SiteLogo } from "@/components/shared";
+import { classesMissingCss } from "@/lib/debug/layoutDebug";
 
 type Props = {
   /**
@@ -53,20 +54,7 @@ export default function DesktopCompactHeader({ visible }: Props) {
       const el = rootRef.current;
       if (!el) return;
       const cs = getComputedStyle(el);
-      const className = el.className;
-      // Cross-check: does a <style data-emotion> tag actually contain a rule
-      // for every class on this element? If a class is present on the node
-      // but its CSS text is missing from every emotion style tag, that class
-      // is "logically applied" but visually inert — proof of a stale/missing
-      // style-insertion bug rather than a wrong prop/state value.
-      const emotionStyleTags = Array.from(
-        document.querySelectorAll("style[data-emotion]")
-      ) as HTMLStyleElement[];
-      const allEmotionCss = emotionStyleTags.map((t) => t.textContent ?? "").join("\n");
-      const classList = className.split(/\s+/).filter(Boolean);
-      const classesMissingCss = classList.filter(
-        (c) => c.startsWith("css-") && !allEmotionCss.includes(`.${c}`)
-      );
+      const missing = classesMissingCss(el);
       // eslint-disable-next-line no-console
       console.log(`%c[layout-debug]%c DesktopCompactHeader computed (post-paint)`, "color:#2196f3;font-weight:bold", "color:inherit", {
         visibleProp: visible,
@@ -76,15 +64,14 @@ export default function DesktopCompactHeader({ visible }: Props) {
         opacity: cs.opacity,
         visibility: cs.visibility,
         transform: cs.transform,
-        className,
-        emotionStyleTagCount: emotionStyleTags.length,
-        classesMissingCss,
+        className: el.className,
+        classesMissingCss: missing,
       });
-      if (classesMissingCss.length > 0) {
+      if (missing.length > 0) {
         // eslint-disable-next-line no-console
         console.warn(
           "[layout-debug] DesktopCompactHeader: class present on element but NO matching CSS rule found in any <style data-emotion> tag",
-          classesMissingCss
+          missing
         );
       }
     });
