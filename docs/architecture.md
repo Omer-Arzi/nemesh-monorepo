@@ -22,7 +22,7 @@ No Anthropic/OpenAI API calls inside server or client code. Claude Code is used 
 nemesh/
 ├── client/                      # Next.js frontend
 │   ├── src/
-│   │   ├── app/                 # App Router pages (categories, recipes, results, tags)
+│   │   ├── app/                 # App Router pages, split into (home) and (standard) route groups — see §9b
 │   │   ├── components/
 │   │   │   ├── domain/          # Recipe-specific UI components
 │   │   │   ├── layout/          # AppShell, Header, Footer, NavDrawer
@@ -199,6 +199,65 @@ type IngredientCatalogItem = BaseEntity & {
 
 ---
 
+## 9b. Route Groups & AppShell `pageMode`
+
+`src/app/` is split into two route groups (organizational only — neither
+appears in any URL):
+
+```
+src/app/
+├── layout.tsx            # RootProviders only (Emotion, MUI theme, TanStack Query). No AppShell here.
+├── (home)/
+│   ├── layout.tsx         # <AppShell pageMode="home">{children}</AppShell>
+│   └── page.tsx           # "/"
+└── (standard)/
+    ├── layout.tsx         # <AppShell pageMode="standard">{children}</AppShell>
+    ├── categories/...
+    ├── recipes/[slug]/...
+    ├── results/...
+    ├── tags/...
+    └── [slug]/...
+```
+
+**Why:** `AppShell` needs to know, deterministically, whether it's rendering
+the homepage — that decision controls whether the compact desktop header
+starts hidden and the nav rail sits flush at the top, which is baked into
+the SSR/ISR HTML for `/`. It used to derive this from `usePathname()`
+inside `AppShell` (a "use client" component in the shared root layout).
+In production, that resolved incorrectly during static generation/ISR
+revalidation for some builds — `AppShell` would render as if it were on a
+non-home route while the page content underneath was still genuinely the
+homepage, baking the wrong layout into the cached static HTML. This did
+not reproduce locally or in `next dev`, only against Vercel's real
+ISR pipeline, and does not appear to be fixable by trusting the hook more
+carefully — nothing in application code ever produced the wrong value;
+the hook's own SSR-time resolution was unreliable.
+
+Route groups sidestep this by making the mode a hardcoded literal, decided
+by Next's file-system router (which `layout.tsx` matched the URL) rather
+than a runtime hook read inside a shared component: `(home)/layout.tsx`
+can only ever render for `/`, by construction, so `pageMode="home"` is
+always correct with zero runtime inference.
+
+**Cost:** `AppShell` (and everything inside it — `Header`,
+`DesktopCompactHeader`, `NavigationRail`, `Footer`) is a separate mounted
+instance per group. Crossing between `/` and any other route unmounts and
+remounts it — client-side navigation *within* a group (e.g.
+`/categories` → `/results`) is unaffected and fully persistent, as before.
+Known regressions from this: `DesktopCompactHeader`'s search input text
+resets when crossing the boundary, and its enter/exit CSS transition
+doesn't play at that exact moment (it still animates normally for the
+scroll-driven show/hide while browsing the homepage itself). `navRailOpen`
+and `colorMode` are unaffected — they live in the Zustand `uiStore`
+module, not component state, so they survive the remount.
+
+Cosmetic `usePathname()` reads for nav-link active-state highlighting
+(`NavigationItem`, `NavDrawer`, `NavLink`) are unrelated to this and were
+left unchanged — they don't affect SSR-critical layout, only which link
+renders bold.
+
+---
+
 ## 9a. Image Architecture
 
 All image rendering goes through two layers:
@@ -298,7 +357,7 @@ Full Railway + S3 setup steps: [docs/deployment.md](./deployment.md).
 
 ## 13. Shir Challenge Page
 
-`/tags/shir-challenge` is handled by a **static Next.js route** (`app/tags/shir-challenge/page.tsx`) which takes precedence over the dynamic `app/tags/[slug]/page.tsx`. This prevents any change to existing tag-page logic.
+`/tags/shir-challenge` is handled by a **static Next.js route** (`app/(standard)/tags/shir-challenge/page.tsx`) which takes precedence over the dynamic `app/(standard)/tags/[slug]/page.tsx`. This prevents any change to existing tag-page logic. (Route group folder — see §9b — does not affect the URL.)
 
 ### Strapi single type — `shir-challenge-page`
 
@@ -332,7 +391,7 @@ Peach accent palette defined in `features/shir-challenge/ShirChallenge.tokens.ts
 
 ## 15. Static Pages CMS
 
-Static informational pages (e.g. privacy policy, about, terms) are managed through a `page` Strapi collection type and rendered by `app/[slug]/page.tsx`.
+Static informational pages (e.g. privacy policy, about, terms) are managed through a `page` Strapi collection type and rendered by `app/(standard)/[slug]/page.tsx`.
 
 ### Strapi collection type — `page`
 
@@ -348,9 +407,9 @@ Located at `server/src/api/page/`. Each document is a standalone content page.
 
 SEO component defined in `server/src/components/shared/seo.json`.
 
-### Route — `app/[slug]/page.tsx`
+### Route — `app/(standard)/[slug]/page.tsx`
 
-A Next.js **server component**. Named segments (`/categories/`, `/recipes/`, `/results/`, `/tags/`) take priority over this dynamic segment.
+A Next.js **server component**. Named segments (`/categories/`, `/recipes/`, `/results/`, `/tags/`) take priority over this dynamic segment. (Route group folder — see §9b — does not affect the URL.)
 
 - Uses `React.cache()` to deduplicate the fetch between `generateMetadata` and the page component.
 - Falls back to `notFound()` if the slug doesn't resolve.
@@ -415,4 +474,4 @@ Dynamic component using TanStack Query (`useFooter`, `staleTime: 10 min`). Rende
 - **Do not remove or rename component fields** (e.g. `ingredientSections`, `preparationSections`) without confirming the DB state and updating any migration/backfill scripts.
 - **Keep this document updated** when the canonical data model changes — see the Architecture Documentation Rule in `CLAUDE.md`.
 - **Strapi single type `footer`** — deleting all sections in the admin does not delete the document; it returns an empty sections array. The footer renders gracefully in this case.
-- **`app/[slug]/` catch-all route** — any new named segment at the root level (e.g. `/about/`) must be added as a directory under `app/` **before** a `Page` with that slug is published, otherwise the dynamic segment may shadow intended behavior during ISR.
+- **`app/(standard)/[slug]/` catch-all route** — any new named segment at the root level (e.g. `/about/`) must be added as a directory under `app/(standard)/` **before** a `Page` with that slug is published, otherwise the dynamic segment may shadow intended behavior during ISR.
