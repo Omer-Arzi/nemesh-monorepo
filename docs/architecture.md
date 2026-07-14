@@ -244,17 +244,56 @@ always correct with zero runtime inference.
 instance per group. Crossing between `/` and any other route unmounts and
 remounts it — client-side navigation *within* a group (e.g.
 `/categories` → `/results`) is unaffected and fully persistent, as before.
-Known regressions from this: `DesktopCompactHeader`'s search input text
-resets when crossing the boundary, and its enter/exit CSS transition
-doesn't play at that exact moment (it still animates normally for the
-scroll-driven show/hide while browsing the homepage itself). `navRailOpen`
-and `colorMode` are unaffected — they live in the Zustand `uiStore`
-module, not component state, so they survive the remount.
+Known regression: `DesktopCompactHeader`'s search input text resets when
+crossing the boundary (its dropdown/query state is local to the
+now-remounting component). `navRailOpen` and `colorMode` are unaffected —
+they live in the Zustand `uiStore` module, not component state, so they
+survive the remount.
 
 Cosmetic `usePathname()` reads for nav-link active-state highlighting
 (`NavigationItem`, `NavDrawer`, `NavLink`) are unrelated to this and were
 left unchanged — they don't affect SSR-critical layout, only which link
 renders bold.
+
+### Reconstructing the transition across the remount
+
+Remounting means the compact header/rail have no persistent DOM node left
+to CSS-transition between states, which would otherwise mean an abrupt
+snap when crossing the boundary. `PageTransitionProvider`
+(`src/providers/PageTransitionProvider.tsx`, mounted once in
+`RootProviders` — so it never remounts, unlike `AppShell`) restores the
+visual continuity without reintroducing any SSR-critical inference:
+
+- Every `AppShell` instance publishes its actual settled visual state
+  (`{ pageMode, desktopHeaderVisible, railStickyTop }`) to the provider
+  whenever it changes (including the homepage's own scroll-driven
+  changes).
+- A freshly-mounted `AppShell` reads that *previous* state via
+  `useSyncExternalStore` (never a raw ref read during render, and never
+  routed through a `useEffect` + `setState`, which would be a
+  derived-state anti-pattern) and, if it differs from its own real target,
+  seeds its first paint to match the previous state, then releases to the
+  real target on the next animation frame — letting the existing
+  opacity/transform/top CSS transitions animate the change exactly as
+  they do for the scroll-driven show/hide within a single page.
+- If the previous state already matches the real target (e.g. leaving the
+  homepage already scrolled past the hero, where the standard-page target
+  is the same visible/64 state), no seed is set at all — no pointless
+  animation.
+- `getServerSnapshot` for that store always returns `null`, so this can
+  never influence SSR/hydration output — the first-ever mount in a tab
+  always renders directly in its correct final state, matching the plain
+  route-group behavior with zero animation. The mechanism only ever
+  activates for a second-or-later, purely client-side mount within an
+  already-running session.
+- Respects `prefers-reduced-motion`: the seed is skipped entirely when set,
+  so reduced-motion users get the final state directly, same as a fresh
+  load.
+- Failure mode by construction: if anything about this mechanism is wrong
+  or stale, the worst case is a missing/incorrect entrance animation — it
+  can never change what the page's final, settled state is, since that
+  remains 100% controlled by the hardcoded `pageMode` prop untouched by
+  any of this.
 
 ---
 
