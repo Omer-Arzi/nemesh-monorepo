@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import RootProviders from "@/providers";
-import AppShell from "@/components/layout/AppShell";
 import { getSiteSettings } from "@/lib/api/services/siteSettingService";
 import { GoogleAnalyticsScript } from "@/lib/analytics";
 
@@ -17,9 +16,18 @@ const heebo = Heebo({
  * Root layout — server component that sets the HTML skeleton.
  *
  * Responsibility split:
- *   RootProviders  → MUI theme, Emotion SSR, TanStack Query
- *   AppShell       → Header, <main>, Footer (persistent across all routes)
- *   {children}     → per-page content rendered into <main>
+ *   RootProviders → MUI theme, Emotion SSR, TanStack Query (persistent
+ *                   across every route — this file never changes per route)
+ *   {children}    → the matched route group's own layout — either
+ *                   (home)/layout.tsx or (standard)/layout.tsx — each of
+ *                   which renders AppShell with a hardcoded pageMode.
+ *
+ * AppShell deliberately does NOT live here. It needs to know whether it's
+ * rendering the home route deterministically at SSR/ISR time, and a
+ * usePathname() read inside a shared "use client" layout has proven
+ * unreliable for that during static generation. Route groups make Next's
+ * own file-system router (not a runtime hook) the source of truth instead.
+ * See docs/architecture.md for the full history.
  *
  * TODO: Set real title/description/icons once branding is decided.
  */
@@ -41,7 +49,7 @@ export default async function RootLayout({
     <html lang="he" dir="rtl" className={heebo.variable}>
       <body>
         <RootProviders activePresetKey={activeThemeKey ?? undefined} branding={branding}>
-          <AppShell>{children}</AppShell>
+          {children}
         </RootProviders>
         <GoogleAnalyticsScript />
         <SpeedInsights />
