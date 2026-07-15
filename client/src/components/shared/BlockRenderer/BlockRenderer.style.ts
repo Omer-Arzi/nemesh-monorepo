@@ -47,6 +47,20 @@ export const BlockRendererStyle = {
     color: "text.primary",
   },
 
+  // Content-page article headings must read as in-article section titles,
+  // not full-size page headings — the same h1-h6 variants elsewhere on the
+  // site (recipe titles, hero sections) use the theme's default sizing.
+  // Scoped here, not in the shared theme, so nothing outside this renderer
+  // is affected.
+  headingFontSize: {
+    1: "1.75rem",
+    2: "1.5rem",
+    3: "1.25rem",
+    4: "1.125rem",
+    5: "1rem",
+    6: "0.9375rem",
+  } as Record<1 | 2 | 3 | 4 | 5 | 6, string>,
+
   list: {
     // paddingInlineStart is an RTL-aware logical property. Using pr/pl here would be
     // swapped by stylis-plugin-rtl, zeroing out the bullet indentation in RTL.
