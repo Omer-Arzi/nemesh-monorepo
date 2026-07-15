@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query/keys";
-import { getPageBySlug, getFooterPages } from "@/lib/api/services/pageService";
+import { getPageBySlug } from "@/lib/api/services/pageService";
 import { getFooter } from "@/lib/api/services/footerService";
 
 export function usePage(slug: string) {
@@ -15,14 +15,6 @@ export function useFooter() {
   return useQuery({
     queryKey: queryKeys.footer.detail(),
     queryFn: getFooter,
-    staleTime: 10 * 60 * 1000,
-  });
-}
-
-export function useFooterPages() {
-  return useQuery({
-    queryKey: queryKeys.pages.footerPages(),
-    queryFn: getFooterPages,
     staleTime: 10 * 60 * 1000,
   });
 }

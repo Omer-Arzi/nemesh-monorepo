@@ -7,29 +7,17 @@ import Typography from "@mui/material/Typography";
 import MuiLink from "@mui/material/Link";
 import NextLink from "next/link";
 import { FreckleDust } from "@/components/shared";
-import { useFooter, useFooterPages } from "@/features/page/hooks";
-import type { Page } from "@/types/domain";
+import { useFooter } from "@/features/page/hooks";
 import { FooterStyle } from "./styles/FooterStyle";
-
-type FooterPageSection = { title: string; pages: Page[] };
-
-function buildSections(pages: Page[]): FooterPageSection[] {
-  const map = new Map<string, Page[]>();
-  for (const page of pages) {
-    const key = page.footerSection ?? "";
-    const group = map.get(key) ?? [];
-    group.push(page);
-    map.set(key, group);
-  }
-  return Array.from(map.entries()).map(([title, pages]) => ({ title, pages }));
-}
 
 export default function Footer() {
   const { data: footer } = useFooter();
-  const { data: footerPages = [] } = useFooterPages();
   const year = new Date().getFullYear();
 
-  const sections = buildSections(footerPages);
+  // footer.sections (Strapi "Footer" singleton) is the single source of truth
+  // for section title, ordering, and links — array order from Strapi is
+  // preserved as-is, both for sections and for links within a section.
+  const sections = footer?.sections ?? [];
   const hasSections = sections.length > 0;
 
   return (
@@ -46,13 +34,24 @@ export default function Footer() {
                   </Typography>
                 )}
                 <Box component="ul" sx={FooterStyle.linkList}>
-                  {section.pages.map((page, j) => (
-                    <Box key={j} component="li" sx={FooterStyle.linkItem}>
-                      <MuiLink component={NextLink} href={`/${page.slug}`} sx={FooterStyle.link}>
-                        {page.title}
-                      </MuiLink>
-                    </Box>
-                  ))}
+                  {section.links.map((link, j) => {
+                    const href = link.page ? `/${link.page.slug}` : (link.externalUrl ?? "#");
+                    const label = link.customLabel ?? link.page?.title ?? link.externalUrl ?? "";
+                    return (
+                      <Box key={j} component="li" sx={FooterStyle.linkItem}>
+                        <MuiLink
+                          component={NextLink}
+                          href={href}
+                          sx={FooterStyle.link}
+                          {...(link.openInNewTab
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {})}
+                        >
+                          {label}
+                        </MuiLink>
+                      </Box>
+                    );
+                  })}
                 </Box>
               </Grid>
             ))}
