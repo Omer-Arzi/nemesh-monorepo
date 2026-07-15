@@ -88,7 +88,14 @@ function renderBlock(block: BlockNode, idx: number): React.ReactNode {
         6: "h6",
       } as const;
       return (
-        <Typography key={idx} variant={variantMap[block.level]} sx={BlockRendererStyle.heading}>
+        <Typography
+          key={idx}
+          variant={variantMap[block.level]}
+          sx={{
+            ...BlockRendererStyle.heading,
+            fontSize: BlockRendererStyle.headingFontSize[block.level],
+          }}
+        >
           {block.children.map((child, i) => renderInlineNode(child, i))}
         </Typography>
       );
