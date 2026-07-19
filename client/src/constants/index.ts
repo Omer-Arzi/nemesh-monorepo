@@ -11,6 +11,7 @@
 
 export const ROUTES = {
   HOME: "/",
+  ABOUT: "/about",
   /** Recipe listing / results page. */
   RESULTS: "/results",
   /** Call as a function: `ROUTES.RECIPE(slug)` → "/recipes/pasta-bolognese" */

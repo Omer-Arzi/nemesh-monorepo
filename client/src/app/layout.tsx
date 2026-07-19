@@ -33,7 +33,7 @@ const heebo = Heebo({
  */
 export const metadata: Metadata = {
   title: {
-    default: "Nemesh | נמש – אתר מתכונים פרטי",
+    default: "Nemesh | נמש",
     template: "%s | Nemesh",
   },
   description:

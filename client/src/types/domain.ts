@@ -166,6 +166,24 @@ export type HomePage = {
   about: HomepageAbout | null;
 };
 
+// ─── About page ───────────────────────────────────────────────────────────────
+
+/**
+ * Content for the dedicated About page (distinct from HomepageAbout, the
+ * shorter homepage teaser). eyebrow and title are both optional; content and
+ * both images are required by the Strapi schema — getAboutPage() returns
+ * null for the whole page if any of those is unusable, rather than
+ * rendering a partial page. When title is absent, the renderer falls back
+ * to a generic heading so the page still has exactly one H1.
+ */
+export type AboutPage = {
+  eyebrow: string | null;
+  title: string | null;
+  content: BlockNode[];
+  primaryImage: Image;
+  secondaryImage: Image;
+};
+
 // ─── Shir Challenge ───────────────────────────────────────────────────────────
 
 export type MyProgressStatus = "idea" | "writing" | "cooked" | "published";

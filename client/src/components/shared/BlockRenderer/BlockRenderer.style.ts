@@ -41,17 +41,20 @@ export const BlockRendererStyle = {
     mb: 0,
   },
 
+  // No fontWeight here deliberately — Typography's own variant already pulls
+  // the theme's per-level weight (typography.ts: h2/h3 700, h4/h5 600, h6
+  // 500), which is exactly the "calmer at smaller levels" hierarchy H4/H5
+  // need. Setting a flat weight here would override that per-level
+  // distinction for every level uniformly.
   heading: {
-    fontWeight: 700,
-    mb: 0.5,
     color: "text.primary",
   },
 
-  // Content-page article headings must read as in-article section titles,
-  // not full-size page headings — the same h1-h6 variants elsewhere on the
-  // site (recipe titles, hero sections) use the theme's default sizing.
-  // Scoped here, not in the shared theme, so nothing outside this renderer
-  // is affected.
+  // Content-page / About-page article headings must read as in-article
+  // section titles, not full-size page headings — the same h1-h6 variants
+  // elsewhere on the site (recipe titles, hero sections) use the theme's
+  // default sizing. Scoped here, not in the shared theme, so nothing outside
+  // this renderer is affected.
   headingFontSize: {
     1: "1.75rem",
     2: "1.5rem",
@@ -60,6 +63,18 @@ export const BlockRendererStyle = {
     5: "1rem",
     6: "0.9375rem",
   } as Record<1 | 2 | 3 | 4 | 5 | 6, string>,
+
+  // h2/h3 keep the smaller, already-verified 0.5 gap; h4/h5/h6 get a touch
+  // more breathing room so they read as deliberately spaced sub-headings
+  // rather than tightly bound to the paragraph beneath them.
+  headingMarginBottom: {
+    1: 1,
+    2: 0.5,
+    3: 0.5,
+    4: 1,
+    5: 1,
+    6: 1,
+  } as Record<1 | 2 | 3 | 4 | 5 | 6, number>,
 
   list: {
     // paddingInlineStart is an RTL-aware logical property. Using pr/pl here would be
