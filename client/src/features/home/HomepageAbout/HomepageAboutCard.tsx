@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { NemeshImage } from "@/components/shared";
 import type { Image, BlockNode } from "@/types/domain";
+import AboutReadMoreLink from "./AboutReadMoreLink";
 import { HomepageAboutStyle } from "./HomepageAbout.style";
 
 // Maximum characters of raw text shown in the homepage preview.
@@ -90,10 +91,10 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
       )}
 
       {/*
-       * imageAndTextArea — display:flow-root BFC.
-       * imageWrapper floats inline-end (physical left in RTL).
-       * textColumn is a BFC block (overflow:hidden) that sits beside the float
-       * on the physical right without overlapping it.
+       * imageAndTextArea — flex row-reverse on desktop (image physically
+       * left, text physically right; DOM order is image-first), centering
+       * the image vertically against the text column's height. See
+       * HomepageAbout.style.ts for why row-reverse specifically.
        */}
       <Box sx={HomepageAboutStyle.imageAndTextArea}>
         <Box sx={HomepageAboutStyle.imageWrapper}>
@@ -114,6 +115,8 @@ export default function HomepageAboutCard({ title, body, image }: Props) {
               {truncated && i === paragraphs.length - 1 && "…"}
             </Typography>
           ))}
+
+          <AboutReadMoreLink />
         </Box>
       </Box>
     </Box>

@@ -94,6 +94,7 @@ function renderBlock(block: BlockNode, idx: number): React.ReactNode {
           sx={{
             ...BlockRendererStyle.heading,
             fontSize: BlockRendererStyle.headingFontSize[block.level],
+            mb: BlockRendererStyle.headingMarginBottom[block.level],
           }}
         >
           {block.children.map((child, i) => renderInlineNode(child, i))}
