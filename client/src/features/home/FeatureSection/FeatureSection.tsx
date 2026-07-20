@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { PageContainer, NemeshImage } from "@/components/shared";
 import type { HomeFeatureSection } from "@/types/domain";
+import FeatureCard from "./FeatureCard";
 import FeatureSectionReadMoreLink from "./FeatureSectionReadMoreLink";
 import { FeatureSectionStyle } from "./FeatureSection.style";
 import { FEATURE_CARD_ILLUSTRATIONS } from "./FeatureSection.consts";
@@ -35,27 +36,12 @@ export default function FeatureSection({ section }: Props) {
         <Box sx={FeatureSectionStyle.cards}>
           {section.cards.map((card) => {
             const Illustration = FEATURE_CARD_ILLUSTRATIONS[card.key];
-            return (
-              <Box key={card.key} sx={FeatureSectionStyle.card}>
-                <Box sx={FeatureSectionStyle.iconWrapper}>
-                  {Illustration ? (
-                    <Illustration />
-                  ) : (
-                    card.icon && (
-                      <NemeshImage image={card.icon} alt={card.icon.alt || card.title} fill sizes="56px" />
-                    )
-                  )}
-                </Box>
-                <Typography component="h3" variant="subtitle1" sx={FeatureSectionStyle.cardTitle}>
-                  {card.title}
-                </Typography>
-                {card.description && (
-                  <Typography component="p" variant="body2" sx={FeatureSectionStyle.cardDescription}>
-                    {card.description}
-                  </Typography>
-                )}
-              </Box>
+            const icon = Illustration ? (
+              <Illustration />
+            ) : (
+              card.icon && <NemeshImage image={card.icon} alt={card.icon.alt || card.title} fill sizes="56px" />
             );
+            return <FeatureCard key={card.key} card={card} icon={icon} />;
           })}
         </Box>
 

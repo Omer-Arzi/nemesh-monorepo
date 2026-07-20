@@ -1,3 +1,6 @@
+import { alpha } from "@mui/material/styles";
+import type { Theme } from "@mui/material/styles";
+
 export const FeatureSectionStyle = {
   section: {
     py: { xs: 3, sm: 3.5, md: 4 },
@@ -16,10 +19,16 @@ export const FeatureSectionStyle = {
     gap: { xs: 2, md: 3 },
   },
 
-  card: {
+  // Hover is a single, coordinated "lift" gesture (translateY + a soft,
+  // low-opacity shadow selling the lift) plus one independent, quieter
+  // accent (the icon warming toward the brand color). Deliberately not
+  // also shifting the border color on hover — with the lift+shadow already
+  // signalling "hovered", a third simultaneous change felt like it started
+  // stacking effects rather than reading as one calm gesture.
+  card: (theme: Theme) => ({
+    display: "flex",
     flex: "1 1 0%",
     minWidth: 0,
-    display: "flex",
     flexDirection: "column",
     alignItems: "center",
     textAlign: "center",
@@ -29,12 +38,22 @@ export const FeatureSectionStyle = {
     border: "1px solid",
     borderColor: "divider",
     bgcolor: "background.paper",
-  },
+    transition: "transform 200ms ease, box-shadow 200ms ease",
+    "&:hover": {
+      transform: "translateY(-2px)",
+      boxShadow: `0 4px 14px ${alpha(theme.palette.text.primary, 0.08)}`,
+    },
+    "&:hover .feature-card-icon": {
+      color: theme.palette.primary.main,
+    },
+  }),
 
   iconWrapper: {
     position: "relative",
     width: 56,
     height: 56,
+    color: "text.primary",
+    transition: "color 200ms ease",
   },
 
   cardTitle: {
