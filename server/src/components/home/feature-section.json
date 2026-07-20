@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_home_feature_sections",
+  "info": {
+    "displayName": "Feature Section",
+    "description": "Homepage section with feature cards and a read-more link to a content page"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "cards": {
+      "type": "component",
+      "repeatable": true,
+      "component": "home.feature-card"
+    },
+    "readMoreLabel": {
+      "type": "string"
+    },
+    "readMorePage": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::content-page.content-page"
+    }
+  }
+}

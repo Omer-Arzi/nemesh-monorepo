@@ -37,6 +37,10 @@ if (imageHost) {
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // Lets the dev server accept requests (including HMR) from a tunnel host
+  // (e.g. ngrok) when testing this dev server from another device. Server-only
+  // config value — no NEXT_PUBLIC_ prefix needed, it's never sent to the browser.
+  allowedDevOrigins: process.env.DEV_TUNNEL_HOST ? [process.env.DEV_TUNNEL_HOST] : undefined,
   images: {
     remotePatterns,
     // Next.js Image blocks private IPs (SSRF protection, added in 14.1.1).

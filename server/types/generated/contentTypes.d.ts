@@ -580,6 +580,7 @@ export interface ApiHomepageHomepage extends Struct.SingleTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     featuredCategoriesTitle: Schema.Attribute.String;
+    featureSection: Schema.Attribute.Component<'home.feature-section', false>;
     heroBackgroundImage: Schema.Attribute.Media<'images'>;
     heroSubtitle: Schema.Attribute.Text;
     heroTitle: Schema.Attribute.String;
