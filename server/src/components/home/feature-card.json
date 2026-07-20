@@ -1,0 +1,30 @@
+{
+  "collectionName": "components_home_feature_cards",
+  "info": {
+    "displayName": "Feature Card",
+    "description": "A single card in the homepage feature section"
+  },
+  "options": {},
+  "attributes": {
+    "cardKey": {
+      "type": "string",
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "icon": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "cardOrder": {
+      "type": "integer"
+    }
+  }
+}

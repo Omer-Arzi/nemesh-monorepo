@@ -30,3 +30,15 @@ export const PAGINATION = {
   MAX_PAGE_SIZE: 100,
 } as const;
 
+/**
+ * The three homepage feature-card `cardKey` values that have a hand-authored
+ * illustration built into the frontend (src/assets/illustrations/). A card
+ * using one of these keys doesn't need a Strapi `icon` upload to be valid —
+ * see homepageService.ts's mapFeatureCard and FeatureSection.consts.ts.
+ */
+export const FEATURE_CARD_KEYS = {
+  INGREDIENTS_AVAILABLE: "ingredients-available",
+  COOKING_MODE: "cooking-mode",
+  SEARCH_BY_INGREDIENTS: "search-by-ingredients",
+} as const;
+

@@ -153,6 +153,36 @@ export type HomepageAbout = {
 };
 
 /**
+ * A single card within the homepage feature section.
+ * title is always required. icon is required UNLESS `key` matches one of
+ * FEATURE_CARD_KEYS (a hand-authored illustration exists in code for those
+ * — see FeatureSection.consts.ts) — a card failing both checks is dropped
+ * by the service layer before this type is ever populated. description and
+ * order are optional; cards without an explicit order keep their array
+ * position.
+ */
+export type HomeFeatureCard = {
+  key: string;
+  title: string;
+  description: string | null;
+  icon: Image | null;
+  order: number | null;
+};
+
+/**
+ * Homepage feature section: an optional heading, a list of cards (already
+ * filtered to only valid ones and sorted), and a single "read more" link to
+ * a content page. Cards is never empty when this type is populated — an
+ * empty result maps to null at the service layer instead.
+ */
+export type HomeFeatureSection = {
+  title: string | null;
+  cards: HomeFeatureCard[];
+  readMoreLabel: string | null;
+  readMorePage: { slug: string; title: string } | null;
+};
+
+/**
  * Editable homepage content from the homepage single type.
  * All fields are optional — components fall back to their built-in defaults
  * when a field is null (not yet filled in Strapi).
@@ -164,6 +194,7 @@ export type HomePage = {
   latestRecipesTitle: string | null;
   featuredCategoriesTitle: string | null;
   about: HomepageAbout | null;
+  featureSection: HomeFeatureSection | null;
 };
 
 // ─── About page ───────────────────────────────────────────────────────────────

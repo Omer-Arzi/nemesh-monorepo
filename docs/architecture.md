@@ -428,6 +428,59 @@ Peach accent palette defined in `features/shir-challenge/ShirChallenge.tokens.ts
 
 ---
 
+## 14. Homepage CMS
+
+The homepage (`app/(home)/page.tsx`) is driven by a `homepage` Strapi **single type** (`draftAndPublish: false`), fetched once server-side via `getHomepage()` (`src/lib/api/services/homepageService.ts`) and passed down as props to purely presentational section components in a fixed render order: hero → feature section → about → featured categories → latest recipes.
+
+### Strapi single type — `homepage`
+
+Located at `server/src/api/homepage/`. All fields are optional — the frontend falls back to built-in Hebrew defaults (or renders nothing) when a field is empty.
+
+| Field | Type | Notes |
+|---|---|---|
+| `heroTitle` / `heroSubtitle` / `heroBackgroundImage` | string / text / media | Search hero content |
+| `latestRecipesTitle` / `featuredCategoriesTitle` | string | Section headers for the collection-driven sections below |
+| `about` | component (`home.about-section`) | Expandable about teaser — see `HomepageAbout` |
+| `featureSection` | component (`home.feature-section`) | 3-card feature section + read-more link — see below |
+
+### `home.feature-section` / `home.feature-card`
+
+Structural-only content model for a homepage section: a repeatable list of feature cards and a single "read more" link to an existing content page — deliberately no section-level heading/subheading. Introduced without real content or final card visual design (spacing/colors/hover) — those remain a separate follow-up task. Icon illustrations for the three known cards were added — see below.
+
+**`home.feature-section`** (`server/src/components/home/feature-section.json`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `cards` | component (`home.feature-card`, repeatable) | Ordered by array position; `cardOrder` (if set on any card) overrides |
+| `readMoreLabel` | string | Optional custom label; falls back to the linked page's title, then a generic default |
+| `readMorePage` | relation (many-to-one → `api::content-page.content-page`) | Same pattern as `shared.footer-link.page` — internal link by relation, not a raw URL, so it can't go stale when the page is renamed |
+
+**`home.feature-card`** (`server/src/components/home/feature-card.json`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `cardKey` | string (required) | Stable internal identifier, not user-facing |
+| `title` | string (required) | Card title — card is dropped by the frontend mapper if missing |
+| `description` | text | Optional short description |
+| `icon` | media, `allowedTypes: ["images"]` (required) | Accepts SVG (same `allowedTypes` group as every other image field in this codebase; no Strapi upload config change needed) |
+| `cardOrder` | integer | Optional explicit sort override; cards without it keep their component-array position |
+
+### Icon illustrations — `src/assets/illustrations/`
+
+The three known feature cards (`ingredients-available`, `cooking-mode`, `search-by-ingredients`) have hand-authored inline-SVG illustrations as React components (`IngredientsAvailableIllustration`, `CookingModeIllustration`, `SearchByIngredientsIllustration`), not raster files. `FeatureSection.consts.ts`'s `FEATURE_CARD_ILLUSTRATIONS` maps a card's `cardKey` to its component; `FeatureSection.tsx` renders the matching illustration in place of the card's Strapi `icon` media when the key matches one of the three, falling back to the Strapi-managed `icon` (via `NemeshImage`) for any other key — so a future fourth card without a matching illustration still renders using its uploaded Strapi icon.
+
+Rendered inline (not through `next/image`) because: (1) the project has no SVGR/webpack config to import raw `.svg` files as components, and the one pre-existing `src/assets/icons/logo-nemesh-icon.svg` was unused dead code; (2) `next.config.ts` doesn't set `images.dangerouslyAllowSVG`, so `next/image`'s optimizer would reject an SVG source in production; (3) inline SVG is vector-native, so it's crisp on retina with no image-optimizer involvement at all, and `stroke="currentColor"` lets each icon inherit the card's theme text color instead of a hardcoded value.
+
+### Frontend mapping — `homepageService.ts`
+
+`mapFeatureCard()` drops any card missing `title` or `icon`. `mapFeatureSection()` maps and sorts the surviving cards (`cardOrder ?? original index`) and returns `null` for the whole section when no cards survive — `FeatureSection` (`src/features/home/FeatureSection/`) then renders nothing. `readMorePage` is populated field-scoped to `slug` + `title` only (identical to `FooterLink.page`), so no page body or draft-only data is ever exposed through this relation.
+
+### Permissions (Strapi admin)
+
+`featureSection` and its nested components ride on the existing `homepage` → `find` public permission (Strapi permissions are granted per content-type action, not per-field) — no new grant needed. The `readMorePage` relation target (`content-page`) already has public `find`/`findOne` granted programmatically in `server/src/index.ts`'s bootstrap hook.
+
+---
+
 ## 15. Static Pages CMS
 
 Static informational pages (e.g. privacy policy, about, terms) are managed through a `page` Strapi collection type and rendered by `app/(standard)/[slug]/page.tsx`.

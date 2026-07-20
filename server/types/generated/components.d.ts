@@ -13,6 +13,38 @@ export interface HomeAboutSection extends Struct.ComponentSchema {
   };
 }
 
+export interface HomeFeatureCard extends Struct.ComponentSchema {
+  collectionName: 'components_home_feature_cards';
+  info: {
+    description: 'A single card in the homepage feature section';
+    displayName: 'Feature Card';
+  };
+  attributes: {
+    cardKey: Schema.Attribute.String & Schema.Attribute.Required;
+    cardOrder: Schema.Attribute.Integer;
+    description: Schema.Attribute.Text;
+    icon: Schema.Attribute.Media<'images'>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface HomeFeatureSection extends Struct.ComponentSchema {
+  collectionName: 'components_home_feature_sections';
+  info: {
+    description: 'Homepage section with feature cards and a read-more link to a content page';
+    displayName: 'Feature Section';
+  };
+  attributes: {
+    cards: Schema.Attribute.Component<'home.feature-card', true>;
+    readMoreLabel: Schema.Attribute.String;
+    readMorePage: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::content-page.content-page'
+    >;
+    title: Schema.Attribute.String;
+  };
+}
+
 export interface RecipeIngredientSection extends Struct.ComponentSchema {
   collectionName: 'components_recipe_ingredient_sections';
   info: {
@@ -107,6 +139,8 @@ declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
       'home.about-section': HomeAboutSection;
+      'home.feature-card': HomeFeatureCard;
+      'home.feature-section': HomeFeatureSection;
       'recipe.ingredient-section': RecipeIngredientSection;
       'recipe.preparation-section': RecipePreparationSection;
       'recipe.preparation-step': RecipePreparationStep;

@@ -33,6 +33,11 @@
       "type": "component",
       "repeatable": false,
       "component": "home.about-section"
+    },
+    "featureSection": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home.feature-section"
     }
   }
 }
