@@ -262,6 +262,44 @@ At the end of each relevant task, note whether `docs/architecture.md` or `docs/s
 
 ---
 
+## Recent Development & Current State (as of July 2026)
+
+### About Page (Strapi-backed)
+
+* Route: `/about` (`src/app/(standard)/about/page.tsx`), backed by the `about-page` singleType in Strapi.
+* Feature folder: `src/features/about/` — `AboutIntro` (eyebrow + H1 title + `BlockRenderer` body) and `AboutPhotoRail` (two Strapi-managed photos styled as clipped to a stylized "kitchen order rail").
+* Service: `src/lib/api/services/aboutPageService.ts` — `getAboutPage()`, `revalidate: 300`. Missing/incomplete content (no `content` blocks, or either image unset) maps to `null` → `notFound()`.
+* Domain type: `AboutPage` in `src/types/domain.ts`. `title` and `eyebrow` are optional; `content`, `primaryImage`, `secondaryImage` are required for the page to render at all.
+* Known quirk: the title only falls back to a generic heading when it's nullish — an entry with `title: " "` (whitespace, not empty) renders a visually empty `<h1>`. Worth a real fix if it resurfaces.
+
+### Homepage About CTA
+
+* `src/features/home/HomepageAbout/` always renders a "קרא עוד ⟵" link to `/about` (not conditional on content existing — the About page is treated as permanent site architecture).
+* `AboutReadMoreLink.tsx` is a small standalone `"use client"` component, split out from the otherwise server-rendered `HomepageAboutCard` — `MuiLink component={NextLink}` can't cross the RSC boundary from a Server Component ("Functions cannot be passed directly to Client Components").
+* **RTL transform gotcha**: `stylis-plugin-rtl` (site-wide, via the RTL theme setup) flips the sign of `transform: translateX()` under `dir="rtl"`. To move an element visually left/right on hover, you may need to author the *opposite* sign than expected — verify with `getBoundingClientRect()` before/after, don't trust the authored CSS value alone. Same class of issue as directional arrow glyphs (`⟵` vs `⟶`) not being auto-mirrored by `dir="rtl"` — the correct glyph has to be picked explicitly.
+
+### Rich-text (BlockRenderer)
+
+* `src/components/shared/BlockRenderer/` supports Strapi Blocks headings H1–H6 with restrained, level-specific font sizes and margins (`headingFontSize` / `headingMarginBottom` maps in `BlockRenderer.style.ts`). Bold inline text is never promoted to a heading — regression-tested.
+
+### Test infrastructure
+
+* Vitest + Testing Library (`vitest.config.mts`, `vitest.setup.ts`).
+* Always wrap component tests in the real theme via `src/test/renderWithTheme.tsx` — without it, MUI silently falls back to its own default theme (Roboto, default font weights), producing tests that look like they assert real values but don't.
+* `jsdom` is pinned to v25 (v27 has an ESM/CJS resolution break via `@asamuzakjp/css-color`). MUI / `react-transition-group` need `server.deps.inline` entries in `vitest.config.mts` to resolve correctly under Vitest's SSR module resolution.
+
+### Production environment
+
+* Images: S3 (`nemesh-images` bucket, `eu-west-1`) via `NEXT_PUBLIC_IMAGE_HOST`; Strapi API via `NEXT_PUBLIC_API_URL`. Local dev uses Strapi's local `/uploads` instead — `next.config.ts` allows both hosts.
+* Client deploys to Vercel, server to Railway (see `docs/deployment.md`).
+* **ISR staleness gotcha**: a page that calls `notFound()` during a static/ISR render gets cached as a 404 by Vercel's edge for the full `revalidate` window (currently 300s on `/about`). Adding the missing Strapi content afterward does not show up until that window elapses and a request triggers background regeneration — a hard-reload only busts the browser's cache, not Vercel's. If a page "still 404s" right after a content fix, check the `age` / `x-nextjs-stale-time` response headers before assuming the fix didn't work.
+
+### Local dev gotcha
+
+* Don't run a full `rm -rf .next && npm run build` in this directory while a `next dev` server is running (yours or someone else's) — a production build overwrites the `.next` folder the dev server's Turbopack process depends on, breaking it with `ENOENT ... build-manifest.json` until that dev server is restarted.
+
+---
+
 ## Theme Philosophy
 
 Nemesh should feel:
