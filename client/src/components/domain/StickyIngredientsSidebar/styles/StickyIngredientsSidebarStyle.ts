@@ -80,12 +80,13 @@ export const StickyIngredientsSidebarStyle = {
   // Appears when the inline trigger has scrolled above the viewport.
   // position:fixed escapes the RecipeDetailLayout grid cell — sits at the true
   // bottom of the viewport regardless of where the component is mounted in the DOM.
-  // display:{xs:"flex",md:"none"} hides it on desktop via CSS only, so the JS
-  // visibility logic never needs to know about the current breakpoint.
+  // display:{xs:"flex",sm:"none"} hides it from sm+ via CSS only (tablet gets its
+  // own edge drawer instead), so the JS visibility logic never needs to know
+  // about the current breakpoint.
   // opacity/transform/pointerEvents are driven by inline style (runtime values).
   // paddingBottom is set via inline style to allow env(safe-area-inset-bottom).
   stickyBar: {
-    display: { xs: "flex", md: "none" },
+    display: { xs: "flex", sm: "none" },
     position: "fixed" as const,
     bottom: 0,
     left: 0,

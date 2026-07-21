@@ -10,6 +10,7 @@ import type { IngredientSection } from "@/types/domain";
 import type { CookingModeIngredientProps } from "@/features/cooking-mode";
 import IngredientSectionList from "../IngredientSectionList";
 import IngredientsBottomSheet from "../IngredientsBottomSheet";
+import TabletIngredientsDrawer from "../TabletIngredientsDrawer";
 import { StickyIngredientsSidebarStyle } from "./styles/StickyIngredientsSidebarStyle";
 import { StickyIngredientsSidebarText } from "./StickyIngredientsSidebar.consts";
 
@@ -28,23 +29,28 @@ function totalIngredientCount(ingredientSections: IngredientSection[] | undefine
 /**
  * Ingredients panel for the recipe detail sidebar.
  *
- * Mobile (xs/sm):
+ * Mobile (xs only):
  *   - Inline trigger card near the top of the recipe opens a Bottom Sheet.
  *   - When the inline trigger scrolls off the top of the viewport a sticky
  *     floating bottom bar appears, giving persistent access to ingredients
  *     while the user reads the preparation steps.
  *   - Both surfaces share a single `sheetOpen` state — no duplicate rendering.
  *
+ * Tablet (sm only): a collapsed-by-default edge drawer (TabletIngredientsDrawer)
+ *   — see that component for why it's a separate persistent panel rather than
+ *   reusing the mobile bottom sheet or the desktop sticky panel as-is.
+ *
  * Desktop (md+): sticky scrollable panel — unchanged.
  *
- * Both mobile and desktop UIs are always in the DOM; CSS `display` controls
- * which is visible. This avoids useMediaQuery and SSR hydration issues.
+ * All three UIs are always in the DOM; CSS `display` controls which is
+ * visible. This avoids useMediaQuery and SSR hydration issues.
  */
 export default function StickyIngredientsSidebar({ ingredientSections, sx, cookingMode }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const [fadeOpacity, setFadeOpacity] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [tabletDrawerOpen, setTabletDrawerOpen] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
   const count = totalIngredientCount(ingredientSections);
@@ -117,8 +123,8 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
 
   return (
     <>
-      {/* ── Mobile: inline trigger + Bottom Sheet (xs / sm only) ── */}
-      <Box sx={{ display: { xs: "block", md: "none" } }}>
+      {/* ── Mobile: inline trigger + Bottom Sheet (xs only) ── */}
+      <Box sx={{ display: { xs: "block", sm: "none" } }}>
         <Box
           ref={triggerRef}
           role="button"
@@ -146,6 +152,18 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
         <IngredientsBottomSheet
           open={sheetOpen}
           onClose={() => setSheetOpen(false)}
+          ingredientSections={ingredientSections ?? []}
+          count={count}
+          cookingMode={cookingModeForSheet}
+        />
+      </Box>
+
+      {/* ── Tablet: collapsed-by-default edge drawer (sm only) ──── */}
+      <Box sx={{ display: { xs: "none", sm: "block", md: "none" } }}>
+        <TabletIngredientsDrawer
+          open={tabletDrawerOpen}
+          onOpen={() => setTabletDrawerOpen(true)}
+          onClose={() => setTabletDrawerOpen(false)}
           ingredientSections={ingredientSections ?? []}
           count={count}
           cookingMode={cookingModeForSheet}
