@@ -35,8 +35,10 @@ export const HomepageAboutStyle = {
   // first, text second) while still placing the image physically on the
   // left in RTL: default row would put the first DOM child at
   // flex-start (=inline-start=right), so row-reverse is required to keep
-  // image-left/text-right unchanged. Mobile keeps the previous stacked
-  // (image above text) arrangement, and is never row-reverse.
+  // image-left/text-right unchanged. Only phone-width (xs) keeps the
+  // stacked (image above text) arrangement — row-reverse starts at `sm`
+  // (portrait tablet) rather than `md`, since the row layout already reads
+  // fine at tablet widths (visually confirmed, not assumed).
   //
   // No alignItems here deliberately — only the image should center (see
   // imageWrapper's alignSelf below). Centering at the container level
@@ -45,7 +47,7 @@ export const HomepageAboutStyle = {
   // the top like normal body text.
   imageAndTextArea: {
     display: "flex" as const,
-    flexDirection: { xs: "column", md: "row-reverse" } as const,
+    flexDirection: { xs: "column", sm: "row-reverse" } as const,
   },
 
   // Desktop: 198px wide × 4/5 aspect ≈ 247.5px tall — 10% smaller than the
@@ -64,16 +66,16 @@ export const HomepageAboutStyle = {
   imageWrapper: {
     display: "block" as const,
     position: "relative" as const,
-    width: { xs: "100%", md: "198px" },
-    aspectRatio: { xs: "4/3", md: "4/5" },
-    marginInlineStart: { xs: 0, md: "20px" },
-    mb: { xs: 2, md: 0 },
+    width: { xs: "100%", sm: "198px" },
+    aspectRatio: { xs: "4/3", sm: "4/5" },
+    marginInlineStart: { xs: 0, sm: "20px" },
+    mb: { xs: 2, sm: 0 },
     borderRadius: "12px",
     border: "1px solid",
     borderColor: "divider",
     overflow: "hidden" as const,
     flexShrink: 0,
-    alignSelf: { xs: "stretch", md: "center" } as const,
+    alignSelf: { xs: "stretch", sm: "center" } as const,
   },
 
   // Text column beside the image. flex:1 so it grows to fill the

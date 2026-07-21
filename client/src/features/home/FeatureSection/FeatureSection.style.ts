@@ -15,7 +15,7 @@ export const FeatureSectionStyle = {
 
   cards: {
     display: "flex",
-    flexDirection: { xs: "column", md: "row" },
+    flexDirection: { xs: "column", sm: "row" },
     gap: { xs: 2, md: 3 },
   },
 
