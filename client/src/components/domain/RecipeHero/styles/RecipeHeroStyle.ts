@@ -17,11 +17,18 @@ export const RecipeHeroStyle = {
 
   // RTL: column 1 is visually RIGHT (content), column 2 is visually LEFT (image).
   // 5:4 split gives the content column more room than the image.
+  //
+  // alignItems: "start" (not "center") — the image has a fixed aspect ratio
+  // while the content column's height varies as the description expands or
+  // collapses. Centering would re-anchor both columns to the row's midpoint
+  // every time that height changes, visibly shifting the image and title.
+  // Top-anchoring both columns keeps them stable; only the empty space below
+  // the shorter column changes, which is invisible.
   grid: {
     display: "grid",
     gridTemplateColumns: { xs: "1fr", md: "5fr 4fr" },
     gap: { xs: 3, md: 5 },
-    alignItems: "center",
+    alignItems: "start",
     maxWidth: 960,
     mx: "auto",
   },
@@ -52,29 +59,31 @@ export const RecipeHeroStyle = {
     fontSize: { xs: "1.75rem", md: "2.25rem", lg: "2.75rem" },
   },
 
-  description: {
+  // Collapsed preview: native line-clamp does the truncation — the browser
+  // measures actual rendered lines, so it's correct regardless of RTL, width,
+  // or font, and always places the ellipsis at a real line boundary (no
+  // character-count guessing, no orphaned fragment). whiteSpace: "normal"
+  // (not "pre-line") so an embedded paragraph break landing inside the
+  // clamped lines reads as flowing text instead of a blank line.
+  descriptionClamp: {
+    display: "-webkit-box" as const,
+    WebkitBoxOrient: "vertical" as const,
+    // Number of lines shown before truncating.
+    WebkitLineClamp: 4,
+    overflow: "hidden" as const,
     color: "text.secondary",
     lineHeight: 1.7,
     maxWidth: 400,
-    // pre-line preserves \n line breaks that come from Strapi's richtext field.
+    whiteSpace: "normal" as const,
+  },
+
+  // Expanded (or short, never-truncated) reading view — real paragraph
+  // structure from Strapi's richtext field is preserved via pre-line.
+  descriptionExpanded: {
+    color: "text.secondary",
+    lineHeight: 1.7,
+    maxWidth: 400,
     whiteSpace: "pre-line" as const,
-  },
-
-  // The clickable "…" that triggers the description expand.
-  readMore: {
-    cursor: "pointer",
-    color: "primary.main",
-    fontWeight: 700,
-    ml: 0.5,
-    userSelect: "none" as const,
-    "&:hover": { opacity: 0.75 },
-  },
-
-  // Inner wrapper for the animated grid expansion — overflow must be hidden
-  // so content is clipped while gridTemplateRows transitions from 0fr to 1fr.
-  descriptionExpanderInner: {
-    overflow: "hidden",
-    minHeight: 0,
   },
 
   divider: {
