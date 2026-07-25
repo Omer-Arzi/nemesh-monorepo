@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import type { TransitionEvent } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
@@ -12,19 +13,6 @@ import { formatPrepTime } from "@/lib/formatters/prepTime";
 import { NemeshImage } from "@/components/shared";
 import { RecipeHeroStyle } from "./styles/RecipeHeroStyle";
 import { RecipeHeroText } from "./RecipeHero.consts";
-
-// Descriptions longer than this are truncated until the user expands them.
-const DESCRIPTION_CHAR_LIMIT = 200;
-
-// Returns the index of the last space or newline at or before `limit`,
-// so the visible text always ends at a word boundary.
-function splitAtWordBoundary(text: string, limit: number): number {
-  if (text.length <= limit) return text.length;
-  for (let i = limit; i > Math.max(0, limit - 40); i--) {
-    if (text[i] === " " || text[i] === "\n") return i;
-  }
-  return limit;
-}
 
 type Props = Pick<
   Recipe,
@@ -59,15 +47,74 @@ export default function RecipeHero({
   sx,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  // Whether the crisp, browser-native N-line clamp (with ellipsis) is the
+  // active visual — as opposed to the full, unclamped text. Kept separate
+  // from `expanded` so collapsing can be animated: reapplying the clamp the
+  // instant `expanded` flips to false would cut the text to N lines before
+  // the max-height transition has actually finished shrinking the box. See
+  // handleTransitionEnd. Starts true so the very first paint (including SSR,
+  // where no measurement is possible yet) is never the unclamped full text —
+  // for a long description that would flash the whole thing briefly; for a
+  // short one it only means embedded paragraph breaks briefly render as
+  // spaces until measurement corrects it, a much smaller cost.
+  const [clampActive, setClampActive] = useState(true);
+  const [hasMeasured, setHasMeasured] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const [heights, setHeights] = useState<{ collapsed: number; full: number } | null>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
 
   const hasMetaStats = prepTime != null || difficulty != null || servings != null;
   const primaryCategory = categories[0] ?? null;
 
   const desc = description?.trim() ?? null;
-  const isLong = !!desc && desc.length > DESCRIPTION_CHAR_LIMIT;
-  const splitAt = isLong ? splitAtWordBoundary(desc, DESCRIPTION_CHAR_LIMIT) : (desc?.length ?? 0);
-  const visiblePart = desc?.slice(0, splitAt) ?? null;
-  const hiddenPart = isLong ? desc.slice(splitAt) : null;
+
+  // Measures the real rendered box while the clamp is active: `clientHeight`
+  // is the natural N-line clamped height, `scrollHeight` is the true full
+  // content height (scrollHeight ignores `overflow: hidden` clipping) — both
+  // come from one measurement, no guessed/theme-derived numbers involved.
+  // Re-measures on width changes (ResizeObserver) so a different breakpoint
+  // or orientation change stays accurate. Only meaningful while `clampActive`
+  // — once unclamped, clientHeight === scrollHeight and would overwrite the
+  // real figures with a stale pair.
+  useLayoutEffect(() => {
+    const el = descRef.current;
+    if (!el || !desc || !clampActive) return;
+
+    const measure = () => {
+      setHeights({ collapsed: el.clientHeight, full: el.scrollHeight });
+      setIsOverflowing(el.scrollHeight - el.clientHeight > 1);
+      setHasMeasured(true);
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [desc, clampActive]);
+
+  const handleToggle = useCallback(() => {
+    setExpanded((prev) => {
+      const next = !prev;
+      // Expanding: reveal the full text immediately. Removing the clamp
+      // while max-height grows never glitches — more of the already-present
+      // text just becomes visible as the box grows.
+      if (next) setClampActive(false);
+      return next;
+    });
+  }, []);
+
+  const handleTransitionEnd = useCallback(
+    (e: TransitionEvent<HTMLParagraphElement>) => {
+      // Collapsing: wait for the max-height shrink to finish before
+      // reapplying the clamp, so the ellipsis appears once the box has
+      // actually settled at the clamped height rather than snapping early.
+      if (e.propertyName === "max-height" && !expanded) setClampActive(true);
+    },
+    [expanded],
+  );
+
+  const useClampVisual = !hasMeasured || (isOverflowing && clampActive);
+  const maxHeight = heights ? (expanded ? heights.full : heights.collapsed) : undefined;
 
   return (
     <Box sx={{ ...RecipeHeroStyle.root, ...sx }}>
@@ -86,38 +133,24 @@ export default function RecipeHero({
 
           {desc && (
             <Box
-              onClick={isLong ? () => setExpanded((prev) => !prev) : undefined}
-              sx={isLong ? { cursor: "pointer", userSelect: "none" } : undefined}
-              role={isLong ? "button" : undefined}
-              aria-expanded={isLong ? expanded : undefined}
+              onClick={isOverflowing ? handleToggle : undefined}
+              sx={isOverflowing ? { cursor: "pointer", userSelect: "none" } : undefined}
+              role={isOverflowing ? "button" : undefined}
+              aria-expanded={isOverflowing ? expanded : undefined}
             >
-              {/* Always-visible portion */}
-              <Typography variant="body1" sx={RecipeHeroStyle.description}>
-                {visiblePart}
-                {isLong && !expanded && (
-                  <Box component="span" sx={RecipeHeroStyle.readMore}>
-                    {"…"}
-                  </Box>
-                )}
+              <Typography
+                ref={descRef}
+                variant="body1"
+                onTransitionEnd={handleTransitionEnd}
+                sx={{
+                  ...(useClampVisual ? RecipeHeroStyle.descriptionClamp : RecipeHeroStyle.descriptionExpanded),
+                  overflow: "hidden",
+                  transition: "max-height 0.35s ease",
+                  maxHeight,
+                }}
+              >
+                {desc}
               </Typography>
-
-              {/* Animated expansion — grid-template-rows: 0fr → 1fr
-                  expands to the exact height of the hidden content. */}
-              {isLong && (
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateRows: expanded ? "1fr" : "0fr",
-                    transition: "grid-template-rows 0.35s ease",
-                  }}
-                >
-                  <Box sx={RecipeHeroStyle.descriptionExpanderInner}>
-                    <Typography variant="body1" sx={RecipeHeroStyle.description}>
-                      {hiddenPart}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
             </Box>
           )}
 
