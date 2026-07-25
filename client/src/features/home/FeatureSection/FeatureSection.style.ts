@@ -25,6 +25,15 @@ export const FeatureSectionStyle = {
   // also shifting the border color on hover — with the lift+shadow already
   // signalling "hovered", a third simultaneous change felt like it started
   // stacking effects rather than reading as one calm gesture.
+  //
+  // Gated behind `@media (hover: hover) and (pointer: fine)` — not a width
+  // breakpoint — because the actual problem is touch, not screen size: a
+  // tap on a touchscreen matches `:hover` with no corresponding "pointer
+  // left" event, so the card gets stuck lifted until the next tap anywhere
+  // else. This media feature only matches devices with a real hover-capable
+  // pointer (mouse/trackpad), correctly excluding touchscreens regardless of
+  // their width (and correctly including e.g. a touchscreen laptop's
+  // trackpad, unlike a width-based xs/sm/md gate would).
   card: (theme: Theme) => ({
     display: "flex",
     flex: "1 1 0%",
@@ -39,12 +48,14 @@ export const FeatureSectionStyle = {
     borderColor: "divider",
     bgcolor: "background.paper",
     transition: "transform 200ms ease, box-shadow 200ms ease",
-    "&:hover": {
-      transform: "translateY(-2px)",
-      boxShadow: `0 4px 14px ${alpha(theme.palette.text.primary, 0.08)}`,
-    },
-    "&:hover .feature-card-icon": {
-      color: theme.palette.primary.main,
+    "@media (hover: hover) and (pointer: fine)": {
+      "&:hover": {
+        transform: "translateY(-2px)",
+        boxShadow: `0 4px 14px ${alpha(theme.palette.text.primary, 0.08)}`,
+      },
+      "&:hover .feature-card-icon": {
+        color: theme.palette.primary.main,
+      },
     },
   }),
 
