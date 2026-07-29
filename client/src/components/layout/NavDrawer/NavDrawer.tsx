@@ -30,8 +30,9 @@ type Props = {
  * Renders the same RAIL_NAV_ITEMS as the desktop NavigationRail — icons,
  * active states, and the "תפתיע אותי" surprise-me action are all included.
  *
- * Anchor: "right" in RTL so the drawer opens from the same physical side as
- * the hamburger button (physical right = start side in Hebrew).
+ * Opens from the same physical side as the hamburger button (physical right,
+ * the start side in Hebrew) — see the anchor prop comment below for why that
+ * means passing "left", not "right".
  *
  * Closes automatically when the active route changes.
  */
@@ -52,9 +53,17 @@ export default function NavDrawer({ open, onClose, items }: Props) {
 
   return (
     <Drawer
-      // In RTL the hamburger sits on the physical right, so the drawer opens from
-      // the right. In LTR the conventional position is the left.
-      anchor={direction === "rtl" ? "right" : "left"}
+      // In RTL the hamburger sits on the physical right, so the drawer must open
+      // from the right; LTR's conventional position is the left. Counterintuitively
+      // that means passing "left" here, not "right": MUI's Drawer paper is
+      // positioned by the raw anchor value (it does not flip it for RTL itself —
+      // only the slide-transition direction gets that treatment internally), but
+      // this app's global Emotion cache (EmotionRegistry) runs stylis-plugin-rtl,
+      // which flips the physical left/right CSS every Emotion-styled component
+      // generates, MUI's own included. So anchor="right" ends up rendering on the
+      // physical left — confirmed by measuring the rendered paper's bounding box,
+      // not just by reasoning about it.
+      anchor={direction === "rtl" ? "left" : "right"}
       open={open}
       onClose={onClose}
       slotProps={{ paper: { sx: NavDrawerStyle.paper } }}
