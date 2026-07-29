@@ -8,14 +8,11 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
-import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { ROUTES } from "@/constants";
 import type { RailNavItem } from "../navConfig";
 import NavigationItem from "../NavigationItem";
 import { useSurpriseMe } from "@/hooks/useSurpriseMe";
-import { SiteLogo } from "@/components/shared";
 import { NavDrawerStyle } from "./styles/NavDrawerStyle";
 
 type Props = {
@@ -70,17 +67,8 @@ export default function NavDrawer({ open, onClose, items }: Props) {
     >
       <Box role="navigation" aria-label="Mobile navigation" sx={NavDrawerStyle.nav}>
 
-        {/* Branded drawer header: logo (RTL start = physical right) + close button */}
+        {/* No logo here — the navbar behind the drawer already shows it. */}
         <Box sx={NavDrawerStyle.drawerHeader}>
-          <Box
-            component={NextLink}
-            href={ROUTES.HOME}
-            aria-label="Nemesh — דף הבית"
-            sx={NavDrawerStyle.logoLink}
-          >
-            <SiteLogo variant="mobile" alt="" sx={NavDrawerStyle.logo} />
-          </Box>
-
           <IconButton
             onClick={onClose}
             aria-label="סגירת תפריט"
