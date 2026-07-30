@@ -58,7 +58,6 @@ export default function RecipeHero({
   // short one it only means embedded paragraph breaks briefly render as
   // spaces until measurement corrects it, a much smaller cost.
   const [clampActive, setClampActive] = useState(true);
-  const [hasMeasured, setHasMeasured] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [heights, setHeights] = useState<{ collapsed: number; full: number } | null>(null);
   const descRef = useRef<HTMLParagraphElement>(null);
@@ -83,7 +82,6 @@ export default function RecipeHero({
     const measure = () => {
       setHeights({ collapsed: el.clientHeight, full: el.scrollHeight });
       setIsOverflowing(el.scrollHeight - el.clientHeight > 1);
-      setHasMeasured(true);
     };
 
     measure();
@@ -91,6 +89,30 @@ export default function RecipeHero({
     ro.observe(el);
     return () => ro.disconnect();
   }, [desc, clampActive]);
+
+  // The effect above stops re-measuring the instant `clampActive` goes
+  // false (right when expanding starts), so `heights.full` freezes at the
+  // value measured while the box was still narrow/clamped. Once genuinely
+  // expanded, the box switches to `descriptionExpanded`'s unconstrained
+  // width (so it can flow beside/past the floated image — see
+  // RecipeHeroStyle.ts), which reflows the text at a different width than
+  // it was measured at. Re-measure `full` here, at the box's real expanded
+  // layout, before the max-height transition target is used, so the
+  // animation grows to the correct height instead of a stale one.
+  useLayoutEffect(() => {
+    const el = descRef.current;
+    if (!el || !desc || !expanded) return;
+
+    const measureFull = () => {
+      const full = el.scrollHeight;
+      setHeights((prev) => (prev && prev.full !== full ? { ...prev, full } : prev));
+    };
+
+    measureFull();
+    const ro = new ResizeObserver(measureFull);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [desc, expanded]);
 
   const handleToggle = useCallback(() => {
     setExpanded((prev) => {
@@ -113,13 +135,38 @@ export default function RecipeHero({
     [expanded],
   );
 
-  const useClampVisual = !hasMeasured || (isOverflowing && clampActive);
+  // Only a genuinely-overflowing, actually-expanded description should get
+  // the wide/floating layout. `!clampActive` alone would be wrong: it's
+  // also true for short descriptions that never overflowed in the first
+  // place (nothing to expand), which must keep the narrow clamp width
+  // forever, matching today's appearance, rather than widen just because
+  // this component now has a wider style to offer.
+  const useWideFlow = isOverflowing && !clampActive;
   const maxHeight = heights ? (expanded ? heights.full : heights.collapsed) : undefined;
 
   return (
     <Box sx={{ ...RecipeHeroStyle.root, ...sx }}>
-      <Box sx={RecipeHeroStyle.grid}>
-        {/* ── Content column (RIGHT in RTL — column 1) ────────────── */}
+      <Box sx={RecipeHeroStyle.layout}>
+        {/* Image first in DOM so it can `float` at md+ and have the content
+            below wrap it, then continue full-width past its bottom edge.
+            `order` in RecipeHeroStyle restores today's visual stacking
+            (content, then image) below `md`, where no float is active. */}
+        <Box sx={RecipeHeroStyle.imageColumn}>
+          <NemeshImage
+            image={image}
+            fill
+            priority
+            sizes="(max-width: 900px) 100vw, 50vw"
+            objectFit="cover"
+            fallback={
+              <Box sx={RecipeHeroStyle.noImageState}>
+                <RestaurantIcon sx={RecipeHeroStyle.noImageIcon} />
+                <Typography sx={RecipeHeroStyle.noImageText}>אין תמונה</Typography>
+              </Box>
+            }
+          />
+        </Box>
+
         <Box sx={RecipeHeroStyle.contentColumn}>
           {primaryCategory && (
             <Box component="span" sx={RecipeHeroStyle.badge}>
@@ -134,7 +181,10 @@ export default function RecipeHero({
           {desc && (
             <Box
               onClick={isOverflowing ? handleToggle : undefined}
-              sx={isOverflowing ? { cursor: "pointer", userSelect: "none" } : undefined}
+              sx={{
+                ...RecipeHeroStyle.descriptionWrapper,
+                ...(isOverflowing ? { cursor: "pointer", userSelect: "none" } : null),
+              }}
               role={isOverflowing ? "button" : undefined}
               aria-expanded={isOverflowing ? expanded : undefined}
             >
@@ -143,8 +193,18 @@ export default function RecipeHero({
                 variant="body1"
                 onTransitionEnd={handleTransitionEnd}
                 sx={{
-                  ...(useClampVisual ? RecipeHeroStyle.descriptionClamp : RecipeHeroStyle.descriptionExpanded),
-                  overflow: "hidden",
+                  ...(useWideFlow ? RecipeHeroStyle.descriptionExpanded : RecipeHeroStyle.descriptionClamp),
+                  // `overflow: hidden` establishes a block-formatting-context,
+                  // which would make this box dodge the floated image as one
+                  // rigid rectangle for its whole height instead of letting
+                  // its individual line boxes wrap it — the opposite of the
+                  // intended flow. Only safe for the clamp variant (always
+                  // narrower than the image, never reaches its bottom edge).
+                  // The wide/expanded variant instead uses `clip-path`, which
+                  // clips paint only, without creating a BFC.
+                  ...(useWideFlow
+                    ? { overflow: "visible", clipPath: "inset(0)" }
+                    : { overflow: "hidden" }),
                   transition: "max-height 0.35s ease",
                   maxHeight,
                 }}
@@ -170,23 +230,6 @@ export default function RecipeHero({
               </Box>
             </>
           )}
-        </Box>
-
-        {/* ── Image column (LEFT in RTL — column 2) ───────────────── */}
-        <Box sx={RecipeHeroStyle.imageColumn}>
-          <NemeshImage
-            image={image}
-            fill
-            priority
-            sizes="(max-width: 900px) 100vw, 50vw"
-            objectFit="cover"
-            fallback={
-              <Box sx={RecipeHeroStyle.noImageState}>
-                <RestaurantIcon sx={RecipeHeroStyle.noImageIcon} />
-                <Typography sx={RecipeHeroStyle.noImageText}>אין תמונה</Typography>
-              </Box>
-            }
-          />
         </Box>
       </Box>
     </Box>
