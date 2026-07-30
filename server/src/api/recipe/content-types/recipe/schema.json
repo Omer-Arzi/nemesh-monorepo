@@ -57,7 +57,7 @@
     },
     "description": {
       "type": "richtext",
-      "maxLength": 350
+      "maxLength": 1000
     },
     "ingredientSections": {
       "type": "component",
