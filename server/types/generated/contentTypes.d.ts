@@ -704,7 +704,7 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     description: Schema.Attribute.RichText &
       Schema.Attribute.SetMinMaxLength<{
-        maxLength: 350;
+        maxLength: 1000;
       }>;
     difficulty: Schema.Attribute.Enumeration<['easy', 'medium', 'hard']>;
     image: Schema.Attribute.Media<'images'>;
