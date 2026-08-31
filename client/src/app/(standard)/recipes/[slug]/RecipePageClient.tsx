@@ -9,6 +9,7 @@ import {
   StickyIngredientsSidebar,
   PreparationStepsSection,
   RecipeTipsSection,
+  RecipeSpecialEquipmentSection,
   RelatedRecipes,
   CookingModeToolbar,
 } from "@/components/domain";
@@ -74,6 +75,8 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
       />
 
       <RecipeTipsSection tips={recipe.tips} />
+
+      <RecipeSpecialEquipmentSection equipment={recipe.specialEquipment} />
 
       <CookingModeToolbar
         isActive={cookingMode.isActive}

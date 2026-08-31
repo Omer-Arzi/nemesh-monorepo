@@ -81,6 +81,17 @@ export interface RecipePreparationStep extends Struct.ComponentSchema {
   };
 }
 
+export interface RecipeRecipeEquipmentItem extends Struct.ComponentSchema {
+  collectionName: 'components_recipe_recipe_equipment_items';
+  info: {
+    description: '';
+    displayName: 'RecipeEquipmentItem';
+  };
+  attributes: {
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 export interface RecipeRecipeIngredient extends Struct.ComponentSchema {
   collectionName: 'components_recipe_recipe_ingredients';
   info: {
@@ -144,6 +155,7 @@ declare module '@strapi/strapi' {
       'recipe.ingredient-section': RecipeIngredientSection;
       'recipe.preparation-section': RecipePreparationSection;
       'recipe.preparation-step': RecipePreparationStep;
+      'recipe.recipe-equipment-item': RecipeRecipeEquipmentItem;
       'recipe.recipe-ingredient': RecipeRecipeIngredient;
       'recipe.recipe-tip': RecipeRecipeTip;
       'shared.footer-link': SharedFooterLink;
