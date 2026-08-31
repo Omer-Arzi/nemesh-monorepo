@@ -4,13 +4,62 @@ import { findMatch, findFuzzySuggestion } from './matcher';
 
 const CANDIDATE_UID = 'api::ingredient-match-candidate.ingredient-match-candidate' as const;
 
-export type ProcessResult = { created: number; skipped: number };
+export type ProcessResult = { created: number; skipped: number; invalidated: number };
+
+/** One ingredient line as seen by the matching pipeline. */
+export type IngredientOccurrence = {
+  ingredientName: string;
+  /**
+   * True when this occurrence has a preparationRecipe set — it represents a
+   * prepared sub-recipe, not a raw ingredient, and must never enter catalog
+   * matching (see server/CLAUDE.md: keep canonical ingredient data and
+   * contextual recipe data separate).
+   */
+  hasPreparationRecipe: boolean;
+};
 
 /**
- * Processes ingredient lines from a recipe and creates IngredientMatchCandidate
+ * Removes any still-pending candidate for (recipe, normalizedText).
+ *
+ * Scope is intentionally narrow: only 'pending' candidates for this exact
+ * recipe + normalized ingredient text are eligible. Approved/rejected
+ * candidates are left untouched — they represent a decision already made,
+ * and this function has no way to distinguish "the same occurrence" from
+ * "a different ingredient that happens to normalize the same way" once a
+ * decision has been recorded, so it never touches those rows.
+ */
+async function invalidatePendingCandidate(
+  strapi: Core.Strapi,
+  recipeDocumentId: string,
+  normalizedText: string
+): Promise<boolean> {
+  const pending = await strapi.documents(CANDIDATE_UID).findFirst({
+    filters: {
+      recipe: { documentId: recipeDocumentId },
+      normalizedText,
+      reviewStatus: 'pending',
+    },
+  });
+
+  if (!pending) return false;
+
+  await strapi.documents(CANDIDATE_UID).delete({ documentId: pending.documentId });
+  strapi.log.info(
+    `[ingredient-processor] Invalidated pending candidate for "${normalizedText}" (now backed by a preparationRecipe)`
+  );
+  return true;
+}
+
+/**
+ * Processes ingredient occurrences from a recipe and creates IngredientMatchCandidate
  * records for admin review.
  *
  * Rules:
+ *   - An occurrence with a preparationRecipe set is a prepared sub-recipe reference,
+ *     not a raw ingredient — it never enters catalog matching, and any pending
+ *     candidate that already exists for it (from before the recipe was linked) is
+ *     invalidated. This is the only case handled specially; everything else is
+ *     unchanged from the original catalog-matching pipeline.
  *   - If the normalized text already matches a catalog item (canonical or variant),
  *     skip it — it is already known and does not need review.
  *   - If a candidate for the same recipe + normalizedText already exists, skip it
@@ -20,14 +69,27 @@ export type ProcessResult = { created: number; skipped: number };
 export async function processRecipeIngredients(
   strapi: Core.Strapi,
   recipeDocumentId: string,
-  rawLines: string[]
+  occurrences: IngredientOccurrence[]
 ): Promise<ProcessResult> {
-  const lines = rawLines.filter((l) => l.trim().length > 0);
   let created = 0;
   let skipped = 0;
+  let invalidated = 0;
 
-  for (const rawText of lines) {
+  for (const occurrence of occurrences) {
+    const rawText = occurrence.ingredientName.trim();
+    if (!rawText) continue;
+
     const normalizedText = normalizeText(rawText);
+
+    if (occurrence.hasPreparationRecipe) {
+      if (await invalidatePendingCandidate(strapi, recipeDocumentId, normalizedText)) {
+        invalidated++;
+      } else {
+        skipped++;
+      }
+      continue;
+    }
+
     const match = await findMatch(strapi, normalizedText);
 
     if (match) {
@@ -73,12 +135,13 @@ export async function processRecipeIngredients(
     created++;
   }
 
-  return { created, skipped };
+  return { created, skipped, invalidated };
 }
 
 /**
  * Convenience wrapper: fetches a recipe's ingredients then calls processRecipeIngredients.
- * Used by both the recipe afterCreate lifecycle and the processIngredientCandidates controller.
+ * Used by both the recipe afterCreate/afterUpdate lifecycle and the
+ * processIngredientCandidates controller.
  */
 export async function processRecipeIngredientsByDocumentId(
   strapi: Core.Strapi,
@@ -87,13 +150,27 @@ export async function processRecipeIngredientsByDocumentId(
   const recipe = await strapi.documents('api::recipe.recipe').findOne({
     documentId: recipeDocumentId,
     populate: {
-      ingredientSections: { populate: { ingredients: { fields: ['ingredientName'] } } },
+      ingredientSections: {
+        populate: {
+          ingredients: {
+            fields: ['ingredientName'],
+            populate: { preparationRecipe: { fields: ['documentId'] } },
+          },
+        },
+      },
     },
   });
 
-  const ingredientLines: string[] = ((recipe as any)?.ingredientSections ?? [])
-    .flatMap((sec: any) => (sec.ingredients ?? []).map((ing: any) => ing.ingredientName as string | undefined))
-    .filter((text: string | undefined): text is string => Boolean(text));
+  const occurrences: IngredientOccurrence[] = ((recipe as any)?.ingredientSections ?? [])
+    .flatMap((sec: any) => sec.ingredients ?? [])
+    .map((ing: any) => ({
+      ingredientName: ing.ingredientName as string | undefined,
+      hasPreparationRecipe: Boolean(ing.preparationRecipe),
+    }))
+    .filter(
+      (occ: { ingredientName: string | undefined; hasPreparationRecipe: boolean }): occ is IngredientOccurrence =>
+        Boolean(occ.ingredientName)
+    );
 
-  return processRecipeIngredients(strapi, recipeDocumentId, ingredientLines);
+  return processRecipeIngredients(strapi, recipeDocumentId, occurrences);
 }

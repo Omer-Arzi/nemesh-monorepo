@@ -18,12 +18,29 @@ declare module "@mui/material/styles" {
       /** Dedicated image-slot surface — clearly distinct from page and card. */
       placeholder: string;
     };
+    /**
+     * Internal recipe-to-recipe ingredient links (e.g. "ריבת לימון" linking to
+     * the lemon-jam recipe). Deliberately distinct from `primary` (brand) and
+     * `text.secondary` (ingredient notes) so the link reads as its own thing.
+     * Values are measured to meet WCAG AA (>=4.5:1) against every background
+     * ingredients can render on: background.default and background.paper, in
+     * both light/dark and both theme presets.
+     */
+    ingredientLink: {
+      main: string;
+      /** Intentional visited state — replaces the browser's default purple. */
+      visited: string;
+    };
   }
 
   interface PaletteOptions {
     surface?: {
       alt?: string;
       placeholder?: string;
+    };
+    ingredientLink?: {
+      main?: string;
+      visited?: string;
     };
   }
 }

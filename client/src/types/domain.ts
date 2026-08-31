@@ -26,12 +26,28 @@ export type Difficulty = "easy" | "medium" | "hard";
 
 // ─── Component types (not standalone entities) ────────────────────────────
 
+/**
+ * Minimal reference to the recipe used to prepare an ingredient
+ * (e.g. "ריבת לימון" pointing at the lemon-jam recipe). Only the fields
+ * needed to build and label an internal link — never populated recursively.
+ */
+export type PreparationRecipeRef = {
+  title: string;
+  slug: string;
+};
+
 /** A single ingredient line within a recipe. */
 export type RecipeIngredient = {
   ingredientName: string | null;
   amount: number | null;
   unit: string | null;
   note: string | null;
+  /**
+   * The recipe used to prepare this ingredient, if any (e.g. a jam or sauce
+   * made via its own recipe). Always null unless the link is safe to render:
+   * the target recipe is published and is not the current recipe itself.
+   */
+  preparationRecipe: PreparationRecipeRef | null;
 };
 
 /** A single preparation step within a recipe. */

@@ -66,6 +66,13 @@ export const freckleWarmLightPalette: PaletteOptions = {
     alt: "#EEDFCB",         // warm section bands — carousel, outer panels
     placeholder: "#E9D7C4", // image placeholder areas — distinct from page and card
   },
+
+  // Same dark green as the classic preset — measured 6.8–7.3:1 against
+  // #FBF6EF/#FFFDFC (this preset's ingredient backgrounds).
+  ingredientLink: {
+    main: "#465C3B",
+    visited: "#5C6E52",
+  },
 };
 
 export const freckleWarmDarkPalette: PaletteOptions = {
@@ -122,5 +129,12 @@ export const freckleWarmDarkPalette: PaletteOptions = {
   surface: {
     alt: "#2B1A0D",
     placeholder: "#3A2415",
+  },
+
+  // Same light sage green as the classic dark preset — measured 6.1–8.3:1
+  // against this preset's dark backgrounds.
+  ingredientLink: {
+    main: "#9CB58A",
+    visited: "#B4C7A6",
   },
 };

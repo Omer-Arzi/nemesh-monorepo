@@ -4,12 +4,16 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
+import NextLink from "next/link";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { RecipeIngredient } from "@/types/domain";
 import type { CookingModeIngredientProps } from "@/features/cooking-mode";
 import { formatIngredientAmount } from "@/lib/formatters/ingredientAmount";
+import { ROUTES } from "@/constants";
 import { IngredientListStyle } from "./styles/IngredientListStyle";
 
 type Props = {
@@ -18,7 +22,8 @@ type Props = {
   cookingMode?: CookingModeIngredientProps;
 };
 
-function formatIngredientLine(ingredient: RecipeIngredient): string {
+/** Amount + unit only — the ingredient name is rendered separately so it can become a link. */
+function formatIngredientPrefix(ingredient: RecipeIngredient): string {
   const parts: string[] = [];
 
   if (ingredient.amount != null) {
@@ -27,11 +32,8 @@ function formatIngredientLine(ingredient: RecipeIngredient): string {
   if (ingredient.unit) {
     parts.push(ingredient.unit);
   }
-  if (ingredient.ingredientName) {
-    parts.push(ingredient.ingredientName);
-  }
 
-  return parts.join(" ");
+  return parts.length > 0 ? `${parts.join(" ")} ` : "";
 }
 
 export default function IngredientList({ ingredients, sx, cookingMode }: Props) {
@@ -79,7 +81,30 @@ export default function IngredientList({ ingredients, sx, cookingMode }: Props) 
             )}
 
             <Box sx={isChecked ? IngredientListStyle.textChecked : undefined}>
-              <Typography variant="body2">{formatIngredientLine(ingredient)}</Typography>
+              <Typography variant="body2">
+                {formatIngredientPrefix(ingredient)}
+                {ingredient.preparationRecipe && ingredient.ingredientName ? (
+                  <Link
+                    component={NextLink}
+                    href={ROUTES.RECIPE(ingredient.preparationRecipe.slug)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    // Stop the click from also bubbling to the ListItem's onClick,
+                    // which would toggle this ingredient as completed in Cooking Mode.
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`למתכון: ${ingredient.ingredientName}, נפתח בכרטיסייה חדשה`}
+                    underline="none"
+                    sx={IngredientListStyle.preparationLink}
+                  >
+                    <Box component="span" sx={IngredientListStyle.preparationLinkText}>
+                      {ingredient.ingredientName}
+                    </Box>
+                    <ArrowOutwardRoundedIcon aria-hidden sx={IngredientListStyle.preparationLinkIcon} />
+                  </Link>
+                ) : (
+                  ingredient.ingredientName
+                )}
+              </Typography>
               {ingredient.note && (
                 <Typography variant="body2" sx={IngredientListStyle.note}>
                   {ingredient.note}

@@ -73,6 +73,13 @@ export const lightPalette: PaletteOptions = {
     alt: "#EDE6DC",         // warm section band — slightly deeper than page bg
     placeholder: "#E2DAD0", // image placeholder — neutral warm, clearly off-white
   },
+
+  // Dark green — measured 7.2–7.4:1 against #FFFCF7/#FFFFFF (this preset's
+  // ingredient backgrounds). See docs/architecture.md for the full contrast table.
+  ingredientLink: {
+    main: "#465C3B",
+    visited: "#5C6E52",
+  },
 };
 
 export const darkPalette: PaletteOptions = {
@@ -122,5 +129,13 @@ export const darkPalette: PaletteOptions = {
   surface: {
     alt: "#211509",
     placeholder: "#2E1E0E",
+  },
+
+  // Light sage green — the dark-mode counterpart of the light theme's dark
+  // green, lightened the same way primary/secondary are for dark backgrounds.
+  // Measured 6.1–8.5:1 against this preset's dark backgrounds.
+  ingredientLink: {
+    main: "#9CB58A",
+    visited: "#B4C7A6",
   },
 };

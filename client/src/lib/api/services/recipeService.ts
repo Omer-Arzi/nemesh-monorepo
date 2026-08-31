@@ -41,12 +41,23 @@ type StrapiTagAttrs = {
   image?: StrapiMediaRaw | null; // not fetched in recipe-list populate; always null there
 };
 
+// Minimal projection — just enough to build and label an internal link, plus
+// publishedAt so the mapper can defensively drop links to unpublished targets
+// regardless of how the public API resolves draft/publish state on relations.
+type StrapiPreparationRecipeRaw = {
+  documentId: string;
+  title: string;
+  slug: string;
+  publishedAt: string | null;
+};
+
 type StrapiIngredientRaw = {
   id: number;
   ingredientName: string | null;
   amount: number | null;
   unit: string | null;
   note: string | null;
+  preparationRecipe?: StrapiPreparationRecipeRaw | null;
 };
 
 type StrapiIngredientSectionRaw = {
@@ -131,12 +142,30 @@ function mapTag(raw: StrapiData<StrapiTagAttrs>): Tag {
   };
 }
 
-function mapIngredient(raw: StrapiIngredientRaw): RecipeIngredient {
+// Only ever emits a preparationRecipe when it is safe to link to: the target
+// is published, has the fields needed to render a link, and is not the
+// recipe the ingredient itself belongs to (a recipe cannot link to itself).
+// This is the single point that guarantees no broken or self-referencing
+// preparationRecipe link ever reaches a component — components never need
+// to know which recipe is "current".
+function mapPreparationRecipe(
+  raw: StrapiPreparationRecipeRaw | null | undefined,
+  currentRecipeSlug: string
+): RecipeIngredient["preparationRecipe"] {
+  if (!raw) return null;
+  if (!raw.title || !raw.slug) return null;
+  if (!raw.publishedAt) return null;
+  if (raw.slug === currentRecipeSlug) return null;
+  return { title: raw.title, slug: raw.slug };
+}
+
+function mapIngredient(raw: StrapiIngredientRaw, currentRecipeSlug: string): RecipeIngredient {
   return {
     ingredientName: raw.ingredientName ?? null,
     amount: raw.amount ?? null,
     unit: raw.unit ?? null,
     note: raw.note ?? null,
+    preparationRecipe: mapPreparationRecipe(raw.preparationRecipe, currentRecipeSlug),
   };
 }
 
@@ -147,10 +176,10 @@ function mapStep(raw: StrapiStepRaw): PreparationStep {
   };
 }
 
-function mapIngredientSection(raw: StrapiIngredientSectionRaw): IngredientSection {
+function mapIngredientSection(raw: StrapiIngredientSectionRaw, currentRecipeSlug: string): IngredientSection {
   return {
     title: raw.title ?? null,
-    ingredients: (raw.ingredients ?? []).map(mapIngredient),
+    ingredients: (raw.ingredients ?? []).map((ing) => mapIngredient(ing, currentRecipeSlug)),
   };
 }
 
@@ -184,7 +213,7 @@ function mapRecipe(raw: StrapiData<StrapiRecipeAttrs>): Recipe {
     prepTime: raw.prepTime ?? null,
     difficulty: raw.difficulty ?? null,
     description: raw.description ?? null,
-    ingredientSections: (raw.ingredientSections ?? []).map(mapIngredientSection),
+    ingredientSections: (raw.ingredientSections ?? []).map((sec) => mapIngredientSection(sec, raw.slug)),
     preparationSections: (raw.preparationSections ?? []).map(mapPreparationSection),
     tips: (raw.tips ?? []).map(mapTip),
     specialEquipment: (raw.specialEquipment ?? [])
@@ -228,7 +257,9 @@ const DETAIL_POPULATE =
   "&populate[categories][fields][1]=slug" +
   "&populate[tags][fields][0]=name" +
   "&populate[tags][fields][1]=slug" +
-  "&populate[ingredientSections][populate][ingredients]=true" +
+  "&populate[ingredientSections][populate][ingredients][populate][preparationRecipe][fields][0]=title" +
+  "&populate[ingredientSections][populate][ingredients][populate][preparationRecipe][fields][1]=slug" +
+  "&populate[ingredientSections][populate][ingredients][populate][preparationRecipe][fields][2]=publishedAt" +
   "&populate[preparationSections][populate][steps][populate][image]=true" +
   "&populate[tips]=true" +
   "&populate[specialEquipment]=true";

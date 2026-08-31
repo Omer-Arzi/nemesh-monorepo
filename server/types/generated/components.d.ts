@@ -102,6 +102,10 @@ export interface RecipeRecipeIngredient extends Struct.ComponentSchema {
     amount: Schema.Attribute.Float;
     ingredientName: Schema.Attribute.String;
     note: Schema.Attribute.String;
+    preparationRecipe: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::recipe.recipe'
+    >;
     unit: Schema.Attribute.String;
   };
 }
