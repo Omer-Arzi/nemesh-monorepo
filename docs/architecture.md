@@ -103,6 +103,14 @@ type RecipeIngredient = {
   amount: number | null;
   unit: string | null;
   note: string | null;      // ingredient-specific note ONLY (e.g. "קלוי", "מגורד")
+  preparationRecipe: PreparationRecipeRef | null; // see below
+};
+
+// Minimal reference to the recipe used to prepare this ingredient
+// (e.g. "ריבת לימון" linking to the lemon-jam recipe).
+type PreparationRecipeRef = {
+  title: string;
+  slug: string;
 };
 ```
 
@@ -110,6 +118,13 @@ type RecipeIngredient = {
 - Section titles (e.g. "למלית", "לבצק") belong in `IngredientSection.title`, **not** in `RecipeIngredient.note`.
 - `RecipeIngredient.note` is for a note about that specific ingredient only.
 - A recipe with a single undivided ingredient list has one section with `title: null`.
+
+**`preparationRecipe` (optional internal recipe link):**
+- Server: `recipe.recipe-ingredient` component has an optional `preparationRecipe` relation — `manyToOne` → `api::recipe.recipe`, no inverse field on `Recipe` (unidirectional, same shape as `ingredient-match-candidate.recipe`). Many ingredient occurrences may point at the same recipe; a recipe cannot reference itself (enforced in `recipe` lifecycle `beforeUpdate`, `server/src/api/recipe/content-types/recipe/lifecycles.ts`).
+- API: `GET /recipes` populates only `preparationRecipe.{title,slug,publishedAt}` — never the linked recipe's own ingredients/media/categories (no recursive population).
+- Client mapping (`recipeService.ts`): `mapIngredient` only ever emits a non-null `preparationRecipe` when the target is published (`publishedAt` present) **and** its slug differs from the current recipe's own slug. This is the single point that guarantees no broken or self-referencing link reaches a component — components never need to know which recipe is "current." A missing/deleted/unpublished/self-referencing relation all map to `null` and render as plain text.
+- Admin: plain Strapi relation field, last attribute on the component (renders at the bottom of the ingredient editor by schema-declaration order — no custom admin UI was added).
+- Rendering: `IngredientList` (`client/src/components/domain/IngredientList/`) is the single component every ingredient-rendering surface (regular page, mobile bottom sheet, tablet drawer, Cooking Mode) funnels through. Only the ingredient **name** becomes an internal `next/link` (opens in a new tab — this link leaves the current recipe to visit a preparation recipe, so `target="_blank" rel="noopener noreferrer"` keeps the user's place in the main recipe); amount/unit/note stay plain text. An `ArrowOutwardRounded` icon (`aria-hidden`, 14px, ~4px inline-start gap) marks the linked name only, underline scoped to the text span so it doesn't draw under the arrow. The link stops click propagation so it doesn't also toggle Cooking Mode's completed state. Styled via a dedicated `palette.ingredientLink.{main,visited}` token (see `themeAugmentation.d.ts`) rather than a hardcoded color — set per palette in `palette.ts` / `presets/freckleWarmPalette.ts`. Light mode uses `#465C3B` (dark green), measured 6.8–7.4:1 against every light background ingredients render on (`background.default`/`.paper`, both presets); dark mode uses `#9CB58A` (the same hue lightened, matching how `primary`/`secondary` are handled for dark backgrounds elsewhere in the theme), measured 6.1–8.5:1. Visited state (`#5C6E52` light / `#B4C7A6` dark, 5.1–10.5:1) replaces the browser default purple. Focus indicator reuses the existing `2px solid primary.main` `:focus-visible` convention (Header/DesktopCompactHeader), measured 3.3–8.1:1 against page backgrounds — all figures clear WCAG AA (4.5:1 text / 3:1 non-text).
 
 ---
 
@@ -193,6 +208,7 @@ type IngredientCatalogItem = BaseEntity & {
 - `ingredientMatchCandidate` records are created after import or backfill — they link a recipe ingredient to a catalog item candidate.
 - Candidates are reviewed and approved/rejected via the Strapi admin panel.
 - Do not duplicate ingredient matching logic; all matching flows through the `processIngredientCandidates` endpoint.
+- **`preparationRecipe` and matching:** an ingredient occurrence with `preparationRecipe` set represents a prepared sub-recipe, not a raw catalog ingredient — it never enters catalog matching and never gets a candidate (`processRecipeIngredients`, `server/src/api/ingredient-match-candidate/services/processor.ts`). If a **pending** candidate already exists for that occurrence (identified by `recipe` + `normalizedText` — the same identity the pipeline already used for de-duplication; there is no other stable per-row identity to key off) when a `preparationRecipe` is added, it is deleted. Approved/rejected candidates and candidates belonging to other occurrences are never touched. Removing the relation makes the occurrence eligible for matching again on the next save (the recipe lifecycle reprocesses all ingredients on every `afterUpdate`), with no special-case code needed.
 
 ---
 

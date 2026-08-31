@@ -17,6 +17,11 @@
     },
     "note": {
       "type": "string"
+    },
+    "preparationRecipe": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::recipe.recipe"
     }
   }
 }
