@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
-import HandymanOutlinedIcon from "@mui/icons-material/HandymanOutlined";
+import BlenderOutlinedIcon from "@mui/icons-material/BlenderOutlined";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { SpecialEquipmentItem } from "@/types/domain";
 import { RecipeSpecialEquipmentSectionStyle } from "./styles/RecipeSpecialEquipmentSectionStyle";
@@ -29,7 +29,7 @@ export default function RecipeSpecialEquipmentSection({ equipment, sx }: Props) 
       ]}
     >
       <Box sx={RecipeSpecialEquipmentSectionStyle.titleRow}>
-        <HandymanOutlinedIcon sx={RecipeSpecialEquipmentSectionStyle.titleIcon} />
+        <BlenderOutlinedIcon sx={RecipeSpecialEquipmentSectionStyle.titleIcon} />
         <Typography sx={RecipeSpecialEquipmentSectionStyle.title}>כלים מיוחדים</Typography>
       </Box>
 
