@@ -15,6 +15,7 @@ import type {
   PreparationStep,
   PreparationSection,
   RecipeTip,
+  SpecialEquipmentItem,
   Difficulty,
 } from "@/types/domain";
 import type { PaginatedResult } from "@/types/shared";
@@ -71,6 +72,11 @@ type StrapiTipRaw = {
   text: string;
 };
 
+type StrapiEquipmentItemRaw = {
+  id: number;
+  name: string;
+};
+
 type StrapiRecipeAttrs = {
   title: string;
   slug: string;
@@ -84,6 +90,7 @@ type StrapiRecipeAttrs = {
   ingredientSections: StrapiIngredientSectionRaw[];
   preparationSections: StrapiPreparationSectionRaw[];
   tips: StrapiTipRaw[];
+  specialEquipment: StrapiEquipmentItemRaw[];
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
@@ -158,6 +165,13 @@ function mapTip(raw: StrapiTipRaw): RecipeTip {
   return { text: raw.text };
 }
 
+// Blank/whitespace-only names are dropped here so callers never need to
+// re-validate — mirrors the HomeFeatureCard filtering pattern.
+function mapEquipmentItem(raw: StrapiEquipmentItemRaw): SpecialEquipmentItem | null {
+  const name = raw.name?.trim();
+  return name ? { name } : null;
+}
+
 function mapRecipe(raw: StrapiData<StrapiRecipeAttrs>): Recipe {
   return {
     id: raw.documentId,
@@ -173,6 +187,9 @@ function mapRecipe(raw: StrapiData<StrapiRecipeAttrs>): Recipe {
     ingredientSections: (raw.ingredientSections ?? []).map(mapIngredientSection),
     preparationSections: (raw.preparationSections ?? []).map(mapPreparationSection),
     tips: (raw.tips ?? []).map(mapTip),
+    specialEquipment: (raw.specialEquipment ?? [])
+      .map(mapEquipmentItem)
+      .filter((item): item is SpecialEquipmentItem => item !== null),
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
   };
@@ -213,7 +230,8 @@ const DETAIL_POPULATE =
   "&populate[tags][fields][1]=slug" +
   "&populate[ingredientSections][populate][ingredients]=true" +
   "&populate[preparationSections][populate][steps][populate][image]=true" +
-  "&populate[tips]=true";
+  "&populate[tips]=true" +
+  "&populate[specialEquipment]=true";
 
 // ─── Public API ───────────────────────────────────────────────────────────
 

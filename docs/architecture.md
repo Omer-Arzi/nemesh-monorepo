@@ -80,6 +80,7 @@ The canonical `Recipe` type lives in [client/src/types/domain.ts](../client/src/
 | `ingredientSections`   | `IngredientSection[]`    | **Canonical structure** (see §4)           |
 | `preparationSections`  | `PreparationSection[]`   | **Canonical structure** (see §5)           |
 | `tips`                 | `RecipeTip[]`            | General kitchen notes (see §6)             |
+| `specialEquipment`     | `SpecialEquipmentItem[]` | Recipe-specific tools (see §6a)            |
 | `createdAt`            | `string`                 | ISO 8601                                   |
 | `updatedAt`            | `string`                 | ISO 8601                                   |
 
@@ -142,6 +143,19 @@ type RecipeTip = { text: string };
 
 - `recipe.tips` are general recipe notes, displayed as **"הערות מהמטבח"**.
 - They are **not** the same as `RecipeIngredient.note` (which is per-ingredient).
+
+---
+
+## 6a. Special Equipment
+
+```ts
+type SpecialEquipmentItem = { name: string };
+```
+
+- `recipe.specialEquipment` is an optional repeatable component (`recipe.recipe-equipment-item`, mirrors `recipe.recipe-tip`), listing recipe-specific tools (siphon, pipette, kitchen torch, thermometer, etc.).
+- Not required; old recipes without it, and new recipes with an empty list, both map to `[]` at the service layer (`recipeService.ts`) — never `null`/`undefined` in the domain type.
+- Blank/whitespace-only names are dropped both when mapping the Strapi response and defensively inside `RecipeSpecialEquipmentSection`.
+- Rendered on the recipe page directly below Tips, as a compact chip row titled **"כלים מיוחדים"**; renders nothing when no valid item exists.
 
 ---
 

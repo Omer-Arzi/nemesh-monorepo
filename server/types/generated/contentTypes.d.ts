@@ -726,6 +726,10 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     servings: Schema.Attribute.Integer;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    specialEquipment: Schema.Attribute.Component<
+      'recipe.recipe-equipment-item',
+      true
+    >;
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>;
     tips: Schema.Attribute.Component<'recipe.recipe-tip', true>;
     title: Schema.Attribute.String & Schema.Attribute.Required;

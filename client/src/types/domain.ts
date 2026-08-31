@@ -45,6 +45,11 @@ export type RecipeTip = {
   text: string;
 };
 
+/** A single special-equipment item attached to a recipe (e.g. siphon, thermometer). */
+export type SpecialEquipmentItem = {
+  name: string;
+};
+
 /**
  * A named preparation section containing its own ordered steps.
  * Used when a recipe has multiple distinct preparation phases
@@ -101,6 +106,7 @@ export type Recipe = BaseEntity & {
   ingredientSections: IngredientSection[];
   preparationSections: PreparationSection[];
   tips: RecipeTip[];
+  specialEquipment: SpecialEquipmentItem[];
   createdAt: string; // ISO 8601
   updatedAt: string;
 };

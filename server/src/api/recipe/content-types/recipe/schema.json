@@ -69,6 +69,11 @@
       "component": "recipe.recipe-tip",
       "repeatable": true
     },
+    "specialEquipment": {
+      "type": "component",
+      "component": "recipe.recipe-equipment-item",
+      "repeatable": true
+    },
     "preparationSections": {
       "type": "component",
       "component": "recipe.preparation-section",
