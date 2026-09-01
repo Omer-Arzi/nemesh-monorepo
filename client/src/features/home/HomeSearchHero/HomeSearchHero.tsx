@@ -64,8 +64,14 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
               fullWidth
               autoComplete="off"
               sx={HomeSearchHeroStyle.searchField}
-              slotProps
-              ={{
+              slotProps={{
+                htmlInput: {
+                  role: "combobox",
+                  "aria-autocomplete": "list",
+                  "aria-expanded": search.showDropdown,
+                  "aria-controls": search.listboxId,
+                  "aria-activedescendant": search.activeDescendantId,
+                },
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
@@ -94,6 +100,7 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
                 suggestions={search.suggestions}
                 activeIndex={search.activeIndex}
                 onSelect={search.handleSelect}
+                listboxId={search.listboxId}
               />
             )}
           </Box>

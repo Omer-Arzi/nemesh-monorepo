@@ -17,7 +17,12 @@ import {
   SectionHeader,
 } from "@/components/shared";
 import { RecipeCard, RecipeGridSkeleton } from "@/components/domain";
-import { useInfiniteRecipes, useIngredientSearch, useSearch } from "@/features/results/hooks";
+import {
+  useInfiniteRecipes,
+  useIngredientSearch,
+  useCanonicalIngredientSearch,
+  useSearch,
+} from "@/features/results/hooks";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { ROUTES } from "@/constants";
 
@@ -71,10 +76,17 @@ function SearchResults({ q }: { q: string }) {
   );
 }
 
-// ── Ingredient-intent results (exact substring match, no fuzzy) ───────────────
+// ── Ingredient-intent results ──────────────────────────────────────────────────
+// `canonical: false` (default) — narrow, exact text (e.g. selecting a variant
+// like "שאלוט"). `canonical: true` — broad, includes the canonical ingredient's
+// approved catalog variants (e.g. selecting "בצל").
 
-function IngredientResults({ ingredient }: { ingredient: string }) {
-  const { data: recipes = [], isLoading, isError } = useIngredientSearch(ingredient);
+function IngredientResults({ ingredient, canonical = false }: { ingredient: string; canonical?: boolean }) {
+  // Both hooks are always called (Rules of Hooks) — whichever mode isn't
+  // active gets an empty string, which its `enabled` check turns into a no-op.
+  const narrow = useIngredientSearch(canonical ? "" : ingredient);
+  const broad = useCanonicalIngredientSearch(canonical ? ingredient : "");
+  const { data: recipes = [], isLoading, isError } = canonical ? broad : narrow;
 
   if (isLoading) {
     return (
@@ -197,11 +209,13 @@ function ResultsContent() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q")?.trim() ?? "";
   const ingredient = searchParams.get("ingredient")?.trim() ?? "";
+  const canonicalIngredient = searchParams.get("canonicalIngredient")?.trim() ?? "";
 
   useEffect(() => {
     analytics.trackPageView({ page_id: "results", page_name: "תוצאות" });
   }, []);
 
+  if (canonicalIngredient) return <IngredientResults ingredient={canonicalIngredient} canonical />;
   if (ingredient) return <IngredientResults ingredient={ingredient} />;
   if (q) return <SearchResults q={q} />;
   return <BrowseResults />;

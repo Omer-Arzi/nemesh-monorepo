@@ -75,7 +75,14 @@ export default function DesktopCompactHeader({ visible }: Props) {
             autoComplete="off"
             sx={DesktopCompactHeaderStyle.searchField}
             slotProps={{
-              htmlInput: { tabIndex: visible ? 0 : -1 },
+              htmlInput: {
+                tabIndex: visible ? 0 : -1,
+                role: "combobox",
+                "aria-autocomplete": "list",
+                "aria-expanded": search.showDropdown,
+                "aria-controls": search.listboxId,
+                "aria-activedescendant": search.activeDescendantId,
+              },
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
@@ -90,6 +97,7 @@ export default function DesktopCompactHeader({ visible }: Props) {
               suggestions={search.suggestions}
               activeIndex={search.activeIndex}
               onSelect={search.handleSelect}
+              listboxId={search.listboxId}
             />
           )}
         </Box>

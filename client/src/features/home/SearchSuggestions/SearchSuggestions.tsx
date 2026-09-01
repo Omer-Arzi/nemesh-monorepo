@@ -8,16 +8,24 @@ type Props = {
   suggestions: SearchSuggestion[];
   activeIndex: number;
   onSelect: (suggestion: SearchSuggestion) => void;
+  /** Unique id for this listbox instance — must match the input's aria-controls. */
+  listboxId: string;
 };
 
-export default function SearchSuggestions({ suggestions, activeIndex, onSelect }: Props) {
+/** Must match how useHomeSearch derives activeDescendantId from the same listboxId. */
+function optionId(listboxId: string, index: number) {
+  return `${listboxId}-option-${index}`;
+}
+
+export default function SearchSuggestions({ suggestions, activeIndex, onSelect, listboxId }: Props) {
   if (suggestions.length === 0) return null;
 
   return (
-    <Paper elevation={2} sx={SearchSuggestionsStyle.root} role="listbox">
+    <Paper elevation={2} sx={SearchSuggestionsStyle.root} role="listbox" id={listboxId}>
       {suggestions.map((s, i) => (
         <Box
-          key={`${s.type}-${s.type === "recipe" ? s.slug : s.canonicalName}`}
+          key={`${s.type}-${s.type === "recipe" ? s.slug : `${s.canonicalId}-${s.matchType}`}`}
+          id={optionId(listboxId, i)}
           role="option"
           aria-selected={i === activeIndex}
           sx={[
