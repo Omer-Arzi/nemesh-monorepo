@@ -321,6 +321,21 @@ export async function searchRecipesByIngredient(ingredient: string): Promise<Rec
 }
 
 /**
+ * Canonical-ingredient search: broader than {@link searchRecipesByIngredient} —
+ * returns recipes containing the canonical ingredient OR any of its approved
+ * catalog variants (exact normalized match per ingredient line, driven by the
+ * ingredient catalog's own canonical/variant relationships — not a substring
+ * heuristic). Used when the user selects the canonical suggestion rather than
+ * an exact variant.
+ */
+export async function searchRecipesByCanonicalIngredient(canonicalIngredient: string): Promise<RecipeSummary[]> {
+  const raw = await apiClient.get<{
+    data: StrapiData<StrapiRecipeSummaryAttrs>[];
+  }>(`/recipes/search?canonicalIngredient=${encodeURIComponent(canonicalIngredient)}`);
+  return (raw.data ?? []).map(mapRecipeSummary);
+}
+
+/**
  * Fetches the most recently published recipes sorted by createdAt descending.
  * Returns a summary projection — no pagination needed for small fixed sets.
  */

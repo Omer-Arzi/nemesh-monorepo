@@ -1,5 +1,10 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { getRecipes, searchRecipes, searchRecipesByIngredient } from "@/lib/api/services/recipeService";
+import {
+  getRecipes,
+  searchRecipes,
+  searchRecipesByIngredient,
+  searchRecipesByCanonicalIngredient,
+} from "@/lib/api/services/recipeService";
 import { queryKeys } from "@/lib/query/keys";
 import { PAGINATION } from "@/constants";
 
@@ -27,6 +32,19 @@ export function useIngredientSearch(ingredient: string) {
     queryKey: queryKeys.recipes.byIngredient(ingredient),
     queryFn: () => searchRecipesByIngredient(ingredient),
     enabled: ingredient.trim().length > 0,
+  });
+}
+
+/**
+ * Canonical-ingredient search: recipes containing the canonical ingredient or
+ * any of its approved catalog variants. Broader than {@link useIngredientSearch}.
+ * Triggered when the user selects the canonical (or canonical-parent) suggestion.
+ */
+export function useCanonicalIngredientSearch(canonicalIngredient: string) {
+  return useQuery({
+    queryKey: queryKeys.recipes.byCanonicalIngredient(canonicalIngredient),
+    queryFn: () => searchRecipesByCanonicalIngredient(canonicalIngredient),
+    enabled: canonicalIngredient.trim().length > 0,
   });
 }
 

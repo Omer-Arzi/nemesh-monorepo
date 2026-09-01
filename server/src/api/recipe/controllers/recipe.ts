@@ -1,34 +1,30 @@
 import { factories } from '@strapi/strapi';
 import { processRecipeIngredientsByDocumentId } from '../../ingredient-match-candidate/services/processor';
 import { normalizeText } from '../../ingredient-match-candidate/services/normalizer';
+import {
+  buildIngredientSuggestions,
+  dedupeIngredientSuggestions,
+  parseVariants,
+  type IngredientCatalogRow,
+} from '../services/suggestion-ranking';
 
 // ── Suggestion helpers (module-level, not Strapi-specific) ───────────────────
 
-// Tier scores — fixed, non-overlapping bands so pg_trgm noise can never
-// bridge tiers. Fuzzy scores (tiers 8–9) are dampened into sub-1.0 ranges
-// that sit safely below every fixed-tier floor.
+// Recipe-suggestion tier scores — fixed, non-overlapping bands so pg_trgm
+// noise can never bridge tiers. Ingredient-suggestion tiers live in
+// suggestion-ranking.ts (INGREDIENT_TIER) and are deliberately scored above
+// this entire range (>= 10) so ingredient suggestions always outrank recipe
+// suggestions, per the required priority order.
 //
-// Tier  Score   Meaning
-//  1    9.0     Exact canonical or variant match
-//  2    8.0     Exact recipe title match
-//  3    7.0     Canonical or variant startsWith query
-//  4    6.0     Recipe title startsWith query
-//  5    5.0     Recipe title contains query
-//  6    4.0     Canonical or variant contains query
-//  7    3.0     Recipe ingredient contains query (no title match)
-//  8    2.0–2.9 Fuzzy recipe title (pg_trgm, capped to leave room below tier 7)
-//  9    1.0–1.9 Fuzzy canonical/variant (pg_trgm)
+// Tier  Score      Meaning
+//  1    8.0        Exact recipe title match
+//  2    6.0        Recipe title startsWith query
+//  3    5.0        Recipe title contains query
+//  4    3.0        Recipe ingredient contains query (no title match)
+//  5    2.0–2.9    Fuzzy recipe title (pg_trgm, capped to leave room below tier 4)
 
 type RecipeRow = { title: string; slug: string; score: number; matched_ingredient?: string };
-type IngredientRow = { document_id: string; canonical_name: string; slug: string | null; variants: unknown; cn_score: number };
-
-function parseVariants(raw: unknown): string[] {
-  if (Array.isArray(raw)) return raw as string[];
-  if (typeof raw === 'string') {
-    try { return JSON.parse(raw); } catch { return []; }
-  }
-  return [];
-}
+type IngredientRow = IngredientCatalogRow;
 
 // SQL snippets that apply Hebrew final-letter normalisation to a COLUMN so
 // ILIKE can match a mid-word query ("שומ") against a stored final form ("שום").
@@ -174,27 +170,11 @@ async function fetchIngredientCandidates(
 
 function scoreRecipe(row: RecipeRow, nq: string): number {
   const nt = normalizeText(row.title);
-  if (nt === nq) return 8.0;                                   // tier 2
-  if (nt.startsWith(nq)) return 6.0;                           // tier 4
-  if (nt.includes(nq)) return 5.0;                             // tier 5
-  if (row.matched_ingredient) return 3.0;                      // tier 7
-  return 2.0 + Math.min(Number(row.score), 0.9);              // tier 8 (fuzzy)
-}
-
-function scoreIngredient(row: IngredientRow, nq: string): number {
-  const nn = normalizeText(row.canonical_name);
-  if (nn === nq) return 9.0;                                   // tier 1
-  if (nn.startsWith(nq)) return 7.0;                          // tier 3
-  if (nn.includes(nq)) return 4.0;                            // tier 6
-
-  for (const v of parseVariants(row.variants)) {
-    const nv = normalizeText(v);
-    if (nv === nq) return 9.0;                                 // tier 1
-    if (nv.startsWith(nq)) return 7.0;                        // tier 3
-    if (nv.includes(nq)) return 4.0;                          // tier 6
-  }
-
-  return 1.0 + Math.min(Number(row.cn_score), 0.9);           // tier 9 (fuzzy)
+  if (nt === nq) return 8.0;                                   // tier 1
+  if (nt.startsWith(nq)) return 6.0;                           // tier 2
+  if (nt.includes(nq)) return 5.0;                             // tier 3
+  if (row.matched_ingredient) return 3.0;                      // tier 4
+  return 2.0 + Math.min(Number(row.score), 0.9);              // tier 5 (fuzzy)
 }
 
 export default factories.createCoreController('api::recipe.recipe', ({ strapi }) => ({
@@ -318,9 +298,78 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
   },
 
   async search(ctx) {
-    const { q, ingredient } = ctx.query as { q?: string; ingredient?: string };
+    const { q, ingredient, canonicalIngredient } = ctx.query as {
+      q?: string;
+      ingredient?: string;
+      canonicalIngredient?: string;
+    };
 
     const knex = strapi.db.connection;
+
+    // Canonical-ingredient mode: broader than the `ingredient` branch below —
+    // matches recipes containing the canonical ingredient OR any of its
+    // approved catalog variants (e.g. selecting "בצל" also finds recipes
+    // using "שאלוט"). Reuses the same catalog relationship the ingredient
+    // match-candidate pipeline already relies on (normalizeText equality
+    // against canonical_name/variants — see matcher.ts findMatch), rather
+    // than a new substring heuristic. Exact-normalized-equality per
+    // ingredient line, not ILIKE substring, so it doesn't over-match (e.g.
+    // "בצל" must not match an unrelated ingredient line that merely contains
+    // the substring "בצל" as part of a longer word).
+    if (canonicalIngredient?.trim()) {
+      const nq = normalizeText(canonicalIngredient.trim());
+      const { rows: catalogRows } = (await knex.raw(
+        `SELECT canonical_name, variants FROM ingredient_catalog_items
+         WHERE approval_status = 'approved' AND ${TR_CN} = ?
+         LIMIT 1`,
+        [nq]
+      )) as { rows: { canonical_name: string; variants: unknown }[] };
+
+      const catalogRow = catalogRows[0];
+      if (!catalogRow) {
+        ctx.body = { data: [] };
+        return;
+      }
+
+      const acceptedNames = Array.from(
+        new Set([normalizeText(catalogRow.canonical_name), ...parseVariants(catalogRow.variants).map(normalizeText)])
+      );
+      const placeholders = acceptedNames.map(() => '?').join(', ');
+
+      const { rows: ingRows } = (await knex.raw(
+        `SELECT DISTINCT r.document_id
+         FROM recipes r
+         INNER JOIN recipes_cmps rc
+           ON rc.entity_id = r.id AND rc.field = 'ingredientSections'
+         INNER JOIN components_recipe_ingredient_sections s
+           ON s.id = rc.cmp_id
+         INNER JOIN components_recipe_ingredient_sections_cmps sic
+           ON sic.entity_id = s.id AND sic.field = 'ingredients'
+         INNER JOIN components_recipe_recipe_ingredients i
+           ON i.id = sic.cmp_id
+         WHERE r.published_at IS NOT NULL
+           AND ${TR_ING} IN (${placeholders})`,
+        acceptedNames
+      )) as { rows: { document_id: string }[] };
+
+      if (ingRows.length === 0) {
+        ctx.body = { data: [] };
+        return;
+      }
+
+      const results = await strapi.documents('api::recipe.recipe').findMany({
+        filters: { documentId: { $in: ingRows.map((r) => r.document_id) } } as any,
+        fields: ['title', 'slug', 'difficulty', 'prepTime', 'servings'],
+        populate: {
+          image: { fields: ['url', 'alternativeText', 'width', 'height'] },
+          categories: { fields: ['name', 'slug'] },
+        },
+        status: 'published',
+      });
+
+      ctx.body = { data: results };
+      return;
+    }
 
     // Ingredient-intent mode: strict ILIKE match on ingredient names only.
     // No fuzzy matching — avoids pg_trgm false positives on short Hebrew words.
@@ -515,7 +564,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
     const recipes = recipeRows.map((r) => {
       const score = scoreRecipe(r, nq);
       // Show which ingredient triggered the match only when the recipe did not
-      // match by title (tier 7 = 3.0; anything >= 5.0 is a title match).
+      // match by title (tier 4 = 3.0; anything >= 5.0 is a title match).
       const subtitle =
         r.matched_ingredient && score < 5.0
           ? `מתכון · מכיל ${r.matched_ingredient}`
@@ -523,14 +572,13 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
       return { type: 'recipe' as const, label: r.title, subtitle, slug: r.slug, score };
     });
 
-    const ingredients = ingredientRows.map((i) => ({
-      type: 'ingredient' as const,
-      label: i.canonical_name,
-      subtitle: `מתכונים עם ${i.canonical_name}`,
-      canonicalName: i.canonical_name,
-      slug: i.slug ?? undefined,
-      score: scoreIngredient(i, nq),
-    }));
+    // Ingredient suggestions always outrank recipe suggestions (INGREDIENT_TIER's
+    // lowest band starts at 10, above scoreRecipe's max of 8.0) — see
+    // suggestion-ranking.ts for the full priority order and why an exact
+    // variant match also emits its canonical parent as a second entry.
+    const ingredients = dedupeIngredientSuggestions(
+      ingredientRows.flatMap((row) => buildIngredientSuggestions(row, nq))
+    );
 
     const merged = [...recipes, ...ingredients]
       .sort((a, b) => b.score - a.score)

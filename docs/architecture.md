@@ -210,6 +210,23 @@ type IngredientCatalogItem = BaseEntity & {
 - Do not duplicate ingredient matching logic; all matching flows through the `processIngredientCandidates` endpoint.
 - **`preparationRecipe` and matching:** an ingredient occurrence with `preparationRecipe` set represents a prepared sub-recipe, not a raw catalog ingredient — it never enters catalog matching and never gets a candidate (`processRecipeIngredients`, `server/src/api/ingredient-match-candidate/services/processor.ts`). If a **pending** candidate already exists for that occurrence (identified by `recipe` + `normalizedText` — the same identity the pipeline already used for de-duplication; there is no other stable per-row identity to key off) when a `preparationRecipe` is added, it is deleted. Approved/rejected candidates and candidates belonging to other occurrences are never touched. Removing the relation makes the occurrence eligible for matching again on the next save (the recipe lifecycle reprocesses all ingredients on every `afterUpdate`), with no special-case code needed.
 
+### Search suggestion ranking & narrow vs. broad ingredient search
+
+`GET /recipes/suggestions` (`server/src/api/recipe/services/suggestion-ranking.ts`) ranks ingredient suggestions in fixed, non-overlapping score bands so ingredients always outrank recipe suggestions, and — critically — an **exact variant match is never silently replaced by its canonical name**:
+
+1. Exact variant match (e.g. querying "שאלוט" — score 100)
+2. Exact canonical match (e.g. querying "בצל" — score 90)
+3. The canonical parent of an exact variant match, shown as a second, explicitly-labeled entry immediately after it (score 85 — e.g. "שאלוט" also surfaces "בצל" as "חיפוש רחב יותר: מתכונים עם בצל")
+4. Partial (prefix/contains/fuzzy) matches on either the canonical name or a variant (scores 10–70)
+5. Recipe suggestions (scored separately in the controller, always < 10)
+
+Each ingredient suggestion carries a `matchType` (`"variant" | "canonical" | "canonical-parent" | "partial"`), a `searchTerm` (the exact text to filter by), and `canonicalId`/`canonicalName` — the client selects the search scope from `matchType`, never by re-parsing the displayed label:
+
+- **Narrow search** (`GET /recipes/search?ingredient=<text>`, `matchType` `"variant"`/`"partial"`) — unchanged: exact ILIKE substring match against the literal text, e.g. selecting "שאלוט" only finds recipes whose ingredient line contains "שאלוט".
+- **Broad search** (`GET /recipes/search?canonicalIngredient=<canonicalName>`, `matchType` `"canonical"`/`"canonical-parent"`) — looks up the catalog row by canonical name, then matches recipes whose ingredient line's normalized text exactly equals the canonical name **or any of its approved variants**. This reuses the catalog's own canonical/variant relationship (the same normalized-equality check `ingredient-match-candidate/services/matcher.ts`'s `findMatch` uses) rather than a new substring heuristic — so broad search coverage is exactly as complete as the catalog's approved variants, no more.
+- The client (`useHomeSearch.ts`) keeps the user's typed text in the input and URL untouched either way — `?ingredient=` / `?canonicalIngredient=` always reflect what was actually searched, never a silently-substituted canonical name.
+- Enter with no suggestion highlighted resolves to an exact `"variant"`/`"canonical"` suggestion already present in the (debounced) suggestions list, if any — otherwise falls back to free-text `?q=` search. Highlighting a suggestion with the keyboard always overrides this.
+
 ---
 
 ## 9. Client Architecture

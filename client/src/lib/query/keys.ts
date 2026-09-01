@@ -24,8 +24,11 @@ export const queryKeys = {
     detail: (slug: string) => ["recipes", "detail", slug] as const,
     /** Full-text search results for a query string. */
     search: (q: string) => ["recipes", "search", q] as const,
-    /** Ingredient-intent search — recipes that actually contain this ingredient. */
+    /** Ingredient-intent search — recipes that actually contain this ingredient (narrow, exact text). */
     byIngredient: (ingredient: string) => ["recipes", "byIngredient", ingredient] as const,
+    /** Canonical-ingredient search — recipes containing the canonical ingredient or any approved variant (broad). */
+    byCanonicalIngredient: (canonicalIngredient: string) =>
+      ["recipes", "byCanonicalIngredient", canonicalIngredient] as const,
     /** Related recipes for a given slug (server-scored, deterministic). */
     related: (slug: string) => ["recipes", "related", slug] as const,
     /** Recipes filtered by category slug. */
