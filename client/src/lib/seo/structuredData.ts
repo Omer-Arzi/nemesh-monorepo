@@ -74,6 +74,9 @@ export function buildRecipeSchema(recipe: Recipe): Record<string, unknown> {
   const prepTime = minutesToIsoDuration(recipe.prepTime);
   if (prepTime) schema.prepTime = prepTime;
 
+  const totalTime = minutesToIsoDuration(recipe.totalTime);
+  if (totalTime) schema.totalTime = totalTime;
+
   const ingredients = recipe.ingredientSections
     .flatMap((s) => s.ingredients)
     .map(formatIngredient)

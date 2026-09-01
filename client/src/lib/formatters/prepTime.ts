@@ -1,5 +1,9 @@
 /**
- * Formats a preparation time (in minutes) into a human-readable Hebrew string.
+ * Formats a duration in minutes into a human-readable Hebrew string.
+ *
+ * Despite the file name (kept for now to avoid an unnecessary rename), this
+ * is a generic minutes formatter — used for both `prepTime` (work time) and
+ * `totalTime` (total elapsed time), which share the same display format.
  *
  * Under 60 minutes:
  *   formatPrepTime(15)  → "15 דקות"

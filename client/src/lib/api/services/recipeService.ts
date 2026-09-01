@@ -96,6 +96,7 @@ type StrapiRecipeAttrs = {
   tags: StrapiData<StrapiTagAttrs>[];
   servings: number | null;
   prepTime: number | null;
+  totalTime: number | null;
   difficulty: Difficulty | null;
   description: string | null;
   ingredientSections: StrapiIngredientSectionRaw[];
@@ -113,6 +114,7 @@ type StrapiRecipeSummaryAttrs = {
   slug: string;
   difficulty: Difficulty | null;
   prepTime: number | null;
+  totalTime: number | null;
   servings: number | null;
   image: StrapiMediaRaw | null;
   categories: StrapiData<StrapiCategoryAttrs>[];
@@ -211,6 +213,9 @@ function mapRecipe(raw: StrapiData<StrapiRecipeAttrs>): Recipe {
     tags: (raw.tags ?? []).map(mapTag),
     servings: raw.servings ?? null,
     prepTime: raw.prepTime ?? null,
+    // Never backfilled from prepTime — a missing/omitted totalTime in the
+    // wire response must map to null, not to the work-time value.
+    totalTime: raw.totalTime ?? null,
     difficulty: raw.difficulty ?? null,
     description: raw.description ?? null,
     ingredientSections: (raw.ingredientSections ?? []).map((sec) => mapIngredientSection(sec, raw.slug)),
@@ -233,6 +238,9 @@ function mapRecipeSummary(
     slug: raw.slug,
     difficulty: raw.difficulty ?? null,
     prepTime: raw.prepTime ?? null,
+    // Never backfilled from prepTime — a missing/omitted totalTime in the
+    // wire response must map to null, not to the work-time value.
+    totalTime: raw.totalTime ?? null,
     servings: raw.servings ?? null,
     image: mapImage(raw.image),
     categories: (raw.categories ?? []).map(mapCategory),

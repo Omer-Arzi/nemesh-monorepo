@@ -70,6 +70,7 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
         description={recipe.description}
         categories={recipe.categories}
         prepTime={recipe.prepTime}
+        totalTime={recipe.totalTime}
         servings={recipe.servings}
         difficulty={recipe.difficulty}
       />

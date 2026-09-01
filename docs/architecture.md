@@ -74,7 +74,8 @@ The canonical `Recipe` type lives in [client/src/types/domain.ts](../client/src/
 | `categories`           | `Category[]`             | Primary navigation grouping                |
 | `tags`                 | `Tag[]`                  | Secondary descriptors / collections        |
 | `servings`             | `number \| null`         |                                            |
-| `prepTime`             | `number \| null`         | Minutes                                    |
+| `prepTime`             | `number \| null`         | Minutes — **active work time** ("זמן עבודה"). Strapi field name kept as `prepTime` for backward compatibility; only its label/meaning changed. |
+| `totalTime`            | `number \| null`         | Minutes — **total elapsed time** ("זמן כולל"), including inactive periods (baking, resting, proofing, cooling). Optional; never inferred from `prepTime` — `null` means "not specified," not "same as prepTime." Most existing recipes have this `null`. |
 | `difficulty`           | `"easy" \| "medium" \| "hard" \| null` |                          |
 | `description`          | `string \| null`         |                                            |
 | `ingredientSections`   | `IngredientSection[]`    | **Canonical structure** (see §4)           |

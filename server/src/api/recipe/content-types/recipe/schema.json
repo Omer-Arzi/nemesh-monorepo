@@ -47,6 +47,9 @@
     "prepTime": {
       "type": "integer"
     },
+    "totalTime": {
+      "type": "integer"
+    },
     "difficulty": {
       "type": "enumeration",
       "enum": [
