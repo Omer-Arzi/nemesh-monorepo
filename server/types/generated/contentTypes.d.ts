@@ -733,6 +733,7 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>;
     tips: Schema.Attribute.Component<'recipe.recipe-tip', true>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
+    totalTime: Schema.Attribute.Integer;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

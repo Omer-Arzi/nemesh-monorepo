@@ -7,9 +7,12 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
 import { formatPrepTime } from "@/lib/formatters/prepTime";
 import type { Difficulty } from "@/types/domain";
+import { RecipeMetaText } from "./RecipeMeta.consts";
 import { RecipeMetaStyle } from "./styles/RecipeMetaStyle";
 
 type Props = {
+  /** Active work time — the only time value recipe cards ever show. `totalTime` is a
+   * full-recipe-page-only detail (see RecipeHero) and is intentionally not a prop here. */
   prepTime?: number | null;
   servings?: number | null;
   difficulty?: Difficulty | null;
@@ -18,15 +21,17 @@ type Props = {
 
 type StatItemProps = {
   icon: React.ReactNode;
-  label: string;
+  value: string;
 };
 
-function StatItem({ icon, label }: StatItemProps) {
+function StatItem({ icon, value }: StatItemProps) {
   return (
     <Box sx={RecipeMetaStyle.statItem}>
-      <Box sx={RecipeMetaStyle.statIcon}>{icon}</Box>
+      <Box sx={RecipeMetaStyle.statIcon} aria-hidden="true">
+        {icon}
+      </Box>
       <Typography variant="body2" color="text.secondary" sx={RecipeMetaStyle.statText}>
-        {label}
+        {value}
       </Typography>
     </Box>
   );
@@ -39,16 +44,16 @@ export default function RecipeMeta({ prepTime, servings, difficulty, sx }: Props
   return (
     <Box sx={{ ...RecipeMetaStyle.root, ...sx }}>
       {prepTime != null && (
-        <StatItem icon={<AccessTimeIcon fontSize="inherit" />} label={formatPrepTime(prepTime)} />
+        <StatItem
+          icon={<AccessTimeIcon fontSize="inherit" />}
+          value={`${formatPrepTime(prepTime)} ${RecipeMetaText.workTimeSuffix}`}
+        />
       )}
       {servings != null && (
-        <StatItem icon={<PeopleIcon fontSize="inherit" />} label={`${servings} מנות`} />
+        <StatItem icon={<PeopleIcon fontSize="inherit" />} value={`${servings} ${RecipeMetaText.servingsUnit}`} />
       )}
       {difficulty != null && (
-        <StatItem
-          icon={<WhatshotIcon fontSize="inherit" />}
-          label={DIFFICULTY_LABEL[difficulty]}
-        />
+        <StatItem icon={<WhatshotIcon fontSize="inherit" />} value={DIFFICULTY_LABEL[difficulty]} />
       )}
     </Box>
   );

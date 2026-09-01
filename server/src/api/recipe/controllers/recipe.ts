@@ -215,7 +215,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
     // Load all other published recipes with categories, tags, and ingredients.
     const all = await strapi.documents('api::recipe.recipe').findMany({
       filters: { documentId: { $ne: (current as any).documentId } } as any,
-      fields: ['documentId', 'title', 'slug', 'difficulty', 'prepTime', 'servings', 'updatedAt'],
+      fields: ['documentId', 'title', 'slug', 'difficulty', 'prepTime', 'totalTime', 'servings', 'updatedAt'],
       populate: {
         image: { fields: ['url', 'alternativeText', 'width', 'height'] },
         categories: { fields: ['documentId', 'name', 'slug'] },
@@ -359,7 +359,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
 
       const results = await strapi.documents('api::recipe.recipe').findMany({
         filters: { documentId: { $in: ingRows.map((r) => r.document_id) } } as any,
-        fields: ['title', 'slug', 'difficulty', 'prepTime', 'servings'],
+        fields: ['title', 'slug', 'difficulty', 'prepTime', 'totalTime', 'servings'],
         populate: {
           image: { fields: ['url', 'alternativeText', 'width', 'height'] },
           categories: { fields: ['name', 'slug'] },
@@ -399,7 +399,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
 
       const results = await strapi.documents('api::recipe.recipe').findMany({
         filters: { documentId: { $in: ingRows.map((r) => r.document_id) } } as any,
-        fields: ['title', 'slug', 'difficulty', 'prepTime', 'servings'],
+        fields: ['title', 'slug', 'difficulty', 'prepTime', 'totalTime', 'servings'],
         populate: {
           image: { fields: ['url', 'alternativeText', 'width', 'height'] },
           categories: { fields: ['name', 'slug'] },
@@ -522,7 +522,7 @@ export default factories.createCoreController('api::recipe.recipe', ({ strapi })
 
     const results = await strapi.documents('api::recipe.recipe').findMany({
       filters: { documentId: { $in: sortedIds } } as any,
-      fields: ['title', 'slug', 'difficulty', 'prepTime', 'servings'],
+      fields: ['title', 'slug', 'difficulty', 'prepTime', 'totalTime', 'servings'],
       populate: {
         image: { fields: ['url', 'alternativeText', 'width', 'height'] },
         categories: { fields: ['name', 'slug'] },

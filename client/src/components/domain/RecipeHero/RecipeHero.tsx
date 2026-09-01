@@ -16,7 +16,7 @@ import { RecipeHeroText } from "./RecipeHero.consts";
 
 type Props = Pick<
   Recipe,
-  "title" | "image" | "description" | "categories" | "prepTime" | "servings" | "difficulty"
+  "title" | "image" | "description" | "categories" | "prepTime" | "totalTime" | "servings" | "difficulty"
 > & {
   sx?: SxProps<Theme>;
 };
@@ -42,6 +42,7 @@ export default function RecipeHero({
   description,
   categories,
   prepTime,
+  totalTime,
   servings,
   difficulty,
   sx,
@@ -62,7 +63,7 @@ export default function RecipeHero({
   const [heights, setHeights] = useState<{ collapsed: number; full: number } | null>(null);
   const descRef = useRef<HTMLParagraphElement>(null);
 
-  const hasMetaStats = prepTime != null || difficulty != null || servings != null;
+  const hasMetaStats = prepTime != null || totalTime != null || difficulty != null || servings != null;
   const primaryCategory = categories[0] ?? null;
 
   const desc = description?.trim() ?? null;
@@ -220,6 +221,9 @@ export default function RecipeHero({
               <Box sx={RecipeHeroStyle.metaRow}>
                 {prepTime != null && (
                   <HeroStat label={RecipeHeroText.prepTimeLabel} value={formatPrepTime(prepTime)} />
+                )}
+                {totalTime != null && (
+                  <HeroStat label={RecipeHeroText.totalTimeLabel} value={formatPrepTime(totalTime)} />
                 )}
                 {difficulty != null && (
                   <HeroStat label={RecipeHeroText.difficultyLabel} value={DIFFICULTY_LABEL[difficulty]} />

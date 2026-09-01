@@ -116,7 +116,16 @@ export type Recipe = BaseEntity & {
   categories: Category[];
   tags: Tag[];
   servings: number | null;
+  /** Active hands-on work time, in minutes — displayed as "זמן עבודה". */
   prepTime: number | null;
+  /**
+   * Total elapsed time from start to finished dish, in minutes — including
+   * inactive periods (baking, resting, proofing, cooling). Displayed as
+   * "זמן כולל". Optional: most recipes only have `prepTime`. Never inferred
+   * or backfilled from `prepTime` — null means "not specified", not "same as
+   * prepTime" and not zero.
+   */
+  totalTime: number | null;
   difficulty: Difficulty | null;
   description: string | null;
   ingredientSections: IngredientSection[];
@@ -133,7 +142,16 @@ export type Recipe = BaseEntity & {
  */
 export type RecipeSummary = Pick<
   Recipe,
-  "id" | "title" | "slug" | "image" | "categories" | "tags" | "difficulty" | "prepTime" | "servings"
+  | "id"
+  | "title"
+  | "slug"
+  | "image"
+  | "categories"
+  | "tags"
+  | "difficulty"
+  | "prepTime"
+  | "totalTime"
+  | "servings"
 >;
 
 /**

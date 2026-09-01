@@ -7,9 +7,12 @@ vi.mock("../client", () => ({
 }));
 
 // Minimal Strapi v5-shaped fixture — only the fields mapRecipe actually reads.
+// `totalTime` is deliberately omitted unless passed — an absent key (not even
+// `null`) is exactly what an old cached/pre-migration response looks like.
 function makeRawRecipe(overrides: {
   slug: string;
   ingredientPreparationRecipe?: unknown;
+  totalTime?: number | null;
 }) {
   return {
     data: [
@@ -23,6 +26,7 @@ function makeRawRecipe(overrides: {
         tags: [],
         servings: 4,
         prepTime: 30,
+        ...("totalTime" in overrides ? { totalTime: overrides.totalTime } : {}),
         difficulty: "medium",
         description: null,
         ingredientSections: [
@@ -123,5 +127,32 @@ describe("getRecipeBySlug — preparationRecipe mapping", () => {
     expect(ingredient?.preparationRecipe).toBeNull();
     expect(ingredient?.ingredientName).toBe("ריבת לימון");
     expect(ingredient?.amount).toBe(2);
+  });
+});
+
+describe("getRecipeBySlug — prepTime (work time) / totalTime mapping", () => {
+  it("an existing recipe whose response has no totalTime key at all (pre-migration shape) maps prepTime unchanged and totalTime to null", async () => {
+    vi.mocked(apiClient.get).mockResolvedValueOnce(makeRawRecipe({ slug: "pizza" }));
+
+    const recipe = await getRecipeBySlug("pizza");
+    expect(recipe?.prepTime).toBe(30);
+    expect(recipe?.totalTime).toBeNull();
+  });
+
+  it("a recipe with both prepTime and totalTime maps both independently", async () => {
+    vi.mocked(apiClient.get).mockResolvedValueOnce(makeRawRecipe({ slug: "pizza", totalTime: 140 }));
+
+    const recipe = await getRecipeBySlug("pizza");
+    expect(recipe?.prepTime).toBe(30);
+    expect(recipe?.totalTime).toBe(140);
+  });
+
+  it("an explicit null totalTime maps to null — never backfilled from prepTime", async () => {
+    vi.mocked(apiClient.get).mockResolvedValueOnce(makeRawRecipe({ slug: "pizza", totalTime: null }));
+
+    const recipe = await getRecipeBySlug("pizza");
+    expect(recipe?.prepTime).toBe(30);
+    expect(recipe?.totalTime).toBeNull();
+    expect(recipe?.totalTime).not.toBe(recipe?.prepTime);
   });
 });

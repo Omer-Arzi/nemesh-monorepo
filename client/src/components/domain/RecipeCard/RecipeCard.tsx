@@ -12,6 +12,7 @@ import { ROUTES } from "@/constants";
 import type { RecipeSummary } from "@/types/domain";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
 import { formatPrepTime } from "@/lib/formatters/prepTime";
+import { RecipeMetaText } from "../RecipeMeta/RecipeMeta.consts";
 import { NemeshImage } from "@/components/shared";
 import RecipeMeta from "../RecipeMeta";
 import { RecipeCardStyle } from "./styles/RecipeCardStyle";
@@ -47,6 +48,11 @@ export default function RecipeCard({ recipe, small = false, priority = false, si
   const visibleTags = recipe.tags.slice(0, MAX_VISIBLE_TAGS);
   const hiddenTagCount = recipe.tags.length - visibleTags.length;
 
+  // Cards only ever show prepTime (active work time) — totalTime is a full-recipe-page-only
+  // detail (see RecipeHero), never shown here, even when present on the recipe.
+  const cardTimeText =
+    recipe.prepTime != null ? `${formatPrepTime(recipe.prepTime)} ${RecipeMetaText.workTimeSuffix}` : null;
+
   return (
     <Card sx={RecipeCardStyle.card}>
       <CardActionArea
@@ -76,7 +82,7 @@ export default function RecipeCard({ recipe, small = false, priority = false, si
           {small ? (
             <Typography variant="body2" sx={RecipeCardStyle.smallMeta}>
               {[
-                recipe.prepTime != null ? formatPrepTime(recipe.prepTime) : null,
+                cardTimeText,
                 recipe.difficulty != null ? DIFFICULTY_LABEL[recipe.difficulty] : null,
                 ...recipe.categories.map((c) => c.name),
                 ...recipe.tags.map((t) => t.name),
