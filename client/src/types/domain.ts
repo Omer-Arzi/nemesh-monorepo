@@ -223,6 +223,18 @@ export type HomeFeatureSection = {
 };
 
 /**
+ * A single editor-curated "recommended tag" shown in the homepage hero search
+ * surface when the field is focused and empty. Ordered by the editor (row
+ * order in the Strapi repeatable component). Tags with zero published recipes
+ * are dropped by the service layer before this type is populated, and the set
+ * is capped at 5 — see homepageService.mapRecommendedTags.
+ */
+export type RecommendedTag = {
+  name: string;
+  slug: string;
+};
+
+/**
  * Editable homepage content from the homepage single type.
  * All fields are optional — components fall back to their built-in defaults
  * when a field is null (not yet filled in Strapi).
@@ -235,6 +247,8 @@ export type HomePage = {
   featuredCategoriesTitle: string | null;
   about: HomepageAbout | null;
   featureSection: HomeFeatureSection | null;
+  /** Editor order preserved; already filtered to tags with >= 1 published recipe; max 5. */
+  recommendedTags: RecommendedTag[];
 };
 
 // ─── About page ───────────────────────────────────────────────────────────────

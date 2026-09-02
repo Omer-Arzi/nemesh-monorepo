@@ -33,8 +33,14 @@ export const queryKeys = {
     related: (slug: string) => ["recipes", "related", slug] as const,
     /** Recipes filtered by category slug. */
     byCategory: (slug: string) => ["recipes", "byCategory", slug] as const,
-    /** Recipes filtered by tag slug. */
+    /** Recipes filtered by tag slug — first page only (challenge page, pageSize 20). */
     byTag: (slug: string) => ["recipes", "byTag", slug] as const,
+    /**
+     * Tag-filter results view (`/results?tag=`) — one page at the max size.
+     * Kept separate from byTag() so it does not share a cache entry with the
+     * challenge page's smaller-page query for the same slug.
+     */
+    byTagResults: (slug: string) => ["recipes", "byTagResults", slug] as const,
     /** Latest recipes sorted by createdAt descending (homepage section). */
     latest: () => ["recipes", "latest"] as const,
     /**

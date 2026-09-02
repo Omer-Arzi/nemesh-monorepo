@@ -38,6 +38,12 @@
       "type": "component",
       "repeatable": false,
       "component": "home.feature-section"
+    },
+    "recommendedSearchTags": {
+      "type": "component",
+      "repeatable": true,
+      "component": "home.recommended-tag",
+      "max": 5
     }
   }
 }

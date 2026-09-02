@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
-import type { Image } from "@/types/domain";
+import type { Image, RecommendedTag } from "@/types/domain";
 import { NemeshImage, FreckleDust, SiteLogo } from "@/components/shared";
 import { SearchSuggestions } from "@/features/home/SearchSuggestions";
 import { useHomeSearch } from "./useHomeSearch";
@@ -18,10 +18,11 @@ type Props = {
   title?: string | null;
   subtitle?: string | null;
   backgroundImage?: Image | null;
+  recommendedTags?: RecommendedTag[];
 };
 
-export default function HomeSearchHero({ title, subtitle, backgroundImage }: Props) {
-  const search = useHomeSearch();
+export default function HomeSearchHero({ title, subtitle, backgroundImage, recommendedTags = [] }: Props) {
+  const search = useHomeSearch({ recommendedTags, mode: "hero" });
 
   const headline = title ?? HomeSearchHeroText.headline;
   const subtitleText = subtitle ?? HomeSearchHeroText.subtitle;
@@ -55,7 +56,11 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
         </Typography>
 
         <Box component="form" onSubmit={search.handleSubmit} sx={HomeSearchHeroStyle.form}>
-          <Box sx={HomeSearchHeroStyle.searchWrapper} onBlur={search.handleWrapperBlur}>
+          <Box
+            sx={HomeSearchHeroStyle.searchWrapper}
+            onFocus={search.handleFocus}
+            onBlur={search.handleWrapperBlur}
+          >
             <TextField
               value={search.query}
               onChange={(e) => search.setQuery(e.target.value)}
@@ -68,7 +73,7 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
                 htmlInput: {
                   role: "combobox",
                   "aria-autocomplete": "list",
-                  "aria-expanded": search.showDropdown,
+                  "aria-expanded": search.isOpen,
                   "aria-controls": search.listboxId,
                   "aria-activedescendant": search.activeDescendantId,
                 },
@@ -95,14 +100,24 @@ export default function HomeSearchHero({ title, subtitle, backgroundImage }: Pro
               }}
             />
 
-            {search.showDropdown && (
-              <SearchSuggestions
-                suggestions={search.suggestions}
-                activeIndex={search.activeIndex}
-                onSelect={search.handleSelect}
-                listboxId={search.listboxId}
-              />
-            )}
+            {search.isOpen &&
+              (search.isRecommendedOpen ? (
+                <SearchSuggestions
+                  variant="recommended"
+                  recommendedTags={search.recommendedTags}
+                  heading={HomeSearchHeroText.recommendedHeading}
+                  activeIndex={search.activeIndex}
+                  onSelectTag={search.selectRecommendedTag}
+                  listboxId={search.listboxId}
+                />
+              ) : (
+                <SearchSuggestions
+                  suggestions={search.suggestions}
+                  activeIndex={search.activeIndex}
+                  onSelect={search.handleSelect}
+                  listboxId={search.listboxId}
+                />
+              ))}
           </Box>
         </Box>
       </Stack>

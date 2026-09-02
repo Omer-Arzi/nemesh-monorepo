@@ -6,6 +6,12 @@ import { queryKeys } from "@/lib/query/keys";
 const DEBOUNCE_MS = 300;
 const MIN_LENGTH = 2;
 
+// Stable reference for the disabled case. An inline `[]` literal would be a new
+// array on every render, so any consumer effect keyed on `suggestions` would
+// re-run every render — that is what broke keyboard nav in the hero's
+// recommended-tags state (empty query ⇒ disabled ⇒ new array each render).
+const NO_SUGGESTIONS: SearchSuggestion[] = [];
+
 export function useSearchSuggestions(query: string) {
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -25,7 +31,7 @@ export function useSearchSuggestions(query: string) {
   });
 
   return {
-    suggestions: enabled ? data : ([] as SearchSuggestion[]),
+    suggestions: enabled ? data : NO_SUGGESTIONS,
     isActive: enabled,
   };
 }

@@ -11,4 +11,5 @@ export const ResultsPageText = {
   ingredientError: "החיפוש נכשל. אנא בדוק את החיבור ונסה שוב.",
   ingredientEmptyTitle: "לא מצאנו מתכונים עם המרכיב הזה",
   ingredientEmptyDescription: "ייתכן שהמרכיב לא קיים עדיין במתכונים שלנו.",
+  tagSectionTitle: (name: string) => `מתכונים בנושא "${name}"`,
 } as const;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { Image } from "@/types/domain";
+import type { Image, RecommendedTag } from "@/types/domain";
 import HomeSearchHero from "@/features/home/HomeSearchHero";
 import { useHomeHeroVisibility } from "@/providers/HomeHeroVisibilityProvider";
 
@@ -9,6 +9,7 @@ type Props = {
   title?: string | null;
   subtitle?: string | null;
   backgroundImage?: Image | null;
+  recommendedTags?: RecommendedTag[];
 };
 
 /**
@@ -26,7 +27,7 @@ type Props = {
  * The DesktopCompactHeader itself is NOT rendered here — it lives in
  * AppShell so it persists across route changes.
  */
-export default function HomeHeroSection({ title, subtitle, backgroundImage }: Props) {
+export default function HomeHeroSection({ title, subtitle, backgroundImage, recommendedTags }: Props) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { setHomeHeroVisible } = useHomeHeroVisibility();
 
@@ -56,7 +57,12 @@ export default function HomeHeroSection({ title, subtitle, backgroundImage }: Pr
 
   return (
     <>
-      <HomeSearchHero title={title} subtitle={subtitle} backgroundImage={backgroundImage} />
+      <HomeSearchHero
+        title={title}
+        subtitle={subtitle}
+        backgroundImage={backgroundImage}
+        recommendedTags={recommendedTags}
+      />
       {/* Sentinel: positioned right after the hero bottom edge */}
       <div ref={sentinelRef} aria-hidden="true" style={{ pointerEvents: "none" }} />
     </>

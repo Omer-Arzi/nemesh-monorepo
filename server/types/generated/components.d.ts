@@ -45,6 +45,18 @@ export interface HomeFeatureSection extends Struct.ComponentSchema {
   };
 }
 
+export interface HomeRecommendedTag extends Struct.ComponentSchema {
+  collectionName: 'components_home_recommended_tags';
+  info: {
+    description: 'One hero-search recommendation. References an existing tag; row order sets the display order in the homepage hero.';
+    displayName: 'Recommended Tag';
+  };
+  attributes: {
+    tag: Schema.Attribute.Relation<'oneToOne', 'api::tag.tag'> &
+      Schema.Attribute.Required;
+  };
+}
+
 export interface RecipeIngredientSection extends Struct.ComponentSchema {
   collectionName: 'components_recipe_ingredient_sections';
   info: {
@@ -156,6 +168,7 @@ declare module '@strapi/strapi' {
       'home.about-section': HomeAboutSection;
       'home.feature-card': HomeFeatureCard;
       'home.feature-section': HomeFeatureSection;
+      'home.recommended-tag': HomeRecommendedTag;
       'recipe.ingredient-section': RecipeIngredientSection;
       'recipe.preparation-section': RecipePreparationSection;
       'recipe.preparation-step': RecipePreparationStep;

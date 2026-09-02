@@ -8,7 +8,13 @@
  *   Settings → Users & Permissions → Roles → Public → homepage → find ✓
  */
 import type { StrapiSingle, StrapiData } from "@/types/api";
-import type { HomePage, HomepageAbout, HomeFeatureCard, HomeFeatureSection } from "@/types/domain";
+import type {
+  HomePage,
+  HomepageAbout,
+  HomeFeatureCard,
+  HomeFeatureSection,
+  RecommendedTag,
+} from "@/types/domain";
 import type { BlockNode } from "@/types/domain";
 import { apiClient } from "../client";
 import { mapImage, type StrapiMediaRaw } from "../mappers";
@@ -46,6 +52,20 @@ type StrapiFeatureSection = {
   readMorePage: StrapiPageRef | null;
 };
 
+// One row of the `recommendedSearchTags` repeatable component. `tag` is a
+// required relation in Strapi, but a row could still arrive incomplete via a
+// stale populate or a tag deleted after curation — the mapper guards for it.
+// `recipes.count` is the published-recipe count (the populate filters to
+// publishedAt != null); it is used only to drop zero-count tags — never rendered.
+type StrapiRecommendedTagRow = {
+  id?: number;
+  tag: {
+    name: string | null;
+    slug: string | null;
+    recipes: { count: number } | null;
+  } | null;
+};
+
 type StrapiHomepageAttrs = {
   heroTitle: string | null;
   heroSubtitle: string | null;
@@ -54,7 +74,11 @@ type StrapiHomepageAttrs = {
   featuredCategoriesTitle: string | null;
   about: StrapiAboutSection | null;
   featureSection: StrapiFeatureSection | null;
+  recommendedSearchTags: StrapiRecommendedTagRow[] | null;
 };
+
+/** Hard cap — mirrors the Strapi component `max`; defensive against a bad payload. */
+const MAX_RECOMMENDED_TAGS = 5;
 
 // ─── Mappers ──────────────────────────────────────────────────────────────
 
@@ -106,6 +130,24 @@ function mapFeatureSection(raw: StrapiFeatureSection | null | undefined): HomeFe
   };
 }
 
+// Keeps editor row order. Drops rows whose tag is missing, unnamed, unslugged,
+// or has zero published recipes (D1). Caps at 5 (D2) as a defensive measure —
+// Strapi already enforces the cap on save.
+function mapRecommendedTags(raw: StrapiRecommendedTagRow[] | null | undefined): RecommendedTag[] {
+  if (!raw) return [];
+  return raw
+    .map((row) => row.tag)
+    .filter((tag): tag is NonNullable<StrapiRecommendedTagRow["tag"]> => tag !== null)
+    .map((tag) => ({
+      name: tag.name?.trim() ?? "",
+      slug: tag.slug?.trim() ?? "",
+      publishedRecipeCount: tag.recipes?.count ?? 0,
+    }))
+    .filter((tag) => tag.name !== "" && tag.slug !== "" && tag.publishedRecipeCount >= 1)
+    .slice(0, MAX_RECOMMENDED_TAGS)
+    .map((tag) => ({ name: tag.name, slug: tag.slug }));
+}
+
 function mapHomepage(raw: StrapiData<StrapiHomepageAttrs>): HomePage {
   return {
     heroTitle: raw.heroTitle ?? null,
@@ -115,6 +157,7 @@ function mapHomepage(raw: StrapiData<StrapiHomepageAttrs>): HomePage {
     featuredCategoriesTitle: raw.featuredCategoriesTitle ?? null,
     about: mapAbout(raw.about),
     featureSection: mapFeatureSection(raw.featureSection),
+    recommendedTags: mapRecommendedTags(raw.recommendedSearchTags),
   };
 }
 
@@ -125,7 +168,14 @@ const HOMEPAGE_POPULATE =
   "&populate[about][populate][image]=true" +
   "&populate[featureSection][populate][cards][populate][icon]=true" +
   "&populate[featureSection][populate][readMorePage][fields][0]=slug" +
-  "&populate[featureSection][populate][readMorePage][fields][1]=title";
+  "&populate[featureSection][populate][readMorePage][fields][1]=title" +
+  // Curated hero-search recommendations. Row order is authoritative. Each tag
+  // carries its published-recipe count (relation filtered to publishedAt != null
+  // so drafts never inflate it) used only to drop zero-count tags client-side.
+  "&populate[recommendedSearchTags][populate][tag][fields][0]=name" +
+  "&populate[recommendedSearchTags][populate][tag][fields][1]=slug" +
+  "&populate[recommendedSearchTags][populate][tag][populate][recipes][count]=true" +
+  "&populate[recommendedSearchTags][populate][tag][populate][recipes][filters][publishedAt][%24notNull]=true";
 
 // ─── Public API ───────────────────────────────────────────────────────────
 

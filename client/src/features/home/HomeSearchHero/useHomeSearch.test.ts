@@ -11,9 +11,17 @@ vi.mock("next/navigation", () => ({
 
 // Controlled from each test via `mockSuggestions` — avoids exercising the
 // real debounce/TanStack Query machinery for hook-level behavior tests.
+//
+// Mirrors the real hook's reference behavior: a STABLE array while enabled
+// (>= 2 typed chars), and a BRAND-NEW empty array on every render while
+// disabled (empty/short query). The latter is the condition that broke
+// recommended-mode keyboard nav — a stable `[]` here would hide the bug.
 let mockSuggestions: SearchSuggestion[] = [];
 vi.mock("./useSearchSuggestions", () => ({
-  useSearchSuggestions: () => ({ suggestions: mockSuggestions, isActive: true }),
+  useSearchSuggestions: (query: string) => {
+    const enabled = query.trim().length >= 2;
+    return { suggestions: enabled ? mockSuggestions : [], isActive: enabled };
+  },
 }));
 
 const SHALLOT: SearchSuggestion = {
@@ -67,6 +75,19 @@ const RECIPE: SearchSuggestion = {
   slug: "french-onion-soup",
   score: 8,
 };
+
+const RECOMMENDED_TAGS = [
+  { name: "ארוחות ערב מהירות", slug: "quick-dinners" },
+  { name: "מתכונים לשבת", slug: "shabbat" },
+  { name: "קינוחים בלי אפייה", slug: "no-bake-desserts" },
+];
+
+// jsdom-friendly stand-in for the wrapper blur event: focus moved entirely
+// outside the search wrapper (relatedTarget not contained).
+const blurredOutEvent = {
+  currentTarget: { contains: () => false },
+  relatedTarget: null,
+} as unknown as React.FocusEvent<HTMLDivElement>;
 
 describe("resolveExactSuggestion", () => {
   it("returns the exact variant suggestion", () => {
@@ -207,5 +228,148 @@ describe("useHomeSearch", () => {
     act(() => result.current.handleKeyDown({ key: "Escape", preventDefault: vi.fn() } as unknown as React.KeyboardEvent));
     expect(result.current.open).toBe(false);
     expect(result.current.activeIndex).toBe(-1);
+  });
+});
+
+describe("useHomeSearch — hero recommended-tags mode", () => {
+  beforeEach(() => {
+    push.mockClear();
+    mockSuggestions = [];
+  });
+
+  const renderHero = (tags = RECOMMENDED_TAGS) =>
+    renderHook(() => useHomeSearch({ recommendedTags: tags, mode: "hero" }));
+
+  it("does not show the recommended state until the field is focused", () => {
+    const { result } = renderHero();
+    expect(result.current.isRecommendedOpen).toBe(false);
+    expect(result.current.isOpen).toBe(false);
+
+    act(() => result.current.handleFocus());
+    expect(result.current.isRecommendedOpen).toBe(true);
+    expect(result.current.isOpen).toBe(true);
+  });
+
+  it("does not enter the recommended state when there are no qualifying tags", () => {
+    const { result } = renderHero([]);
+    act(() => result.current.handleFocus());
+    expect(result.current.isRecommendedOpen).toBe(false);
+  });
+
+  it("exits the recommended state on the first typed character and re-enters when cleared back to empty (D4)", () => {
+    const { result } = renderHero();
+    act(() => result.current.handleFocus());
+    expect(result.current.isRecommendedOpen).toBe(true);
+
+    act(() => result.current.setQuery(" ")); // even a space counts as typing
+    expect(result.current.isRecommendedOpen).toBe(false);
+
+    act(() => result.current.setQuery(""));
+    expect(result.current.isRecommendedOpen).toBe(true);
+  });
+
+  it("Escape keeps the recommended state dismissed while focus + empty query persist (D8), re-armed by a query change", () => {
+    const { result } = renderHero();
+    act(() => result.current.handleFocus());
+    act(() =>
+      result.current.handleKeyDown({ key: "Escape", preventDefault: vi.fn() } as unknown as React.KeyboardEvent)
+    );
+    expect(result.current.isRecommendedOpen).toBe(false);
+
+    // still focused, still empty — stays dismissed
+    act(() => result.current.handleFocus());
+    expect(result.current.isRecommendedOpen).toBe(false);
+
+    // any query change re-arms it (typing then clearing)
+    act(() => result.current.setQuery("a"));
+    act(() => result.current.setQuery(""));
+    expect(result.current.isRecommendedOpen).toBe(true);
+  });
+
+  it("blur clears both focus and the Escape dismissal", () => {
+    const { result } = renderHero();
+    act(() => result.current.handleFocus());
+    act(() =>
+      result.current.handleKeyDown({ key: "Escape", preventDefault: vi.fn() } as unknown as React.KeyboardEvent)
+    );
+    act(() => result.current.handleWrapperBlur(blurredOutEvent));
+
+    act(() => result.current.handleFocus());
+    expect(result.current.isRecommendedOpen).toBe(true);
+  });
+
+  it("ArrowDown/ArrowUp move the highlight and activeDescendantId across renders (regression: reset-effect churn)", () => {
+    const { result } = renderHero();
+    act(() => result.current.handleFocus());
+
+    act(() =>
+      result.current.handleKeyDown({ key: "ArrowDown", preventDefault: vi.fn() } as unknown as React.KeyboardEvent)
+    );
+    expect(result.current.activeIndex).toBe(0);
+    expect(result.current.activeDescendantId).toMatch(/-option-0$/);
+
+    act(() =>
+      result.current.handleKeyDown({ key: "ArrowDown", preventDefault: vi.fn() } as unknown as React.KeyboardEvent)
+    );
+    expect(result.current.activeIndex).toBe(1);
+    expect(result.current.activeDescendantId).toMatch(/-option-1$/);
+
+    act(() =>
+      result.current.handleKeyDown({ key: "ArrowUp", preventDefault: vi.fn() } as unknown as React.KeyboardEvent)
+    );
+    expect(result.current.activeIndex).toBe(0);
+  });
+
+  it("ArrowDown then Enter routes to the tag-filter results view by slug — never a q= search", () => {
+    const { result } = renderHero();
+    act(() => result.current.handleFocus());
+    act(() =>
+      result.current.handleKeyDown({ key: "ArrowDown", preventDefault: vi.fn() } as unknown as React.KeyboardEvent)
+    );
+    expect(result.current.activeIndex).toBe(0);
+    act(() =>
+      result.current.handleKeyDown({ key: "Enter", preventDefault: vi.fn() } as unknown as React.KeyboardEvent)
+    );
+    expect(push).toHaveBeenCalledWith("/results?tag=quick-dinners");
+  });
+
+  it("ArrowDown is clamped to the number of recommended tags", () => {
+    const { result } = renderHero();
+    act(() => result.current.handleFocus());
+    for (let i = 0; i < 10; i++) {
+      act(() =>
+        result.current.handleKeyDown({ key: "ArrowDown", preventDefault: vi.fn() } as unknown as React.KeyboardEvent)
+      );
+    }
+    expect(result.current.activeIndex).toBe(RECOMMENDED_TAGS.length - 1);
+  });
+
+  it("selectRecommendedTag routes to the tag-filter results view by slug", () => {
+    const { result } = renderHero();
+    act(() => result.current.selectRecommendedTag(RECOMMENDED_TAGS[1]));
+    expect(push).toHaveBeenCalledWith("/results?tag=shabbat");
+  });
+
+  it("Enter with nothing highlighted in the recommended state does not navigate", () => {
+    const { result } = renderHero();
+    act(() => result.current.handleFocus());
+    act(() =>
+      result.current.handleKeyDown({ key: "Enter", preventDefault: vi.fn() } as unknown as React.KeyboardEvent)
+    );
+    expect(push).not.toHaveBeenCalled();
+  });
+});
+
+describe("useHomeSearch — compact mode never enters recommended state (D3)", () => {
+  beforeEach(() => {
+    push.mockClear();
+    mockSuggestions = [];
+  });
+
+  it("focus does nothing in the default (compact) mode even if tags are somehow passed", () => {
+    const { result } = renderHook(() => useHomeSearch({ recommendedTags: RECOMMENDED_TAGS }));
+    act(() => result.current.handleFocus());
+    expect(result.current.isRecommendedOpen).toBe(false);
+    expect(result.current.isOpen).toBe(false);
   });
 });

@@ -39,6 +39,32 @@ export const SearchSuggestionsStyle = {
     },
   }),
 
+  // Recommended-mode single-line row: overrides the typed row's column layout
+  // and adds an explicit touch target (a one-line row would not otherwise
+  // clear 44px the way the two-line typed rows do incidentally).
+  recommendedRow: {
+    flexDirection: "row" as const,
+    alignItems: "center",
+    py: 1.5,
+    minHeight: 44,
+  },
+
+  // Non-interactive section-label strip above the recommended rows.
+  recommendedHeading: (theme: Theme) => ({
+    px: 2.5,
+    pt: 1.5,
+    pb: 1,
+    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+  }),
+
+  recommendedHeadingText: {
+    fontSize: "0.72rem",
+    fontWeight: 700,
+    color: "text.secondary",
+    letterSpacing: "0.03em",
+    lineHeight: 1.3,
+  },
+
   label: {
     fontSize: "0.9rem",
     fontWeight: 600,

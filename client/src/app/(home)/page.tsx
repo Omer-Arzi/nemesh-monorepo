@@ -21,6 +21,7 @@ export default async function HomePage() {
         title={homepage?.heroTitle ?? null}
         subtitle={homepage?.heroSubtitle ?? null}
         backgroundImage={homepage?.heroBackgroundImage ?? null}
+        recommendedTags={homepage?.recommendedTags ?? []}
       />
       <FeatureSection section={homepage?.featureSection ?? null} />
       <HomepageAbout about={homepage?.about ?? null} />
