@@ -444,7 +444,9 @@ Full Railway + S3 setup steps: [docs/deployment.md](./deployment.md).
 
 ## 13. Shir Challenge Page
 
-`/tags/shir-challenge` is handled by a **static Next.js route** (`app/(standard)/tags/shir-challenge/page.tsx`) which takes precedence over the dynamic `app/(standard)/tags/[slug]/page.tsx`. This prevents any change to existing tag-page logic. (Route group folder — see §9b — does not affect the URL.)
+`/tags/shir-challenge` is handled by a **static Next.js route** (`app/(standard)/tags/shir-challenge/page.tsx`) which takes precedence over the dynamic `app/(standard)/tags/[slug]/page.tsx`. This prevents any change to existing challenge-page logic. (Route group folder — see §9b — does not affect the URL.)
+
+The generic per-tag page was removed (most tags have no image, so its large-image header read as broken). `app/(standard)/tags/[slug]/page.tsx` and `app/(standard)/tags/page.tsx` are now one-line server components that `redirect(ROUTES.HOME)` — every `/tags/<slug>` URL except `shir-challenge`, and bare `/tags`, silently 307 to the homepage. Tag browsing lives in the results view instead: `/results?tag=<slug>` is a link-only peer of `?q=` / `?ingredient=` / `?canonicalIngredient=` (`TagResults` in `app/(standard)/results/page.tsx`, hook `useTagSearch`). It resolves the tag's current display name from the fetched recipes' populated `tags` (rename-safe, no `getTagBySlug`), renders `SectionHeader` + a finite `RecipeCard` grid (one `getRecipesByTag` call at `pageSize` 100, no infinite scroll), and silently `router.replace`s to the homepage when the slug resolves to zero published recipes — no tag-filter empty state exists. `src/middleware.ts` sets `X-Robots-Tag: noindex` on `/results` responses that carry a `tag` param (the view is non-canonical); the other `/results` modes are unaffected. `ROUTES.TAGS` was removed; `ROUTES.TAG(slug)` stays (nav rail + categories page, both for `shir-challenge`).
 
 ### Strapi single type — `shir-challenge-page`
 
@@ -490,6 +492,7 @@ Located at `server/src/api/homepage/`. All fields are optional — the frontend 
 | `latestRecipesTitle` / `featuredCategoriesTitle` | string | Section headers for the collection-driven sections below |
 | `about` | component (`home.about-section`) | Expandable about teaser — see `HomepageAbout` |
 | `featureSection` | component (`home.feature-section`) | 3-card feature section + read-more link — see below |
+| `recommendedSearchTags` | component (`home.recommended-tag`, repeatable, `max: 5`) | Editor-curated tags shown in the hero search surface on focus + empty query — see below |
 
 ### `home.feature-section` / `home.feature-card`
 
@@ -519,9 +522,19 @@ The three known feature cards (`ingredients-available`, `cooking-mode`, `search-
 
 Rendered inline (not through `next/image`) because: (1) the project has no SVGR/webpack config to import raw `.svg` files as components, and the one pre-existing `src/assets/icons/logo-nemesh-icon.svg` was unused dead code; (2) `next.config.ts` doesn't set `images.dangerouslyAllowSVG`, so `next/image`'s optimizer would reject an SVG source in production; (3) inline SVG is vector-native, so it's crisp on retina with no image-optimizer involvement at all, and `stroke="currentColor"` lets each icon inherit the card's theme text color instead of a hardcoded value.
 
+### `home.recommended-tag` — hero search recommendations
+
+`server/src/components/home/recommended-tag.json`: a repeatable component on the `homepage` single type (`max: 5`, no `min` — Strapi 5.42 rejects `min: 0` on a component attribute), one required `tag` relation (`oneToOne` → `api::tag.tag`) per row. Row order is authoritative and drives the display order in the hero. Additive, backward-compatible — the existing homepage record stays valid with an empty list.
+
+When the homepage hero search field is focused with an empty query, `SearchSuggestions` renders (in a parallel `variant="recommended"` path) a non-interactive heading band (`אולי יתחשק לכם`) plus the curated tag rows; activating a row routes to `ROUTES.RESULTS_BY_TAG(slug)` (`/results?tag=<slug>`, the tag-filter results mode — see §13), never a `?q=` search. The compact desktop header instance of `useHomeSearch` never receives the `recommendedTags` / `mode: "hero"` props, so this state is hero-only. Typing exits the state; Escape dismisses it until blur/refocus or a query change.
+
+`HOMEPAGE_POPULATE` pulls each curated tag's `name`, `slug`, and its **published**-recipe count via `populate[...][tag][populate][recipes][count]=true` combined with `populate[...][recipes][filters][publishedAt][$notNull]=true` (the explicit filter makes the count published-only regardless of default relation-status behavior). Rides on the existing `homepage` → `find` public permission plus the already-granted public read on `tag` / `recipe`.
+
 ### Frontend mapping — `homepageService.ts`
 
 `mapFeatureCard()` drops any card missing `title` or `icon`. `mapFeatureSection()` maps and sorts the surviving cards (`cardOrder ?? original index`) and returns `null` for the whole section when no cards survive — `FeatureSection` (`src/features/home/FeatureSection/`) then renders nothing. `readMorePage` is populated field-scoped to `slug` + `title` only (identical to `FooterLink.page`), so no page body or draft-only data is ever exposed through this relation.
+
+`mapRecommendedTags()` keeps editor row order, drops rows with a missing/blank tag or a zero published-recipe count, and caps the result at 5. `HomePage.recommendedTags` is always an array (`[]` when unset or all-filtered).
 
 ### Permissions (Strapi admin)
 

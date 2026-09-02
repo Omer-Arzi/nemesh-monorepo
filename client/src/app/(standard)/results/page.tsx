@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useRef, useCallback, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { analytics } from "@/lib/analytics";
 import { ResultsPageText } from "./consts";
 import Box from "@mui/material/Box";
@@ -22,6 +22,7 @@ import {
   useIngredientSearch,
   useCanonicalIngredientSearch,
   useSearch,
+  useTagSearch,
 } from "@/features/results/hooks";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { ROUTES } from "@/constants";
@@ -133,6 +134,57 @@ function IngredientResults({ ingredient, canonical = false }: { ingredient: stri
   );
 }
 
+// ── Tag-filter results (link-only, finite list) ───────────────────────────────
+// Reached only via `/results?tag=<slug>` (hero recommended-tag shortcuts, shared
+// links). Structure mirrors `IngredientResults`. The tag name is not in the URL,
+// so it is resolved from the fetched recipes' populated `tags`; the heading and
+// any "0 results" treatment are gated behind `recipes.length >= 1` so neither can
+// ever render for an invalid tag — which is silently redirected home instead.
+
+function TagResults({ tagSlug }: { tagSlug: string }) {
+  const router = useRouter();
+  const { data: recipes = [], isLoading, isError } = useTagSearch(tagSlug);
+
+  // Invalid destination: unknown slug, unpublished / all-draft tag, or zero
+  // published recipes all resolve to an empty list. Redirect home with
+  // `replace` so Back does not return to the dead URL.
+  const isInvalid = !isLoading && !isError && recipes.length === 0;
+  useEffect(() => {
+    if (isInvalid) router.replace(ROUTES.HOME);
+  }, [isInvalid, router]);
+
+  // Resolving, or about to redirect: neutral skeleton only — no SectionHeader,
+  // no EmptyState. Matches the page-level Suspense fallback.
+  if (isLoading || isInvalid) {
+    return (
+      <PageContainer>
+        <RecipeGridSkeleton count={8} />
+      </PageContainer>
+    );
+  }
+
+  // Transient fetch failure (network) — distinct from an empty/invalid tag.
+  // Shared ErrorState, no retry button, matching the finite-list peers.
+  if (isError) {
+    return <ErrorState description={ResultsPageText.browseError} />;
+  }
+
+  const tagName = recipes[0]?.tags.find((t) => t.slug === tagSlug)?.name ?? "";
+
+  return (
+    <PageContainer>
+      <SectionHeader title={ResultsPageText.tagSectionTitle(tagName)} sx={{ mb: 3 }} />
+      <Grid container spacing={2}>
+        {recipes.map((recipe, index) => (
+          <Grid key={recipe.id} size={{ xs: 12, sm: 4, md: 3 }}>
+            <RecipeCard recipe={recipe} priority={index < 3} />
+          </Grid>
+        ))}
+      </Grid>
+    </PageContainer>
+  );
+}
+
 // ── Browse all (infinite scroll) ──────────────────────────────────────────────
 
 function BrowseResults() {
@@ -210,6 +262,7 @@ function ResultsContent() {
   const q = searchParams.get("q")?.trim() ?? "";
   const ingredient = searchParams.get("ingredient")?.trim() ?? "";
   const canonicalIngredient = searchParams.get("canonicalIngredient")?.trim() ?? "";
+  const tag = searchParams.get("tag")?.trim() ?? "";
 
   useEffect(() => {
     analytics.trackPageView({ page_id: "results", page_name: "תוצאות" });
@@ -218,6 +271,7 @@ function ResultsContent() {
   if (canonicalIngredient) return <IngredientResults ingredient={canonicalIngredient} canonical />;
   if (ingredient) return <IngredientResults ingredient={ingredient} />;
   if (q) return <SearchResults q={q} />;
+  if (tag) return <TagResults tagSlug={tag} />;
   return <BrowseResults />;
 }
 

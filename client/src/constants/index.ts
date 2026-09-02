@@ -14,12 +14,16 @@ export const ROUTES = {
   ABOUT: "/about",
   /** Recipe listing / results page. */
   RESULTS: "/results",
+  /**
+   * Results page pre-filtered to one tag, by slug.
+   * `ROUTES.RESULTS_BY_TAG("quick")` → "/results?tag=quick"
+   */
+  RESULTS_BY_TAG: (slug: string) => `/results?tag=${encodeURIComponent(slug)}`,
   /** Call as a function: `ROUTES.RECIPE(slug)` → "/recipes/pasta-bolognese" */
   RECIPE: (slug: string) => `/recipes/${slug}`,
   CATEGORIES: "/categories",
   /** Call as a function: `ROUTES.CATEGORY(slug)` → "/categories/italian" */
   CATEGORY: (slug: string) => `/categories/${slug}`,
-  TAGS: "/tags",
   /** Call as a function: `ROUTES.TAG(slug)` → "/tags/quick" */
   TAG: (slug: string) => `/tags/${slug}`,
   SURPRISE_ME: "/surprise-me",

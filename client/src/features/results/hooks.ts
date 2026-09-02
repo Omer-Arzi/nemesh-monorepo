@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   getRecipes,
+  getRecipesByTag,
   searchRecipes,
   searchRecipesByIngredient,
   searchRecipesByCanonicalIngredient,
@@ -45,6 +46,34 @@ export function useCanonicalIngredientSearch(canonicalIngredient: string) {
     queryKey: queryKeys.recipes.byCanonicalIngredient(canonicalIngredient),
     queryFn: () => searchRecipesByCanonicalIngredient(canonicalIngredient),
     enabled: canonicalIngredient.trim().length > 0,
+  });
+}
+
+/**
+ * Tag-filter results: published recipes carrying a given tag slug, as one
+ * finite list (no infinite scroll) — the link-only `/results?tag=<slug>` mode.
+ *
+ * One page at `PAGINATION.MAX_PAGE_SIZE` (100). The `/recipes` REST endpoint is
+ * hard-capped at 100 by `server/config/api.ts` (`rest.maxLimit`); a curated tag
+ * with more than 100 published recipes is implausible, and items past 100 would
+ * be silently omitted — the same practical ceiling the search / ingredient
+ * modes work within.
+ *
+ * `select` unwraps the paginated envelope to `RecipeSummary[]` so this hook
+ * mirrors `useIngredientSearch` at the call site. An empty list means the tag
+ * is not a valid destination (unknown slug, unpublished / all-draft tag, or
+ * zero published recipes) — the caller redirects home.
+ *
+ * Uses its own `byTagResults` key rather than `byTag` so it never shares a
+ * cache entry with the challenge page's `useRecipesByTag` (which fetches the
+ * same slug at a smaller page size).
+ */
+export function useTagSearch(slug: string) {
+  return useQuery({
+    queryKey: queryKeys.recipes.byTagResults(slug),
+    queryFn: () => getRecipesByTag(slug, { pageSize: PAGINATION.MAX_PAGE_SIZE }),
+    select: (result) => result.items,
+    enabled: slug.trim().length > 0,
   });
 }
 

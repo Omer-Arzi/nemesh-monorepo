@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_home_recommended_tags",
+  "info": {
+    "displayName": "Recommended Tag",
+    "description": "One hero-search recommendation. References an existing tag; row order sets the display order in the homepage hero."
+  },
+  "options": {},
+  "attributes": {
+    "tag": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::tag.tag",
+      "required": true
+    }
+  }
+}
