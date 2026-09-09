@@ -181,6 +181,26 @@ export const RecipeHeroStyle = {
     flexWrap: "wrap" as const,
   },
 
+  // Print control (or any `action`) sharing the metadata row. At md+ it sits
+  // vertically centred with the stat chips and is pushed to the row's
+  // inline-end (visual-left in RTL). On mobile `flexBasis: 100%` drops it onto
+  // its own line below the chips, anchored to the inline-start edge.
+  actionSlot: {
+    display: "flex",
+    alignItems: "center",
+    alignSelf: { xs: "flex-start", md: "center" },
+    flexBasis: { xs: "100%", md: "auto" },
+    marginInlineStart: { md: "auto" },
+    mt: { xs: 0.5, md: 0 },
+  },
+
+  // Fallback home when the hero has no metadata stats: below the description,
+  // above where the divider would sit.
+  actionSlotNoStats: {
+    alignSelf: "flex-start",
+    mt: { xs: 1.5, md: 2 },
+  },
+
   statChip: {
     bgcolor: "background.default",
     border: 1,

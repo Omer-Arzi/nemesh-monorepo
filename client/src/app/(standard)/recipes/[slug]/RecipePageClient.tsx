@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+import Box from "@mui/material/Box";
 import { RecipePageText } from "./consts";
 import { Section, LoadingState, ErrorState } from "@/components/shared";
 import {
@@ -12,10 +14,15 @@ import {
   RecipeSpecialEquipmentSection,
   RelatedRecipes,
   CookingModeToolbar,
+  PrintRecipeButton,
+  RecipePrintDocument,
+  buildRecipePrintPageStyle,
 } from "@/components/domain";
 import { useRecipe, useRelatedRecipes } from "@/features/recipe/hooks";
 import { useCookingMode } from "@/features/cooking-mode";
 import { analytics } from "@/lib/analytics";
+import { getSiteUrl } from "@/lib/seo/seoConfig";
+import { ROUTES } from "@/constants";
 import type { Recipe, RecipeSummary } from "@/types/domain";
 
 // ── RecipeContent ────────────────────────────────────────────────────────────
@@ -38,6 +45,17 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
   );
 
   const cookingMode = useCookingMode(recipe.id, totalIngredients, totalSteps);
+
+  // Dedicated print document (hidden subtree, cloned by react-to-print into
+  // its own iframe). Renders from `recipe` — no extra fetch, no live-page
+  // restyle. The URL + footer strings are interpolated into `pageStyle` here.
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: recipe.title,
+    pageStyle: buildRecipePrintPageStyle(`${getSiteUrl()}${ROUTES.RECIPE(recipe.slug)}`),
+    preserveAfterPrint: true,
+  });
 
   // Track recipe view once on mount.
   useEffect(() => {
@@ -73,7 +91,17 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
         totalTime={recipe.totalTime}
         servings={recipe.servings}
         difficulty={recipe.difficulty}
+        action={<PrintRecipeButton onClick={handlePrint} />}
       />
+
+      {/* Hidden print subtree — offscreen (not display:none, which can break
+          react-to-print cloning). Targeted by `printRef`. */}
+      <Box
+        aria-hidden
+        sx={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}
+      >
+        <RecipePrintDocument ref={printRef} recipe={recipe} />
+      </Box>
 
       <RecipeTipsSection tips={recipe.tips} />
 
