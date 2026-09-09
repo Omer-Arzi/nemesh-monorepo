@@ -61,7 +61,12 @@ export const RecipeHeroStyle = {
     float: { md: "inline-end" },
     width: { md: "calc((100% - 40px) * 4 / 9)" },
     marginInlineStart: { md: "40px" },
-    aspectRatio: "3 / 2",
+    // Portrait/stacked at xs. At md+ the image is floated and the divider
+    // below it must `clear`, so a tall image leaves a large empty band above
+    // the divider when the badge/title/description is short — a shallower
+    // crop keeps that band small. `objectFit: cover` on the fill image
+    // handles the tighter crop for any source photo.
+    aspectRatio: { xs: "3 / 2", md: "2 / 1" },
     overflow: "hidden",
     borderRadius: 4,
     bgcolor: "background.paper",
@@ -172,7 +177,17 @@ export const RecipeHeroStyle = {
   divider: {
     borderColor: "divider",
     my: 0.75,
-    clear: "both" as const,
+  },
+
+  // Wraps the divider + stat/action row. `clear: "both"` keeps the block
+  // below the floated image at md+ (a full-width rule flowing beside the
+  // float would collapse to a stub). The divider therefore can't sit higher
+  // than the image's lower edge — the empty band above it is governed by the
+  // image height (see `imageColumn`'s md aspect ratio, kept shallow so a
+  // short badge/title/description doesn't leave a large gap here). At xs
+  // there is no float.
+  metaFooter: {
+    clear: { md: "both" },
   },
 
   // `alignItems: "center"` puts every item on the row — the stat chips AND
