@@ -40,7 +40,7 @@ export default function RecipeTipsSection({ tips, sx }: Props) {
       >
         <Box sx={RecipeTipsSectionStyle.titleRow}>
           <TipsAndUpdatesOutlinedIcon sx={RecipeTipsSectionStyle.titleIcon} />
-          <Typography sx={RecipeTipsSectionStyle.title}>הערות מהמטבח</Typography>
+          <Typography sx={RecipeTipsSectionStyle.title}>הערות מהמטבח ({tips.length})</Typography>
         </Box>
         <ExpandMoreIcon
           sx={{
