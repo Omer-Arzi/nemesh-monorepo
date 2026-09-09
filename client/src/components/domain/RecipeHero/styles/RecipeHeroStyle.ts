@@ -175,20 +175,23 @@ export const RecipeHeroStyle = {
     clear: "both" as const,
   },
 
+  // `alignItems: "center"` puts every item on the row — the stat chips AND
+  // the `action` control — on one shared vertical centre line, so the
+  // shorter print pill is not top-aligned against the taller chips.
   metaRow: {
     display: "flex",
+    alignItems: "center",
     gap: { xs: 1.5, md: 2 },
     flexWrap: "wrap" as const,
   },
 
-  // Print control (or any `action`) sharing the metadata row. At md+ it sits
-  // vertically centred with the stat chips and is pushed to the row's
-  // inline-end (visual-left in RTL). On mobile `flexBasis: 100%` drops it onto
-  // its own line below the chips, anchored to the inline-start edge.
+  // Print control (or any `action`) sharing the metadata row. Vertical
+  // centring with the chips comes from `metaRow`'s `alignItems: "center"`.
+  // At md+ it is pushed to the row's inline-end (visual-left in RTL). On
+  // mobile `flexBasis: 100%` drops it onto its own line below the chips,
+  // where `display: flex` keeps the button anchored to the inline-start edge.
   actionSlot: {
     display: "flex",
-    alignItems: "center",
-    alignSelf: { xs: "flex-start", md: "center" },
     flexBasis: { xs: "100%", md: "auto" },
     marginInlineStart: { md: "auto" },
     mt: { xs: 0.5, md: 0 },
