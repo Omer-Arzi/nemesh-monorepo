@@ -11,7 +11,11 @@ export const RecipeHeroStyle = {
     borderTopColor: "primary.main",
     boxShadow: 3,
     px: { xs: 3, md: 4, lg: 6 },
-    py: { xs: 3, md: 4 },
+    // Asymmetric at md+: a tighter lower inset so the metadata row (which has
+    // its own top margin, see `metaRow`) doesn't leave a wide dead band below
+    // itself before the hero's edge. xs keeps the even 3/3.
+    pt: { xs: 3, md: 4 },
+    pb: { xs: 3, md: 2.5 },
     mb: 3,
   },
 
@@ -62,11 +66,14 @@ export const RecipeHeroStyle = {
     width: { md: "calc((100% - 40px) * 4 / 9)" },
     marginInlineStart: { md: "40px" },
     // Portrait/stacked at xs. At md+ the image is floated and the divider
-    // below it must `clear`, so a tall image leaves a large empty band above
-    // the divider when the badge/title/description is short — a shallower
-    // crop keeps that band small. `objectFit: cover` on the fill image
-    // handles the tighter crop for any source photo.
-    aspectRatio: { xs: "3 / 2", md: "2 / 1" },
+    // below it must `clear`, so a tall image leaves an empty band above the
+    // divider when the badge/title/description is short. `16 / 9` is the
+    // compromise crop: noticeably taller than a `2 / 1` letterbox (the image
+    // still reads as a real photo, not a strip) while staying shallow enough
+    // that a typical badge+title+short-description column reaches close to its
+    // lower edge. `objectFit: cover` on the fill image handles the crop for
+    // any source photo.
+    aspectRatio: { xs: "3 / 2", md: "16 / 9" },
     overflow: "hidden",
     borderRadius: 4,
     bgcolor: "background.paper",
@@ -74,6 +81,14 @@ export const RecipeHeroStyle = {
     borderColor: "divider",
     // Warm inset shadow gives the image depth and a premium framed quality.
     boxShadow: "inset 0 0 0 1px rgba(193, 123, 60, 0.10)",
+  },
+
+  // Applied at md+ when the recipe has no photo: the "no image" placeholder
+  // doesn't need the full 2:1 height, and a tall empty box only widens the
+  // band the metadata footer's `clear` has to skip past (see `metaFooter`).
+  // At xs the stacked placeholder keeps its normal 3:2.
+  imageColumnEmpty: {
+    aspectRatio: { md: "9 / 2" },
   },
 
   // Badge/title/description/meta-stats. At `xs`/`sm` this is a flex column
@@ -193,11 +208,16 @@ export const RecipeHeroStyle = {
   // `alignItems: "center"` puts every item on the row — the stat chips AND
   // the `action` control — on one shared vertical centre line, so the
   // shorter print pill is not top-aligned against the taller chips.
+  // `mt` at md+ opens a modest gap above the row (roughly matching the gap
+  // that falls below it, from the hero's bottom padding) so the row reads as
+  // sitting between the divider and the hero's lower edge rather than pinned
+  // tight under the divider — without inflating the hero with dead space.
   metaRow: {
     display: "flex",
     alignItems: "center",
     gap: { xs: 1.5, md: 2 },
     flexWrap: "wrap" as const,
+    mt: { md: 2 },
   },
 
   // Print control (or any `action`) sharing the metadata row. Vertical
