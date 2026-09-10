@@ -11,7 +11,12 @@ export const RecipeHeroStyle = {
     borderTopColor: "primary.main",
     boxShadow: 3,
     px: { xs: 3, md: 4, lg: 6 },
-    py: { xs: 3, md: 4 },
+    // md+ splits `py` so the lower inset matches `metaRow`'s own top margin:
+    // the stat/action row then sits vertically centred in the band between
+    // the divider and the hero's bottom edge, instead of pinned tight under
+    // the divider with all the slack below it. xs keeps the even 3/3.
+    pt: { xs: 3, md: 4 },
+    pb: { xs: 3, md: 3 },
     mb: 3,
   },
 
@@ -175,10 +180,17 @@ export const RecipeHeroStyle = {
     clear: "both" as const,
   },
 
+  // `mt` at md+ opens a gap above the row that matches `root`'s `pb` below
+  // it, so the row reads as centred in the band between the divider and the
+  // hero's lower edge. It collapses with the divider's 6px bottom margin
+  // (both plain block margins), so the effective top gap is this value. Only
+  // at md+, where the float/`clear` layout drops the row into that band; at
+  // xs the row follows the divider with normal flow spacing.
   metaRow: {
     display: "flex",
     gap: { xs: 1.5, md: 2 },
     flexWrap: "wrap" as const,
+    mt: { md: 3 },
   },
 
   // Print control (or any `action`) sharing the metadata row. At md+ it sits
