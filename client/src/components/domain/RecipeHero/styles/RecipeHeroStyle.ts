@@ -11,7 +11,12 @@ export const RecipeHeroStyle = {
     borderTopColor: "primary.main",
     boxShadow: 3,
     px: { xs: 3, md: 4, lg: 6 },
-    py: { xs: 3, md: 4 },
+    // md+ splits `py` so the lower inset matches `metaRow`'s own top margin:
+    // the stat/action row then sits vertically centred in the band between
+    // the divider and the hero's bottom edge, instead of pinned tight under
+    // the divider with all the slack below it. xs keeps the even 3/3.
+    pt: { xs: 3, md: 4 },
+    pb: { xs: 3, md: 3 },
     mb: 3,
   },
 
@@ -61,12 +66,7 @@ export const RecipeHeroStyle = {
     float: { md: "inline-end" },
     width: { md: "calc((100% - 40px) * 4 / 9)" },
     marginInlineStart: { md: "40px" },
-    // Portrait/stacked at xs. At md+ the image is floated and the divider
-    // below it must `clear`, so a tall image leaves a large empty band above
-    // the divider when the badge/title/description is short — a shallower
-    // crop keeps that band small. `objectFit: cover` on the fill image
-    // handles the tighter crop for any source photo.
-    aspectRatio: { xs: "3 / 2", md: "2 / 1" },
+    aspectRatio: "3 / 2",
     overflow: "hidden",
     borderRadius: 4,
     bgcolor: "background.paper",
@@ -177,36 +177,30 @@ export const RecipeHeroStyle = {
   divider: {
     borderColor: "divider",
     my: 0.75,
+    clear: "both" as const,
   },
 
-  // Wraps the divider + stat/action row. `clear: "both"` keeps the block
-  // below the floated image at md+ (a full-width rule flowing beside the
-  // float would collapse to a stub). The divider therefore can't sit higher
-  // than the image's lower edge — the empty band above it is governed by the
-  // image height (see `imageColumn`'s md aspect ratio, kept shallow so a
-  // short badge/title/description doesn't leave a large gap here). At xs
-  // there is no float.
-  metaFooter: {
-    clear: { md: "both" },
-  },
-
-  // `alignItems: "center"` puts every item on the row — the stat chips AND
-  // the `action` control — on one shared vertical centre line, so the
-  // shorter print pill is not top-aligned against the taller chips.
+  // `mt` at md+ opens a gap above the row that matches `root`'s `pb` below
+  // it, so the row reads as centred in the band between the divider and the
+  // hero's lower edge. It collapses with the divider's 6px bottom margin
+  // (both plain block margins), so the effective top gap is this value. Only
+  // at md+, where the float/`clear` layout drops the row into that band; at
+  // xs the row follows the divider with normal flow spacing.
   metaRow: {
     display: "flex",
-    alignItems: "center",
     gap: { xs: 1.5, md: 2 },
     flexWrap: "wrap" as const,
+    mt: { md: 3 },
   },
 
-  // Print control (or any `action`) sharing the metadata row. Vertical
-  // centring with the chips comes from `metaRow`'s `alignItems: "center"`.
-  // At md+ it is pushed to the row's inline-end (visual-left in RTL). On
-  // mobile `flexBasis: 100%` drops it onto its own line below the chips,
-  // where `display: flex` keeps the button anchored to the inline-start edge.
+  // Print control (or any `action`) sharing the metadata row. At md+ it sits
+  // vertically centred with the stat chips and is pushed to the row's
+  // inline-end (visual-left in RTL). On mobile `flexBasis: 100%` drops it onto
+  // its own line below the chips, anchored to the inline-start edge.
   actionSlot: {
     display: "flex",
+    alignItems: "center",
+    alignSelf: { xs: "flex-start", md: "center" },
     flexBasis: { xs: "100%", md: "auto" },
     marginInlineStart: { md: "auto" },
     mt: { xs: 0.5, md: 0 },

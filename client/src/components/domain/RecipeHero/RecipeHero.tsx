@@ -224,7 +224,7 @@ export default function RecipeHero({
           )}
 
           {hasMetaStats && (
-            <Box sx={RecipeHeroStyle.metaFooter}>
+            <>
               <Divider sx={RecipeHeroStyle.divider} />
               <Box sx={RecipeHeroStyle.metaRow}>
                 {prepTime != null && (
@@ -241,7 +241,7 @@ export default function RecipeHero({
                 )}
                 {action && <Box sx={RecipeHeroStyle.actionSlot}>{action}</Box>}
               </Box>
-            </Box>
+            </>
           )}
 
           {action && !hasMetaStats && (

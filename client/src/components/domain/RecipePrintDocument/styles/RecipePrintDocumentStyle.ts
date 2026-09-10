@@ -35,9 +35,15 @@ export const RecipePrintDocumentStyle = {
   },
   logo: {
     display: "block",
-    height: "11mm",
+    // Sits on its own line above the title. Enlarged from 11mm for a stronger
+    // masthead; the extra height is taken up by the whitespace that the
+    // floated header photo already leaves beside/below a short title, so on a
+    // recipe with a photo the metadata run and everything below it don't move
+    // — only the title-to-logo gap tightens. A photo-less recipe with a long
+    // title shifts down by the (small) delta.
+    height: "16mm",
     width: "auto",
-    mb: "4mm",
+    mb: "3mm",
   },
   headerRow: {
     // The photo floats to the inline-end (visual-left in RTL); the title sits
