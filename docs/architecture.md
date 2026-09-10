@@ -423,6 +423,7 @@ All client-side persistence goes through `NemeshStorage` ([client/src/lib/storag
 - Print content: header (logo + title + one photo) → metadata → tips → special equipment → ingredients → steps. Excludes description, step photos, categories, tags, related recipes, cooking mode.
 - The repeating footer (site name · recipe URL · `עמוד X מתוך Y`) uses `@page` margin boxes — Chromium/Safari only; Firefox prints the body without the footer (approved deviation).
 - `src/lib/fonts.ts` — shared next/font module so both `RootLayout` and the print subtree use the same `Heebo` instance (`--font-heebo` does not cross into the print iframe, so the print root binds `heebo.style.fontFamily` directly). `next/font/google` is stubbed in `vitest.setup.ts`.
+- **Mobile browsers** (iOS Safari; Chrome/Firefox on Android) print the top-level page, not a sub-frame, so `react-to-print`'s iframe would print the whole live site. `useIsMobileBrowser` (`src/hooks/`, UA check) switches those to `useMobileRecipePrint` (`src/components/domain/RecipePrintDocument/`): it portals a real `RecipePrintDocument` into `<body>`, injects a scoped `<style>` carrying the same `pageStyle` plus `@media print { body > *:not([data-nemesh-recipe-print="host"]) { display:none } }`, then calls the top-level `window.print()`. Cleanup on `afterprint` / refocus / timeout. Desktop path is unchanged.
 
 ---
 

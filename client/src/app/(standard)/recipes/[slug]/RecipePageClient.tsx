@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import Box from "@mui/material/Box";
 import { RecipePageText } from "./consts";
@@ -17,9 +17,11 @@ import {
   PrintRecipeButton,
   RecipePrintDocument,
   buildRecipePrintPageStyle,
+  useMobileRecipePrint,
 } from "@/components/domain";
 import { useRecipe, useRelatedRecipes } from "@/features/recipe/hooks";
 import { useCookingMode } from "@/features/cooking-mode";
+import { useIsMobileBrowser } from "@/hooks/useIsMobileBrowser";
 import { analytics } from "@/lib/analytics";
 import { getSiteUrl } from "@/lib/seo/seoConfig";
 import { ROUTES } from "@/constants";
@@ -50,12 +52,29 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
   // its own iframe). Renders from `recipe` — no extra fetch, no live-page
   // restyle. The URL + footer strings are interpolated into `pageStyle` here.
   const printRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({
+  const pageStyle = useMemo(
+    () => buildRecipePrintPageStyle(`${getSiteUrl()}${ROUTES.RECIPE(recipe.slug)}`),
+    [recipe.slug],
+  );
+
+  // Desktop path — unchanged. react-to-print's off-screen iframe.
+  const handleDesktopPrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: recipe.title,
-    pageStyle: buildRecipePrintPageStyle(`${getSiteUrl()}${ROUTES.RECIPE(recipe.slug)}`),
+    pageStyle,
     preserveAfterPrint: true,
   });
+
+  // Mobile path — iOS Safari / Android print the top-level page, not the
+  // iframe, so react-to-print would print the whole live site. This portals
+  // the print document into <body> and prints that instead.
+  const isMobileBrowser = useIsMobileBrowser();
+  const { startPrint: handleMobilePrint, printPortal } = useMobileRecipePrint(
+    recipe,
+    pageStyle,
+  );
+
+  const handlePrint = isMobileBrowser ? handleMobilePrint : handleDesktopPrint;
 
   // Track recipe view once on mount.
   useEffect(() => {
@@ -95,13 +114,17 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
       />
 
       {/* Hidden print subtree — offscreen (not display:none, which can break
-          react-to-print cloning). Targeted by `printRef`. */}
+          react-to-print cloning). Targeted by `printRef` on desktop. */}
       <Box
         aria-hidden
         sx={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}
       >
         <RecipePrintDocument ref={printRef} recipe={recipe} />
       </Box>
+
+      {/* Mobile print path renders its own copy into a <body> portal while
+          the dialog is open (null otherwise). */}
+      {printPortal}
 
       <RecipeTipsSection tips={recipe.tips} />
 

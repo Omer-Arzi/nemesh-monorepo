@@ -22,6 +22,10 @@ export { default as StickyIngredientsSidebar } from "./StickyIngredientsSidebar"
 export { default as RelatedRecipes } from "./RelatedRecipes";
 export { default as CookingModeToolbar } from "./CookingModeToolbar";
 export { default as PrintRecipeButton } from "./PrintRecipeButton";
-export { default as RecipePrintDocument, buildRecipePrintPageStyle } from "./RecipePrintDocument";
+export {
+  default as RecipePrintDocument,
+  buildRecipePrintPageStyle,
+  useMobileRecipePrint,
+} from "./RecipePrintDocument";
 export { default as CollectionCard } from "./CollectionCard";
 export { RecipeCardSkeleton, RecipeGridSkeleton } from "./RecipeCardSkeleton";
