@@ -413,6 +413,19 @@ All client-side persistence goes through `NemeshStorage` ([client/src/lib/storag
 
 ---
 
+## 11a. Recipe Print
+
+- Client-only feature; no DB, no API, no data-model change. A reader-triggered browser print of a single recipe.
+- Dependency: `react-to-print` v3 (`client/package.json`) — MIT, zero runtime deps. `useReactToPrint` lives in `RecipeContent` (`src/app/(standard)/recipes/[slug]/RecipePageClient.tsx`).
+- **First print output in the codebase** — before this there were no `@media print` / `@page` / `break-inside` rules anywhere.
+- `PrintRecipeButton` (`src/components/domain/PrintRecipeButton/`) is the on-screen control, passed into `RecipeHero` via its new optional `action` prop (same pattern as `SectionHeader`'s `action` slot).
+- `RecipePrintDocument` (`src/components/domain/RecipePrintDocument/`) is a hidden offscreen render subtree, cloned by react-to-print into its own `<iframe>`. It renders from the already-fetched `recipe` object, forces the light theme, and owns its root reset (`dir="rtl"`, base type/colour, `print-color-adjust`) because the iframe inherits nothing from `<html>` / `CssBaseline`. Print CSS is not `@media print` on the live page — it is a `pageStyle` string (`buildPrintPageStyle.ts`) injected only into the print iframe.
+- Print content: header (logo + title + one photo) → metadata → tips → special equipment → ingredients → steps. Excludes description, step photos, categories, tags, related recipes, cooking mode.
+- The repeating footer (site name · recipe URL · `עמוד X מתוך Y`) uses `@page` margin boxes — Chromium/Safari only; Firefox prints the body without the footer (approved deviation).
+- `src/lib/fonts.ts` — shared next/font module so both `RootLayout` and the print subtree use the same `Heebo` instance (`--font-heebo` does not cross into the print iframe, so the print root binds `heebo.style.fontFamily` directly). `next/font/google` is stubbed in `vitest.setup.ts`.
+
+---
+
 ## 12. Deployment & Storage
 
 | Environment | Database | File Uploads | Notes |

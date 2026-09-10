@@ -1,16 +1,9 @@
 import type { Metadata } from "next";
-import { Heebo } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import RootProviders from "@/providers";
 import { getSiteSettings } from "@/lib/api/services/siteSettingService";
 import { GoogleAnalyticsScript } from "@/lib/analytics";
-
-const heebo = Heebo({
-  subsets: ["hebrew", "latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-heebo",
-  display: "swap",
-});
+import { heebo } from "@/lib/fonts";
 
 /**
  * Root layout — server component that sets the HTML skeleton.

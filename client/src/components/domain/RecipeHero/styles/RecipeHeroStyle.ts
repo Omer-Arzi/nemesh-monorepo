@@ -61,7 +61,12 @@ export const RecipeHeroStyle = {
     float: { md: "inline-end" },
     width: { md: "calc((100% - 40px) * 4 / 9)" },
     marginInlineStart: { md: "40px" },
-    aspectRatio: "3 / 2",
+    // Portrait/stacked at xs. At md+ the image is floated and the divider
+    // below it must `clear`, so a tall image leaves a large empty band above
+    // the divider when the badge/title/description is short — a shallower
+    // crop keeps that band small. `objectFit: cover` on the fill image
+    // handles the tighter crop for any source photo.
+    aspectRatio: { xs: "3 / 2", md: "2 / 1" },
     overflow: "hidden",
     borderRadius: 4,
     bgcolor: "background.paper",
@@ -172,13 +177,46 @@ export const RecipeHeroStyle = {
   divider: {
     borderColor: "divider",
     my: 0.75,
-    clear: "both" as const,
   },
 
+  // Wraps the divider + stat/action row. `clear: "both"` keeps the block
+  // below the floated image at md+ (a full-width rule flowing beside the
+  // float would collapse to a stub). The divider therefore can't sit higher
+  // than the image's lower edge — the empty band above it is governed by the
+  // image height (see `imageColumn`'s md aspect ratio, kept shallow so a
+  // short badge/title/description doesn't leave a large gap here). At xs
+  // there is no float.
+  metaFooter: {
+    clear: { md: "both" },
+  },
+
+  // `alignItems: "center"` puts every item on the row — the stat chips AND
+  // the `action` control — on one shared vertical centre line, so the
+  // shorter print pill is not top-aligned against the taller chips.
   metaRow: {
     display: "flex",
+    alignItems: "center",
     gap: { xs: 1.5, md: 2 },
     flexWrap: "wrap" as const,
+  },
+
+  // Print control (or any `action`) sharing the metadata row. Vertical
+  // centring with the chips comes from `metaRow`'s `alignItems: "center"`.
+  // At md+ it is pushed to the row's inline-end (visual-left in RTL). On
+  // mobile `flexBasis: 100%` drops it onto its own line below the chips,
+  // where `display: flex` keeps the button anchored to the inline-start edge.
+  actionSlot: {
+    display: "flex",
+    flexBasis: { xs: "100%", md: "auto" },
+    marginInlineStart: { md: "auto" },
+    mt: { xs: 0.5, md: 0 },
+  },
+
+  // Fallback home when the hero has no metadata stats: below the description,
+  // above where the divider would sit.
+  actionSlotNoStats: {
+    alignSelf: "flex-start",
+    mt: { xs: 1.5, md: 2 },
   },
 
   statChip: {

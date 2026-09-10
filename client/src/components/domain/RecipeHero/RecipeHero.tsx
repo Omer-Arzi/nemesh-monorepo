@@ -18,6 +18,13 @@ type Props = Pick<
   Recipe,
   "title" | "image" | "description" | "categories" | "prepTime" | "totalTime" | "servings" | "difficulty"
 > & {
+  /**
+   * Optional trailing action (e.g. the print control), mirroring
+   * `SectionHeader`'s `action` slot. Rendered inline-end of the metadata stat
+   * row at md+, and below the stats (or below the description when there are
+   * no stats) on mobile.
+   */
+  action?: React.ReactNode;
   sx?: SxProps<Theme>;
 };
 
@@ -45,6 +52,7 @@ export default function RecipeHero({
   totalTime,
   servings,
   difficulty,
+  action,
   sx,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -216,7 +224,7 @@ export default function RecipeHero({
           )}
 
           {hasMetaStats && (
-            <>
+            <Box sx={RecipeHeroStyle.metaFooter}>
               <Divider sx={RecipeHeroStyle.divider} />
               <Box sx={RecipeHeroStyle.metaRow}>
                 {prepTime != null && (
@@ -231,8 +239,13 @@ export default function RecipeHero({
                 {servings != null && (
                   <HeroStat label={RecipeHeroText.servingsLabel} value={String(servings)} />
                 )}
+                {action && <Box sx={RecipeHeroStyle.actionSlot}>{action}</Box>}
               </Box>
-            </>
+            </Box>
+          )}
+
+          {action && !hasMetaStats && (
+            <Box sx={RecipeHeroStyle.actionSlotNoStats}>{action}</Box>
           )}
         </Box>
       </Box>
