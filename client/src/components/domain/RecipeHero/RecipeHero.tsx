@@ -160,7 +160,7 @@ export default function RecipeHero({
             below wrap it, then continue full-width past its bottom edge.
             `order` in RecipeHeroStyle restores today's visual stacking
             (content, then image) below `md`, where no float is active. */}
-        <Box sx={[RecipeHeroStyle.imageColumn, !image && RecipeHeroStyle.imageColumnEmpty]}>
+        <Box sx={RecipeHeroStyle.imageColumn}>
           <NemeshImage
             image={image}
             fill
@@ -224,7 +224,7 @@ export default function RecipeHero({
           )}
 
           {hasMetaStats && (
-            <Box sx={RecipeHeroStyle.metaFooter}>
+            <>
               <Divider sx={RecipeHeroStyle.divider} />
               <Box sx={RecipeHeroStyle.metaRow}>
                 {prepTime != null && (
@@ -241,7 +241,7 @@ export default function RecipeHero({
                 )}
                 {action && <Box sx={RecipeHeroStyle.actionSlot}>{action}</Box>}
               </Box>
-            </Box>
+            </>
           )}
 
           {action && !hasMetaStats && (
