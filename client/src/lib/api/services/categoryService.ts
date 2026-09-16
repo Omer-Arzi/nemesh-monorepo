@@ -43,10 +43,19 @@ export async function getCategories(): Promise<Category[]> {
   return raw.data.map(mapCategory);
 }
 
-/** Fetches a single category by slug. Returns null if not found. */
+/**
+ * Fetches a single category by slug. Returns null if not found.
+ *
+ * Matches case-insensitively (`$eqi`, not `$eq`) so a differently-cased URL
+ * (e.g. `/categories/Chicken`) still resolves to the real category — the
+ * caller (the category page) is responsible for redirecting to the
+ * canonical, stored `slug` when it differs from what was requested, instead
+ * of serving/indexing the mismatched casing as a second URL for the same
+ * category.
+ */
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   const raw = await apiClient.get<StrapiList<StrapiCategoryAttrs>>(
-    `/categories?${CATEGORY_POPULATE}&filters[slug][$eq]=${encodeURIComponent(slug)}`
+    `/categories?${CATEGORY_POPULATE}&filters[slug][$eqi]=${encodeURIComponent(slug)}`
   );
   const first = raw.data[0];
   return first ? mapCategory(first) : null;

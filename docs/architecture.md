@@ -427,6 +427,18 @@ All client-side persistence goes through `NemeshStorage` ([client/src/lib/storag
 
 ---
 
+## 11b. SEO — Canonical Origin & Server-Rendered Content
+
+Fixes two related Search Console issues: **"Duplicate without user-selected canonical"** (category pages) and **"Crawled – currently not indexed"** (categories index, category pages, recipe pages).
+
+- **Single canonical origin.** `getSiteUrl()` (`src/lib/seo/seoConfig.ts`) is the *only* place the production domain is defined — every sitemap `<loc>`, `robots.txt`'s `Sitemap:` line, `alternates.canonical`, `openGraph.url`, and JSON-LD `url`/`item` value is built from it. Its fallback (used when `NEXT_PUBLIC_SITE_URL` is unset) is `https://www.nemesh-food.com` — production redirects the bare `nemesh-food.com` domain to `www` with a 308, so `www` is the real canonical host. Set `NEXT_PUBLIC_SITE_URL` to the same `www` URL explicitly on Vercel (see `docs/deployment.md`) rather than relying on the fallback.
+- **`recipes/[slug]` and `categories/[slug]` are now a server `page.tsx` + a `"use client"` `*PageClient.tsx`**, mirroring the pattern `tags/shir-challenge` already used: `page.tsx` calls `generateMetadata()` (category/recipe-specific title, description, `alternates.canonical`, matching `openGraph.url`, all built from the entity's own stored slug, never the raw URL param) and fetches the entity + its listing data (recipes-by-category, related-recipes) server-side, then passes them as `initial*` props into the client component. `useCategory`/`useRecipesByCategory` (`src/features/category/hooks.ts`) and `useRecipe`/`useRelatedRecipes` (`src/features/recipe/hooks.ts`) all take an optional `initialData` param that seeds the underlying `useQuery` — so the *first* render, including the server-rendered HTML, shows the real `<h1>`/description/content instead of the `"טוען..."` loading state a bare client `useQuery` produces on a fresh server render. The query still refetches client-side per the normal `staleTime`; no other page behavior (filters, pagination, cooking mode, print, layout) changed.
+- **404 vs. outage.** Both `page.tsx`s call `getCategoryBySlug`/`getRecipeBySlug` *without* a `.catch()` — a normal, successful "no match" Strapi response resolves to `null`, which triggers `notFound()`; a real Strapi outage/network failure throws instead, and Next renders the error boundary (5xx). A temporary backend hiccup can therefore never be mistaken for "doesn't exist" and turned into a permanent 404. `generateMetadata`'s own lookup *is* wrapped in `.catch(() => null)` so a metadata failure just falls back to the root layout's defaults. The secondary fetch (recipes-by-category / related-recipes) is allowed to fail independently via `.catch()` — a transient error there degrades to the client-side query's own loading/empty state rather than failing the whole page.
+- **Category case normalization.** `getCategoryBySlug` filters with Strapi's `$eqi` (case-insensitive) so `/categories/Chicken` still resolves; the page then `permanentRedirect()`s to the category's real, stored (lowercase) slug whenever it differs from the requested one, instead of serving a second indexable URL for the same category. (Recipes have no equivalent case-variant issue reported and were left as `$eq`.)
+- **Deduplication:** each `page.tsx`'s own entity fetch is deduplicated against the identical call in `generateMetadata` by Next's fetch cache (same URL + options, same request lifecycle) — no extra network round trip, same mechanism the original recipe page already relied on for structured data.
+
+---
+
 ## 12. Deployment & Storage
 
 | Environment | Database | File Uploads | Notes |
