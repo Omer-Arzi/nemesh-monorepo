@@ -17,6 +17,7 @@ import {
   PrintRecipeButton,
   RecipePrintDocument,
   buildRecipePrintPageStyle,
+  RECIPE_PRINT_AMBIENT_STYLE,
   useMobileRecipePrint,
 } from "@/components/domain";
 import { useRecipe, useRelatedRecipes } from "@/features/recipe/hooks";
@@ -113,11 +114,34 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
         action={<PrintRecipeButton onClick={handlePrint} />}
       />
 
-      {/* Hidden print subtree — offscreen (not display:none, which can break
-          react-to-print cloning). Targeted by `printRef` on desktop. */}
+      {/* Ambient print path — always present, not conditional on any click.
+          Covers Ctrl+P / File>Print / a mobile browser's own Print menu item,
+          none of which run `handlePrint` at all: it reveals the (already
+          server-rendered) print document below via CSS alone whenever
+          printing is triggered any other way. */}
+      <style>{pageStyle + RECIPE_PRINT_AMBIENT_STYLE}</style>
+
+      {/* Hidden print subtree — offscreen on screen (not display:none, which
+          can break react-to-print cloning). Targeted by `printRef` on
+          desktop. Under print, `position: static` stops this 0×0 box from
+          acting as the containing block for RecipePrintDocument's own
+          `position: absolute` (the ambient rule below anchors it to the page
+          instead) and `overflow: visible` stops it from clipping the result
+          to nothing while that reflow settles. */}
       <Box
         aria-hidden
-        sx={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}
+        sx={{
+          position: "absolute",
+          width: 0,
+          height: 0,
+          overflow: "hidden",
+          "@media print": {
+            position: "static",
+            width: "auto",
+            height: "auto",
+            overflow: "visible",
+          },
+        }}
       >
         <RecipePrintDocument ref={printRef} recipe={recipe} />
       </Box>
