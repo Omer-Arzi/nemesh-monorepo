@@ -79,6 +79,14 @@ export default function RecipePrintDocument({ recipe, ref }: Props) {
     <ThemeProvider theme={lightTheme}>
       <Box
         ref={ref}
+        // Selector the ambient print stylesheet (RECIPE_PRINT_AMBIENT_STYLE)
+        // targets to reveal this document when printing is triggered any way
+        // other than the on-screen button (Ctrl+P, File>Print, a mobile
+        // browser's own Print menu item). Present on every render — the
+        // desktop iframe clone and the mobile portal copy both carry it too,
+        // but the ambient rule is a no-op there (see that constant's doc
+        // comment) so this is safe everywhere this component renders.
+        data-nemesh-recipe-print="document"
         dir="rtl"
         lang="he"
         style={{ fontFamily: HEEBO_FONT_STACK }}

@@ -27,6 +27,15 @@ vi.stubGlobal(
 );
 window.scrollTo = vi.fn();
 
+// NOTE: RecipeContent always renders a plain `<style>` tag carrying the
+// ambient print stylesheet (RECIPE_PRINT_AMBIENT_STYLE, see
+// buildPrintPageStyle.ts). Its `@page` nested margin-box at-rules are valid
+// CSS that real browsers (Chromium 131+ / Safari 18.2+) support — jsdom's own
+// CSS parser doesn't, so it logs a harmless "Could not parse CSS stylesheet"
+// error via its virtual console on every render in this file. That log
+// bypasses the page's own `console`, so it can't be silenced with a
+// `console.error` spy; it does not fail any test.
+
 vi.mock("@/lib/analytics", () => ({
   analytics: {
     trackRecipeView: vi.fn(),
