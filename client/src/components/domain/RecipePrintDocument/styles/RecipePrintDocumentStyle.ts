@@ -25,33 +25,44 @@ export const RecipePrintDocumentStyle = {
   },
 
   // ── Header (page 1) ──────────────────────────────────────────────────────
+  // Flex row instead of the earlier float layout: `headerContent` (logo,
+  // title, metadata) and the photo are two flex items, vertically centred on
+  // a shared axis (`alignItems: "center"`) — the whole point being that
+  // `headerContent`'s stack has real vertical room to grow *into* up to the
+  // photo's own height (its tallest natural constraint) before this header
+  // grows any taller and pushes the sections below it down. Plain `row`
+  // resolves visually right-to-left under `dir="rtl"` with no logical-vs-
+  // physical direction fuss, so `headerContent` (first in DOM) sits
+  // inline-start (right) and the photo inline-end (left) — matching the
+  // previous float layout's result. Safe to use flex here specifically
+  // (elsewhere in this document, floats/blocks are used instead) because
+  // `breakInside: "avoid"` already keeps the whole header on one page
+  // regardless of its internal layout mechanism.
   header: {
-    // `flow-root` contains the floated header photo so no later section
-    // (e.g. the first section body when a recipe has a photo but no
-    // metadata run) can flow up beside it.
-    display: "flow-root",
+    display: "flex",
+    alignItems: "center",
+    gap: "6mm",
     breakInside: "avoid",
     mb: "6mm",
   },
+  headerContent: {
+    flex: "1 1 auto",
+    minWidth: 0,
+  },
   logo: {
     display: "block",
-    // Sits on its own line above the title. Enlarged from 11mm for a stronger
-    // masthead; the extra height is taken up by the whitespace that the
-    // floated header photo already leaves beside/below a short title, so on a
-    // recipe with a photo the metadata run and everything below it don't move
-    // — only the title-to-logo gap tightens. A photo-less recipe with a long
-    // title shifts down by the (small) delta.
-    height: "16mm",
+    // Enlarged from 11mm, then 16mm, to 18mm: each bump was previously
+    // absorbed by the floated photo's leftover height beside a short title.
+    // Now that the metadata run lives in this same vertically-centred
+    // column (see `header`), that's true by construction rather than by
+    // coincidence — the column only pushes the sections below the header
+    // down once its total height exceeds the photo's.
+    height: "18mm",
     width: "auto",
     mb: "3mm",
   },
-  headerRow: {
-    // The photo floats to the inline-end (visual-left in RTL); the title sits
-    // inline-start and wraps beneath the photo past its bottom edge.
-    display: "block",
-  },
   photo: {
-    float: "inline-end",
+    flexShrink: 0,
     width: "55mm",
     maxWidth: "40%",
     aspectRatio: "3 / 2",
@@ -59,8 +70,6 @@ export const RecipePrintDocumentStyle = {
     borderRadius: "4px",
     border: 1,
     borderColor: "divider",
-    marginInlineStart: "6mm",
-    mb: "2mm",
   },
   title: {
     fontSize: "22pt",
@@ -70,12 +79,14 @@ export const RecipePrintDocumentStyle = {
   },
 
   // ── Metadata run ─────────────────────────────────────────────────────────
+  // Lives directly under the title inside `headerContent` now (previously a
+  // separate block below the whole header, `clear`ed past the floated
+  // photo) — `mt` alone provides the gap from the title above it.
   metaRun: {
     breakInside: "avoid",
-    clear: "both",
     fontSize: "9.5pt",
     lineHeight: 1.5,
-    mt: "4mm",
+    mt: "2mm",
   },
   metaLabel: {
     color: "text.secondary",

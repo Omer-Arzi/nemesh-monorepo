@@ -94,34 +94,32 @@ export default function RecipePrintDocument({ recipe, ref }: Props) {
       >
         {/* ── Header (page 1) ─────────────────────────────────────────── */}
         <Box sx={S.header}>
-          <SiteLogo variant="desktop" alt={T.logoAlt} sx={S.logo} />
-          <Box sx={S.headerRow}>
-            {recipe.image && (
-              <Box
-                component="img"
-                src={recipe.image.url}
-                alt={recipe.image.alt}
-                sx={S.photo}
-              />
-            )}
+          <Box sx={S.headerContent}>
+            <SiteLogo variant="desktop" alt={T.logoAlt} sx={S.logo} />
             <Box component="h1" sx={S.title}>
               {recipe.title}
             </Box>
+            {meta.length > 0 && (
+              <Box sx={S.metaRun}>
+                {meta.map((item, i) => (
+                  <Fragment key={item.label}>
+                    {i > 0 && <Box component="span" sx={S.metaSeparator}>{T.separator}</Box>}
+                    <Box component="span" sx={S.metaLabel}>{item.label}: </Box>
+                    <Box component="span" sx={S.metaValue}>{item.value}</Box>
+                  </Fragment>
+                ))}
+              </Box>
+            )}
           </Box>
+          {recipe.image && (
+            <Box
+              component="img"
+              src={recipe.image.url}
+              alt={recipe.image.alt}
+              sx={S.photo}
+            />
+          )}
         </Box>
-
-        {/* ── Metadata run ───────────────────────────────────────────── */}
-        {meta.length > 0 && (
-          <Box sx={S.metaRun}>
-            {meta.map((item, i) => (
-              <Fragment key={item.label}>
-                {i > 0 && <Box component="span" sx={S.metaSeparator}>{T.separator}</Box>}
-                <Box component="span" sx={S.metaLabel}>{item.label}: </Box>
-                <Box component="span" sx={S.metaValue}>{item.value}</Box>
-              </Fragment>
-            ))}
-          </Box>
-        )}
 
         {/* ── Tips ───────────────────────────────────────────────────── */}
         {recipe.tips.length > 0 && (
