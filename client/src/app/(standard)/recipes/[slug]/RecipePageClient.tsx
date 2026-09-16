@@ -171,11 +171,16 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
 
 type Props = {
   slug: string;
+  /** Fetched server-side in page.tsx; seeds `useRecipe` so the very first
+   *  render (including the server-rendered HTML) shows the real recipe. */
+  initialRecipe: Recipe;
+  /** Same idea, for the related-recipes rail. */
+  initialRelatedRecipes: RecipeSummary[];
 };
 
-export default function RecipePageClient({ slug }: Props) {
-  const { data: recipe, isLoading, isError, refetch } = useRecipe(slug);
-  const { data: relatedRecipes = [] } = useRelatedRecipes(slug);
+export default function RecipePageClient({ slug, initialRecipe, initialRelatedRecipes }: Props) {
+  const { data: recipe, isLoading, isError, refetch } = useRecipe(slug, initialRecipe);
+  const { data: relatedRecipes = [] } = useRelatedRecipes(slug, initialRelatedRecipes);
 
   useEffect(() => {
     window.scrollTo(0, 0);

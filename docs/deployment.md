@@ -283,16 +283,18 @@ If the Strapi fetch fails, the sitemap degrades gracefully and returns only the 
 ### Required environment variable (Vercel)
 
 ```
-NEXT_PUBLIC_SITE_URL=https://nemesh-food.com
+NEXT_PUBLIC_SITE_URL=https://www.nemesh-food.com
 ```
 
-Without this, the sitemap URL base falls back to `https://nemesh-food.com` (hardcoded fallback) — still correct for production, but set the env var explicitly so staging/preview builds can override it.
+**Must be the `www` host.** Production redirects the bare `nemesh-food.com` domain to `www` with a 308 — `www` is the actual canonical origin, not the non-`www` domain. Every SEO URL (sitemap `<loc>`, `robots.txt`'s `Sitemap:` line, canonical tags, `openGraph.url`, JSON-LD) is built from `getSiteUrl()` (`client/src/lib/seo/seoConfig.ts`), whose fallback also defaults to the `www` URL — but set the env var explicitly on Vercel rather than relying on the fallback, and so staging/preview builds can override it.
+
+(Historically this was documented — and set — as the non-`www` domain, which meant every generated URL pointed at a page that 308-redirected. That mismatch is what Search Console reports as "Crawled – currently not indexed": Google sees the sitemap/canonical pointing at one URL and the actual served page at another.)
 
 ### Verifying after deploy
 
 ```
-https://nemesh-food.com/sitemap.xml   → should return XML with all recipe and category URLs
-https://nemesh-food.com/robots.txt    → should list Sitemap: https://nemesh-food.com/sitemap.xml
+https://www.nemesh-food.com/sitemap.xml   → should return XML with all recipe and category URLs, every <loc> using https://www.nemesh-food.com
+https://www.nemesh-food.com/robots.txt    → should list Sitemap: https://www.nemesh-food.com/sitemap.xml
 ```
 
 Then go to **Google Search Console → Sitemaps → Add a new sitemap** and enter `sitemap.xml`.

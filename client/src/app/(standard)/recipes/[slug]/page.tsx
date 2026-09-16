@@ -1,8 +1,10 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getRecipeBySlug } from "@/lib/api/services/recipeService";
+import { getRecipeBySlug, getRelatedRecipes } from "@/lib/api/services/recipeService";
 import RecipePageClient from "./RecipePageClient";
 import StructuredData from "@/components/seo/StructuredData";
 import { buildRecipeSchema, buildBreadcrumbSchema, getSiteUrl, SITE_NAME, DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { ROUTES } from "@/constants";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -11,15 +13,19 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
+  // A genuinely-missing recipe resolves to `null`, not a thrown error — see
+  // the page component below. Metadata generation is additionally wrapped so
+  // a transient failure here just falls back to the root layout's default
+  // metadata instead of failing the whole request.
   const recipe = await getRecipeBySlug(slug).catch(() => null);
+  if (!recipe) return {};
 
   const base = getSiteUrl();
-  const canonicalUrl = `${base}/recipes/${slug}`;
-  const title = recipe?.title ?? SITE_NAME;
-  const description =
-    recipe?.description?.trim().replace(/\n+/g, " ") || undefined;
+  const canonicalUrl = `${base}${ROUTES.RECIPE(slug)}`;
+  const title = recipe.title;
+  const description = recipe.description?.trim().replace(/\n+/g, " ") || undefined;
 
-  const ogImages = recipe?.image?.url
+  const ogImages = recipe.image?.url
     ? [
         {
           url: recipe.image.url,
@@ -33,6 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title,
       description,
@@ -53,19 +60,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function RecipePage({ params }: Props) {
   const { slug } = await params;
-  // getRecipeBySlug is deduplicated by Next.js fetch cache — no extra network call
-  // on top of the generateMetadata call above.
-  const recipe = await getRecipeBySlug(slug).catch(() => null);
+
+  // Deliberately NOT wrapped in try/catch: `getRecipeBySlug` resolves to
+  // `null` on a normal, successful "no match" response from Strapi — that's
+  // the only case that should 404. A real Strapi outage/network failure
+  // throws here instead, and Next renders the nearest error boundary (a
+  // 5xx), so a temporary backend hiccup can never be mistaken for "recipe
+  // doesn't exist" and turned into a permanent 404.
+  //
+  // Also deduplicated by Next's fetch cache against the identical call in
+  // generateMetadata above — no extra network round trip.
+  const recipe = await getRecipeBySlug(slug);
+  if (!recipe) notFound();
+
+  // Related recipes are allowed to fail independently: a transient error
+  // here shouldn't take down an otherwise-healthy recipe page.
+  // RecipePageClient's related-recipes rail simply renders empty in that
+  // case, same as it always has when there are genuinely no related recipes.
+  const relatedRecipes = await getRelatedRecipes(slug).catch(() => []);
 
   return (
     <>
-      {recipe && (
-        <>
-          <StructuredData data={buildRecipeSchema(recipe)} />
-          <StructuredData data={buildBreadcrumbSchema(recipe)} />
-        </>
-      )}
-      <RecipePageClient slug={slug} />
+      <StructuredData data={buildRecipeSchema(recipe)} />
+      <StructuredData data={buildBreadcrumbSchema(recipe)} />
+      <RecipePageClient
+        slug={slug}
+        initialRecipe={recipe}
+        initialRelatedRecipes={relatedRecipes}
+      />
     </>
   );
 }
