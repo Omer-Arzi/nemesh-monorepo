@@ -1,107 +1,104 @@
-"use client";
-
-import { useEffect } from "react";
-import { useParams } from "next/navigation";
-import Box from "@mui/material/Box";
+import { notFound, permanentRedirect } from "next/navigation";
+import type { Metadata } from "next";
+import { getCategoryBySlug } from "@/lib/api/services/categoryService";
+import { getRecipesByCategory } from "@/lib/api/services/recipeService";
+import CategoryPageClient from "./CategoryPageClient";
 import { CategoryPageText } from "./consts";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import { PageContainer, LoadingState, ErrorState, EmptyState, SectionHeader, NemeshImage } from "@/components/shared";
-import { RecipeCard, RecipeGridSkeleton } from "@/components/domain";
-import { useCategory, useRecipesByCategory } from "@/features/category/hooks";
-import { analytics } from "@/lib/analytics";
+import { getSiteUrl, SITE_NAME, DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { ROUTES } from "@/constants";
 
-export default function CategoryPage() {
-  const { slug } = useParams<{ slug: string }>();
+type Props = {
+  params: Promise<{ slug: string }>;
+};
 
-  const { data: category, isLoading: categoryLoading, isError: categoryError } = useCategory(slug);
-  const { data: recipesResult, isLoading: recipesLoading } = useRecipesByCategory(slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
 
-  useEffect(() => {
-    if (!category) return;
-    analytics.trackCategoryView({
-      category_id: category.id,
-      category_name: category.name,
-      category_slug: slug,
-    });
-  }, [category?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A genuinely-missing category resolves to `null`, not a thrown error — see
+  // the `.catch` note on the page component below. Metadata generation is
+  // additionally wrapped so a transient failure here just falls back to the
+  // root layout's default metadata instead of failing the whole request.
+  const category = await getCategoryBySlug(slug).catch(() => null);
+  if (!category) return {};
 
-  if (categoryLoading) {
-    return <LoadingState label={CategoryPageText.loading} minHeight={400} />;
+  const base = getSiteUrl();
+  // Built from the category's own stored `slug`, never the raw URL param —
+  // so a differently-cased request (`/categories/Chicken`) still generates
+  // the one, real canonical URL rather than echoing back whatever casing was
+  // requested.
+  const canonicalUrl = `${base}${ROUTES.CATEGORY(category.slug)}`;
+  const displayName = category.menuName ?? category.name;
+  const title = CategoryPageText.metaTitle(displayName);
+  const description =
+    category.description?.trim() || CategoryPageText.metaDescriptionFallback(displayName);
+
+  const ogImages = category.image?.url
+    ? [
+        {
+          url: category.image.url,
+          width: category.image.width || undefined,
+          height: category.image.height || undefined,
+          alt: category.image.alt || title,
+        },
+      ]
+    : [{ url: `${base}${DEFAULT_OG_IMAGE}`, alt: SITE_NAME }];
+
+  return {
+    title,
+    description,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: canonicalUrl,
+      siteName: SITE_NAME,
+      locale: "he_IL",
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImages.map((img) => img.url),
+    },
+  };
+}
+
+export default async function CategoryPage({ params }: Props) {
+  const { slug } = await params;
+
+  // Deliberately NOT wrapped in try/catch: `getCategoryBySlug` resolves to
+  // `null` on a normal, successful "no match" response from Strapi — that's
+  // the only case that should 404. A real Strapi outage/network failure
+  // throws here instead, and Next renders the nearest error boundary (a 5xx),
+  // so a temporary backend hiccup can never be mistaken for "category
+  // doesn't exist" and turned into a permanent 404.
+  //
+  // Also deduplicated by Next's fetch cache against the identical call in
+  // generateMetadata above — no extra network round trip.
+  const category = await getCategoryBySlug(slug);
+  if (!category) notFound();
+
+  // `getCategoryBySlug` matches case-insensitively, so a differently-cased
+  // URL (`/categories/Chicken`) still resolves to a real category here.
+  // Permanently redirect to the stored, lowercase slug instead of serving —
+  // and letting Google index — a second URL for the same category.
+  if (category.slug !== slug) {
+    permanentRedirect(ROUTES.CATEGORY(category.slug));
   }
 
-  if (categoryError || !category) {
-    return <ErrorState title={CategoryPageText.errorNotFound} />;
-  }
-
-  const recipes = recipesResult?.items ?? [];
+  // Recipes are allowed to fail independently of the category lookup above:
+  // a transient error here shouldn't take down an otherwise-healthy category
+  // page. `CategoryPageClient` falls back to its normal client-side
+  // fetch/loading state when this is `null`.
+  const recipesResult = await getRecipesByCategory(category.slug).catch(() => null);
 
   return (
-    <PageContainer>
-      {/* ── Category header ──────────────────────────────────────────── */}
-      <Box sx={{ mb: 3, textAlign: "center" }}>
-        {category.image ? (
-          <Box sx={{ position: "relative", height: 280, borderRadius: 3, mb: 3, overflow: "hidden" }}>
-            <NemeshImage
-              image={category.image}
-              fill
-              objectFit="cover"
-              objectPosition="center 60%"
-              sizes="(max-width: 600px) 100vw, 800px"
-            />
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              width: "100%",
-              height: 160,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: "action.hover",
-              borderRadius: 3,
-              mb: 3,
-            }}
-          >
-            <RestaurantIcon sx={{ fontSize: 64, color: "text.disabled", opacity: 0.4 }} />
-          </Box>
-        )}
-
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-          {category.menuName ?? category.name}
-        </Typography>
-
-        {category.description && (
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 1, maxWidth: 600, mx: "auto" }}>
-            {category.description}
-          </Typography>
-        )}
-      </Box>
-
-      {/* ── Recipe grid ─────────────────────────────────────────────── */}
-      {recipesLoading ? (
-        <RecipeGridSkeleton count={4} />
-      ) : recipes.length === 0 ? (
-        <EmptyState
-          icon={<MenuBookOutlinedIcon fontSize="inherit" />}
-          title={CategoryPageText.emptyTitle}
-          description={CategoryPageText.emptyDescription}
-        />
-      ) : (
-        <>
-          <SectionHeader title={CategoryPageText.recipeSectionTitle} sx={{ mb: 2 }} />
-          {/* xs:12 = single column on mobile, consistent with the results page grid */}
-          <Grid container spacing={2}>
-            {recipes.map((recipe) => (
-              <Grid key={recipe.id} size={{ xs: 12, sm: 4, md: 3 }}>
-                <RecipeCard recipe={recipe} />
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      )}
-    </PageContainer>
+    <CategoryPageClient
+      slug={category.slug}
+      initialCategory={category}
+      initialRecipes={recipesResult}
+    />
   );
 }
