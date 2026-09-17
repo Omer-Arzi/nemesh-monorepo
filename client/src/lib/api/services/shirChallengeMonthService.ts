@@ -76,9 +76,18 @@ function mapMonth(raw: StrapiData<StrapiShirChallengeMonthAttrs>): ShirChallenge
 /**
  * Fetches the challenge month record matching the given YYYY-MM key.
  * Returns null if no record exists yet (server auto-creates one on next startup/cron).
+ *
+ * `monthKey` is no longer unique (a calendar month can hold more than one
+ * challenge instance — see shir-challenge-month's schema.json) so an explicit
+ * tie-break sort is required for `pagination[pageSize]=1` to be deterministic:
+ * the chronologically-first instance in the month wins. With today's real
+ * data (at most one record per month), this sort is a no-op.
  */
 export async function getCurrentChallengeMonth(monthKey: string): Promise<ShirChallengeMonth | null> {
-  const qs = `filters[monthKey][$eq]=${encodeURIComponent(monthKey)}&pagination[pageSize]=1`;
+  const qs =
+    `filters[monthKey][$eq]=${encodeURIComponent(monthKey)}` +
+    `&sort[0]=monthStart:asc` +
+    `&pagination[pageSize]=1`;
   const raw = await apiClient.get<StrapiList<StrapiShirChallengeMonthAttrs>>(
     `/shir-challenge-months?${qs}`
   );
@@ -127,9 +136,15 @@ const CAROUSEL_POPULATE =
  * positive-match case would require writing a real relation onto a live
  * content record, which is out of bounds for routine implementation
  * verification).
+ *
+ * `monthKey` is no longer unique (a calendar month can hold more than one
+ * challenge instance), so a secondary `monthStart:desc` sort is added purely
+ * for determinism between two records that tie on `monthKey` — otherwise
+ * their relative order would be unspecified across requests. With today's
+ * data (no ties possible), this is a no-op.
  */
 export async function getShirChallengeCarouselMonths(currentMonthKey: string): Promise<ShirChallengeMonth[]> {
-  const qs = `${CAROUSEL_POPULATE}&sort[0]=monthKey:desc&pagination[pageSize]=100`;
+  const qs = `${CAROUSEL_POPULATE}&sort[0]=monthKey:desc&sort[1]=monthStart:desc&pagination[pageSize]=100`;
   const raw = await apiClient.get<StrapiList<StrapiShirChallengeMonthAttrs>>(
     `/shir-challenge-months?${qs}`
   );
