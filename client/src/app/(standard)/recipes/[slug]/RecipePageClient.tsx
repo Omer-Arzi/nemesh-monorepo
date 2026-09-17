@@ -17,8 +17,8 @@ import {
   PrintRecipeButton,
   RecipePrintDocument,
   buildRecipePrintPageStyle,
-  RECIPE_PRINT_AMBIENT_STYLE,
   useMobileRecipePrint,
+  useAmbientRecipePrint,
 } from "@/components/domain";
 import { useRecipe, useRelatedRecipes } from "@/features/recipe/hooks";
 import { useCookingMode } from "@/features/cooking-mode";
@@ -77,6 +77,11 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
 
   const handlePrint = isMobileBrowser ? handleMobilePrint : handleDesktopPrint;
 
+  // Ambient print path — Ctrl+P / File>Print / a mobile browser's own Print
+  // menu item, none of which run `handlePrint` at all. See the hook's own
+  // doc comment for why this can never affect the button paths above.
+  useAmbientRecipePrint(printRef);
+
   // Track recipe view once on mount.
   useEffect(() => {
     analytics.trackRecipeView({
@@ -114,20 +119,21 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
         action={<PrintRecipeButton onClick={handlePrint} />}
       />
 
-      {/* Ambient print path — always present, not conditional on any click.
-          Covers Ctrl+P / File>Print / a mobile browser's own Print menu item,
-          none of which run `handlePrint` at all: it reveals the (already
-          server-rendered) print document below via CSS alone whenever
-          printing is triggered any other way. */}
-      <style>{pageStyle + RECIPE_PRINT_AMBIENT_STYLE}</style>
+      {/* `@page` size/margin/footer rules — needed by the ambient path too
+          (Ctrl+P prints this document directly, not through react-to-print's
+          iframe, which gets its own copy of `pageStyle` from the `useReactToPrint`
+          option instead). */}
+      <style>{pageStyle}</style>
 
       {/* Hidden print subtree — offscreen on screen (not display:none, which
           can break react-to-print cloning). Targeted by `printRef` on
-          desktop. Under print, `position: static` stops this 0×0 box from
-          acting as the containing block for RecipePrintDocument's own
-          `position: absolute` (the ambient rule below anchors it to the page
-          instead) and `overflow: visible` stops it from clipping the result
-          to nothing while that reflow settles. */}
+          desktop. Under print, `position: static` / `width/height: auto` /
+          `overflow: visible` let this box lay out normally at its natural
+          size instead of staying pinned to 0×0. For the ambient path
+          (`useAmbientRecipePrint`), every OTHER sibling up to `<body>` gets
+          `display: none` on `beforeprint`, so this becomes the only content
+          left in flow and naturally lands at the top of the page — no
+          explicit positioning needed here for that. */}
       <Box
         aria-hidden
         sx={{
