@@ -6,10 +6,27 @@
  * enable find and findOne.
  */
 import type { StrapiList, StrapiData } from "@/types/api";
-import type { ShirChallengeMonth, MyProgressStatus, MonthlyChallengeStatus } from "@/types/domain";
+import type {
+  ShirChallengeMonth,
+  ShirChallengeMonthRecipeRef,
+  MyProgressStatus,
+  MonthlyChallengeStatus,
+} from "@/types/domain";
 import { apiClient } from "../client";
+import { mapImage, type StrapiMediaRaw } from "../mappers";
 
 // ─── Internal Strapi wire types ────────────────────────────────────────────
+
+// Minimal projection of the linked recipe — only what the homepage carousel
+// card renders (title/slug/prepTime/image). publishedAt is wire-only, used
+// to drop links to draft recipes; it never reaches the domain type.
+type StrapiShirChallengeMonthRecipeRaw = {
+  title: string;
+  slug: string;
+  prepTime: number | null;
+  publishedAt: string | null;
+  image: StrapiMediaRaw | null;
+};
 
 type StrapiShirChallengeMonthAttrs = {
   monthKey: string;
@@ -18,9 +35,28 @@ type StrapiShirChallengeMonthAttrs = {
   monthlyChallengeStatus: MonthlyChallengeStatus;
   monthlyChallengeNote: string | null;
   myProgressStatus: MyProgressStatus | null;
+  // Absent (not populated) on getCurrentChallengeMonth/getPreviousChallengeMonth's
+  // queries — only getShirChallengeCarouselMonths requests it.
+  recipe?: StrapiShirChallengeMonthRecipeRaw | null;
 };
 
 // ─── Mapper ───────────────────────────────────────────────────────────────
+
+// Never surfaces a relation pointing at an unpublished/draft recipe — mirrors
+// recipeService.ts's mapPreparationRecipe guard. The carousel is public
+// homepage content, and a draft recipe's own page 404s for anonymous visitors.
+function mapMonthRecipe(
+  raw: StrapiShirChallengeMonthRecipeRaw | null | undefined
+): ShirChallengeMonthRecipeRef | null {
+  if (!raw) return null;
+  if (!raw.publishedAt) return null;
+  return {
+    title: raw.title,
+    slug: raw.slug,
+    prepTime: raw.prepTime ?? null,
+    image: mapImage(raw.image ?? null),
+  };
+}
 
 function mapMonth(raw: StrapiData<StrapiShirChallengeMonthAttrs>): ShirChallengeMonth {
   return {
@@ -31,6 +67,7 @@ function mapMonth(raw: StrapiData<StrapiShirChallengeMonthAttrs>): ShirChallenge
     monthlyChallengeStatus: raw.monthlyChallengeStatus,
     monthlyChallengeNote: raw.monthlyChallengeNote ?? null,
     myProgressStatus: raw.myProgressStatus ?? null,
+    recipe: mapMonthRecipe(raw.recipe),
   };
 }
 
@@ -66,4 +103,37 @@ export async function getPreviousChallengeMonth(
   );
   const first = raw.data[0];
   return first ? mapMonth(first) : null;
+}
+
+const CAROUSEL_POPULATE =
+  "populate[recipe][fields][0]=title" +
+  "&populate[recipe][fields][1]=slug" +
+  "&populate[recipe][fields][2]=prepTime" +
+  "&populate[recipe][fields][3]=publishedAt" +
+  "&populate[recipe][populate][image]=true";
+
+/**
+ * Fetches the months to show in the homepage carousel: any month with a
+ * matched (published) recipe, plus `currentMonthKey` itself as a placeholder
+ * when unmatched — older unmatched back-support months are excluded. Sorted
+ * newest-first by monthKey (calendar order), matching the RTL carousel's
+ * read order with no client-side reversal needed.
+ *
+ * The inclusion rule is applied client-side rather than via a server-side
+ * `$or`/`$notNull` relation filter: this collection is small and structurally
+ * bounded (~12 records/year — see shir-challenge-month's own schema
+ * description), so fetching the full list is cheap, and it avoids relying on
+ * an unverified combination of Strapi filter operators (verifying the
+ * positive-match case would require writing a real relation onto a live
+ * content record, which is out of bounds for routine implementation
+ * verification).
+ */
+export async function getShirChallengeCarouselMonths(currentMonthKey: string): Promise<ShirChallengeMonth[]> {
+  const qs = `${CAROUSEL_POPULATE}&sort[0]=monthKey:desc&pagination[pageSize]=100`;
+  const raw = await apiClient.get<StrapiList<StrapiShirChallengeMonthAttrs>>(
+    `/shir-challenge-months?${qs}`
+  );
+  return raw.data
+    .map(mapMonth)
+    .filter((month) => month.recipe !== null || month.monthKey === currentMonthKey);
 }

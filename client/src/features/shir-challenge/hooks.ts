@@ -3,6 +3,7 @@ import { getShirChallengePage } from "@/lib/api/services/shirChallengePageServic
 import {
   getCurrentChallengeMonth,
   getPreviousChallengeMonth,
+  getShirChallengeCarouselMonths,
 } from "@/lib/api/services/shirChallengeMonthService";
 import { queryKeys } from "@/lib/query/keys";
 import { getCurrentMonthKey, getCurrentMonthStart } from "./shirChallengeUtils";
@@ -36,5 +37,18 @@ export function usePreviousChallengeMonth() {
   return useQuery({
     queryKey: queryKeys.shirChallengeMonth.previous(currentMonthStart),
     queryFn: () => getPreviousChallengeMonth(currentMonthStart),
+  });
+}
+
+/**
+ * Months to show in the homepage Shir Challenge carousel: any month with a
+ * matched recipe, plus the current month as a placeholder when unmatched —
+ * see getShirChallengeCarouselMonths() for the exact inclusion rule.
+ */
+export function useShirChallengeCarouselMonths() {
+  const monthKey = getCurrentMonthKey();
+  return useQuery({
+    queryKey: queryKeys.shirChallengeMonth.carousel(monthKey),
+    queryFn: () => getShirChallengeCarouselMonths(monthKey),
   });
 }

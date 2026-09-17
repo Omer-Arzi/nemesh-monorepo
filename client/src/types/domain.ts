@@ -287,6 +287,20 @@ export type ShirChallengePage = {
   heroImage: Image | null;
 };
 
+/**
+ * Minimal recipe reference used by the Shir Challenge homepage carousel card —
+ * only the fields the card renders, not the full RecipeSummary shape (no
+ * categories/tags/difficulty/totalTime/servings). Populated only when the
+ * linked recipe is published; an unpublished/draft recipe relation is
+ * treated the same as no relation at all (see shirChallengeMonthService.ts).
+ */
+export type ShirChallengeMonthRecipeRef = {
+  title: string;
+  slug: string;
+  prepTime: number | null;
+  image: Image | null;
+};
+
 /** One record per calendar month in the shir-challenge-month collection. */
 export type ShirChallengeMonth = BaseEntity & {
   monthKey: string;                          // "YYYY-MM"
@@ -295,6 +309,15 @@ export type ShirChallengeMonth = BaseEntity & {
   monthlyChallengeStatus: MonthlyChallengeStatus;
   monthlyChallengeNote: string | null;
   myProgressStatus: MyProgressStatus | null;
+  /**
+   * The recipe matched to this month's challenge, if any. Always null on
+   * existing records and stays null until an editor links one in Strapi —
+   * back-compatible, additive field (see brief.md D1). Only
+   * getShirChallengeCarouselMonths() populates this; getCurrentChallengeMonth
+   * and getPreviousChallengeMonth never request it, so it is always null on
+   * those results.
+   */
+  recipe: ShirChallengeMonthRecipeRef | null;
 };
 
 // ─── Strapi Blocks (rich text editor) ────────────────────────────────────────
