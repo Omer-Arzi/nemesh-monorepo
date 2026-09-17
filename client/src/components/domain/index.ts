@@ -25,8 +25,8 @@ export { default as PrintRecipeButton } from "./PrintRecipeButton";
 export {
   default as RecipePrintDocument,
   buildRecipePrintPageStyle,
-  RECIPE_PRINT_AMBIENT_STYLE,
   useMobileRecipePrint,
+  useAmbientRecipePrint,
 } from "./RecipePrintDocument";
 export { default as CollectionCard } from "./CollectionCard";
 export { RecipeCardSkeleton, RecipeGridSkeleton } from "./RecipeCardSkeleton";
