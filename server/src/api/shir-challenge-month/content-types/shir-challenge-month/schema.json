@@ -13,12 +13,12 @@
   "attributes": {
     "monthKey": {
       "type": "string",
-      "required": true,
-      "unique": true
+      "required": true
     },
     "monthStart": {
       "type": "date",
-      "required": true
+      "required": true,
+      "unique": true
     },
     "monthlyIngredientName": {
       "type": "string"

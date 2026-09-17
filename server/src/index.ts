@@ -24,7 +24,7 @@ async function ensureCurrentChallengeMonth(strapi: Core.Strapi) {
   const monthStart = `${monthKey}-01`;
 
   const existing = await strapi.documents(MONTH_UID).findFirst({
-    filters: { monthKey: { $eq: monthKey } },
+    filters: { monthStart: { $eq: monthStart } },
   });
 
   if (!existing) {

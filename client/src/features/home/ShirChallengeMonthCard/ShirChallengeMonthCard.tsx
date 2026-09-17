@@ -13,7 +13,6 @@ import type { ShirChallengeMonth } from "@/types/domain";
 import { SHIR_CHALLENGE_SLUG } from "@/features/shir-challenge/ShirChallenge.consts";
 import { formatHebrewMonthLabel } from "@/features/shir-challenge/shirChallengeUtils";
 import { NemeshImage } from "@/components/shared";
-import RecipeMeta from "@/components/domain/RecipeMeta";
 import { ShirChallengeMonthCardStyle } from "./ShirChallengeMonthCard.style";
 import { ShirChallengeMonthCardText } from "./ShirChallengeMonthCard.consts";
 
@@ -60,7 +59,11 @@ export default function ShirChallengeMonthCard({ month }: Props) {
               {recipe.title}
             </Typography>
             <Typography sx={ShirChallengeMonthCardStyle.caption}>{monthLabel}</Typography>
-            <RecipeMeta prepTime={recipe.prepTime} />
+            {month.monthlyIngredientName && (
+              <Typography sx={ShirChallengeMonthCardStyle.ingredientMeta}>
+                {month.monthlyIngredientName}
+              </Typography>
+            )}
           </CardContent>
         </CardActionArea>
       </Card>

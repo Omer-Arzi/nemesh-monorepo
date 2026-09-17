@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { apiClient } from "../client";
-import { getShirChallengeCarouselMonths } from "./shirChallengeMonthService";
+import { getCurrentChallengeMonth, getShirChallengeCarouselMonths } from "./shirChallengeMonthService";
 
 vi.mock("../client", () => ({
   apiClient: { get: vi.fn() },
@@ -132,5 +132,42 @@ describe("getShirChallengeCarouselMonths — D3 inclusion rule", () => {
     const months = await getShirChallengeCarouselMonths("2026-09");
     expect(months).toHaveLength(1);
     expect(months[0].recipe).toBeNull();
+  });
+
+  it("requests a monthKey:desc, monthStart:desc tie-break sort (monthKey is no longer unique)", async () => {
+    mockMonths([]);
+
+    await getShirChallengeCarouselMonths("2026-09");
+
+    const requestedUrl = vi.mocked(apiClient.get).mock.calls.at(-1)?.[0] as string;
+    expect(requestedUrl).toContain("sort[0]=monthKey:desc");
+    expect(requestedUrl).toContain("sort[1]=monthStart:desc");
+  });
+});
+
+describe("getCurrentChallengeMonth — determinism when a month has 2+ records", () => {
+  it("requests an explicit monthStart:asc tie-break sort", async () => {
+    mockMonths([]);
+
+    await getCurrentChallengeMonth("2026-09");
+
+    const requestedUrl = vi.mocked(apiClient.get).mock.calls.at(-1)?.[0] as string;
+    expect(requestedUrl).toContain("filters[monthKey][$eq]=2026-09");
+    expect(requestedUrl).toContain("sort[0]=monthStart:asc");
+  });
+
+  it("picks the chronologically-first instance among two records sharing a monthKey", async () => {
+    mockMonths([
+      makeRawMonth({ id: 2, documentId: "month-2b", monthKey: "2026-09" }),
+      makeRawMonth({ id: 1, documentId: "month-2a", monthKey: "2026-09" }),
+    ]);
+
+    const result = await getCurrentChallengeMonth("2026-09");
+
+    // pageSize=1 means the service only ever reads data[0]; the sort
+    // (asserted above) is what guarantees the server puts the
+    // chronologically-first record there — this just documents that
+    // data[0] (not some other selection) is what's returned.
+    expect(result?.id).toBe("month-2b");
   });
 });
