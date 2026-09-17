@@ -772,9 +772,7 @@ export interface ApiShirChallengeMonthShirChallengeMonth
       'api::shir-challenge-month.shir-challenge-month'
     > &
       Schema.Attribute.Private;
-    monthKey: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.Unique;
+    monthKey: Schema.Attribute.String & Schema.Attribute.Required;
     monthlyChallengeNote: Schema.Attribute.Text;
     monthlyChallengeStatus: Schema.Attribute.Enumeration<
       ['pending', 'active', 'skipped']
@@ -782,7 +780,9 @@ export interface ApiShirChallengeMonthShirChallengeMonth
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'pending'>;
     monthlyIngredientName: Schema.Attribute.String;
-    monthStart: Schema.Attribute.Date & Schema.Attribute.Required;
+    monthStart: Schema.Attribute.Date &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
     myProgressStatus: Schema.Attribute.Enumeration<
       ['idea', 'writing', 'cooked', 'published']
     >;
