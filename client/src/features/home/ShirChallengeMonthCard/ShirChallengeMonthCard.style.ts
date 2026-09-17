@@ -95,4 +95,17 @@ export const ShirChallengeMonthCardStyle = {
     fontWeight: 600,
     letterSpacing: "0.02em",
   },
+
+  // Meta slot (matched card only): the month's challenge ingredient, in
+  // place of RecipeCard's usual prep-time stat — same body2/text.secondary
+  // weight as RecipeMeta's stat text, single line with ellipsis overflow.
+  ingredientMeta: {
+    fontSize: "0.8125rem",
+    color: "text.secondary",
+    textAlign: "center" as const,
+    whiteSpace: "nowrap" as const,
+    overflow: "hidden" as const,
+    textOverflow: "ellipsis" as const,
+    maxWidth: "100%",
+  },
 } as const;
