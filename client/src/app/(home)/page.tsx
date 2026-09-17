@@ -4,6 +4,7 @@ import FeatureSection from "@/features/home/FeatureSection";
 import HomepageAbout from "@/features/home/HomepageAbout";
 import LatestRecipes from "@/features/home/LatestRecipes";
 import FeaturedCategoriesCarousel from "@/features/home/FeaturedCategoriesCarousel";
+import ShirChallengeCarousel from "@/features/home/ShirChallengeCarousel";
 import { PageViewTracker } from "@/lib/analytics";
 import StructuredData from "@/components/seo/StructuredData";
 import { buildWebSiteSchema } from "@/lib/seo/structuredData";
@@ -25,8 +26,9 @@ export default async function HomePage() {
       />
       <FeatureSection section={homepage?.featureSection ?? null} />
       <HomepageAbout about={homepage?.about ?? null} />
-      <FeaturedCategoriesCarousel sectionTitle={homepage?.featuredCategoriesTitle ?? null} />
       <LatestRecipes sectionTitle={homepage?.latestRecipesTitle ?? null} />
+      <ShirChallengeCarousel />
+      <FeaturedCategoriesCarousel sectionTitle={homepage?.featuredCategoriesTitle ?? null} />
     </>
   );
 }

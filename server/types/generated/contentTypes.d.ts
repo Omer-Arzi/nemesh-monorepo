@@ -787,6 +787,7 @@ export interface ApiShirChallengeMonthShirChallengeMonth
       ['idea', 'writing', 'cooked', 'published']
     >;
     publishedAt: Schema.Attribute.DateTime;
+    recipe: Schema.Attribute.Relation<'oneToOne', 'api::recipe.recipe'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

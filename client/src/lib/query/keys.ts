@@ -84,6 +84,8 @@ export const queryKeys = {
     /** Previous month record, keyed by the current month's start date. */
     previous: (currentMonthStart: string) =>
       ["shirChallengeMonth", "previous", currentMonthStart] as const,
+    /** Homepage carousel months, keyed by current monthKey so it re-fetches on month rollover. */
+    carousel: (currentMonthKey: string) => ["shirChallengeMonth", "carousel", currentMonthKey] as const,
   },
   suggestions: {
     all: () => ["suggestions"] as const,

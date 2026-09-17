@@ -35,6 +35,11 @@
     "myProgressStatus": {
       "type": "enumeration",
       "enum": ["idea", "writing", "cooked", "published"]
+    },
+    "recipe": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::recipe.recipe"
     }
   }
 }
