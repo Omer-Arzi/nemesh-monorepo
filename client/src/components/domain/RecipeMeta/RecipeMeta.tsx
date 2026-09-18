@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PeopleIcon from "@mui/icons-material/People";
-import WhatshotIcon from "@mui/icons-material/Whatshot";
+import StairsIcon from "@mui/icons-material/Stairs";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { DIFFICULTY_LABEL } from "@/lib/i18n/labels";
 import { formatPrepTime } from "@/lib/formatters/prepTime";
@@ -16,6 +16,8 @@ type Props = {
   prepTime?: number | null;
   servings?: number | null;
   difficulty?: Difficulty | null;
+  /** Abbreviates "דקות" to "דק׳" — used by RecipeCard's compact metadata only. */
+  abbreviated?: boolean;
   sx?: SxProps<Theme>;
 };
 
@@ -37,7 +39,7 @@ function StatItem({ icon, value }: StatItemProps) {
   );
 }
 
-export default function RecipeMeta({ prepTime, servings, difficulty, sx }: Props) {
+export default function RecipeMeta({ prepTime, servings, difficulty, abbreviated, sx }: Props) {
   const hasAny = prepTime != null || servings != null || difficulty != null;
   if (!hasAny) return null;
 
@@ -46,14 +48,14 @@ export default function RecipeMeta({ prepTime, servings, difficulty, sx }: Props
       {prepTime != null && (
         <StatItem
           icon={<AccessTimeIcon fontSize="inherit" />}
-          value={`${formatPrepTime(prepTime)} ${RecipeMetaText.workTimeSuffix}`}
+          value={`${formatPrepTime(prepTime, { abbreviated })} ${RecipeMetaText.workTimeSuffix}`}
         />
       )}
       {servings != null && (
         <StatItem icon={<PeopleIcon fontSize="inherit" />} value={`${servings} ${RecipeMetaText.servingsUnit}`} />
       )}
       {difficulty != null && (
-        <StatItem icon={<WhatshotIcon fontSize="inherit" />} value={DIFFICULTY_LABEL[difficulty]} />
+        <StatItem icon={<StairsIcon fontSize="inherit" />} value={DIFFICULTY_LABEL[difficulty]} />
       )}
     </Box>
   );

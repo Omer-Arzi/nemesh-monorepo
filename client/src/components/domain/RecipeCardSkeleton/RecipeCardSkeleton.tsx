@@ -16,12 +16,23 @@ export default function RecipeCardSkeleton() {
         <Skeleton variant="rectangular" sx={RecipeCardSkeletonStyle.imageSkeleton} />
       </Box>
       <CardContent sx={RecipeCardSkeletonStyle.content}>
-        {/* Two title lines — matches RecipeCard's minHeight: "2.7em" reserved area */}
-        <Skeleton variant="text" width="72%" height={22} />
-        <Skeleton variant="text" width="50%" height={22} />
-        <Box sx={RecipeCardSkeletonStyle.metaRow}>
+        {/* Mirrors RecipeCard's titleWrapper reserved area (minHeight: "2.7em") */}
+        <Box sx={RecipeCardSkeletonStyle.titleZone}>
+          <Skeleton variant="text" width="72%" height={22} />
+          <Skeleton variant="text" width="50%" height={22} />
+        </Box>
+        {/* Mirrors RecipeCard's metaWrapper reserved area */}
+        <Box sx={RecipeCardSkeletonStyle.metaZone}>
           <Skeleton variant="text" width={60} height={16} />
           <Skeleton variant="text" width={60} height={16} />
+        </Box>
+        {/* Mirrors RecipeCard's categoriesRow reserved area */}
+        <Box sx={RecipeCardSkeletonStyle.categoriesZone}>
+          <Skeleton variant="rounded" width={70} height={24} />
+        </Box>
+        {/* Mirrors RecipeCard's tagsRow reserved area */}
+        <Box sx={RecipeCardSkeletonStyle.tagsZone}>
+          <Skeleton variant="rounded" width={50} height={18} />
         </Box>
       </CardContent>
     </Card>

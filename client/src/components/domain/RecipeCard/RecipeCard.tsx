@@ -49,9 +49,12 @@ export default function RecipeCard({ recipe, small = false, priority = false, si
   const hiddenTagCount = recipe.tags.length - visibleTags.length;
 
   // Cards only ever show prepTime (active work time) — totalTime is a full-recipe-page-only
-  // detail (see RecipeHero), never shown here, even when present on the recipe.
+  // detail (see RecipeHero), never shown here, even when present on the recipe. Abbreviated
+  // ("דק׳") on cards only — RecipeHero and the print document keep the full word.
   const cardTimeText =
-    recipe.prepTime != null ? `${formatPrepTime(recipe.prepTime)} ${RecipeMetaText.workTimeSuffix}` : null;
+    recipe.prepTime != null
+      ? `${formatPrepTime(recipe.prepTime, { abbreviated: true })} ${RecipeMetaText.workTimeSuffix}`
+      : null;
 
   return (
     <Card sx={RecipeCardStyle.card}>
@@ -75,60 +78,65 @@ export default function RecipeCard({ recipe, small = false, priority = false, si
 
         {/* ── Content zone ────────────────────────────────────────── */}
         <CardContent sx={small ? RecipeCardStyle.smallContent : RecipeCardStyle.content}>
-          <Typography variant="subtitle1" component="h3" sx={RecipeCardStyle.title}>
-            {recipe.title}
-          </Typography>
+          <Box sx={RecipeCardStyle.titleWrapper}>
+            <Typography variant="subtitle1" component="h3" sx={RecipeCardStyle.title}>
+              {recipe.title}
+            </Typography>
+          </Box>
 
           {small ? (
             <Typography variant="body2" sx={RecipeCardStyle.smallMeta}>
               {[
                 cardTimeText,
                 recipe.difficulty != null ? DIFFICULTY_LABEL[recipe.difficulty] : null,
-                ...recipe.categories.map((c) => c.name),
-                ...recipe.tags.map((t) => t.name),
+                ...visibleCategories.map((c) => c.name),
+                ...visibleTags.map((t) => t.name),
               ]
                 .filter(Boolean)
                 .join(" • ")}
             </Typography>
           ) : (
             <>
-              <RecipeMeta
-                prepTime={recipe.prepTime}
-                servings={recipe.servings}
-                difficulty={recipe.difficulty}
-                sx={{ justifyContent: "center" }}
-              />
+              <Box sx={RecipeCardStyle.metaWrapper}>
+                <RecipeMeta
+                  prepTime={recipe.prepTime}
+                  servings={recipe.servings}
+                  difficulty={recipe.difficulty}
+                  abbreviated
+                  sx={{ justifyContent: "center" }}
+                />
+              </Box>
 
-              {visibleCategories.length > 0 && (
-                <Box sx={RecipeCardStyle.categoriesRow}>
-                  {visibleCategories.map((cat) => (
-                    <Chip key={cat.id} label={cat.name} size="small" variant="outlined" />
-                  ))}
-                  {hiddenCount > 0 && (
-                    <Chip
-                      label={`+${hiddenCount}`}
-                      size="small"
-                      variant="outlined"
-                      sx={RecipeCardStyle.overflowChip}
-                    />
-                  )}
-                </Box>
-              )}
+              {/* Always rendered (even with 0 categories) so every card reserves the same
+                  content height — see categoriesRow's minHeight comment in RecipeCardStyle. */}
+              <Box sx={RecipeCardStyle.categoriesRow}>
+                {visibleCategories.map((cat) => (
+                  <Chip key={cat.id} label={cat.name} size="small" variant="outlined" />
+                ))}
+                {hiddenCount > 0 && (
+                  <Chip
+                    label={`+${hiddenCount}`}
+                    size="small"
+                    variant="outlined"
+                    sx={RecipeCardStyle.overflowChip}
+                  />
+                )}
+              </Box>
 
-              {visibleTags.length > 0 && (
-                <Box sx={RecipeCardStyle.tagsRow}>
-                  {visibleTags.map((tag) => (
-                    <Chip key={tag.id} label={tag.name} size="small" sx={RecipeCardStyle.tagChip} />
-                  ))}
-                  {hiddenTagCount > 0 && (
-                    <Chip
-                      label={`+${hiddenTagCount}`}
-                      size="small"
-                      sx={{ ...RecipeCardStyle.tagChip, ...RecipeCardStyle.overflowChip }}
-                    />
-                  )}
-                </Box>
-              )}
+              {/* Always rendered (even with 0 tags) — same reserved-height rationale as
+                  categoriesRow above. */}
+              <Box sx={RecipeCardStyle.tagsRow}>
+                {visibleTags.map((tag) => (
+                  <Chip key={tag.id} label={tag.name} size="small" sx={RecipeCardStyle.tagChip} />
+                ))}
+                {hiddenTagCount > 0 && (
+                  <Chip
+                    label={`+${hiddenTagCount}`}
+                    size="small"
+                    sx={{ ...RecipeCardStyle.tagChip, ...RecipeCardStyle.overflowChip }}
+                  />
+                )}
+              </Box>
             </>
           )}
         </CardContent>
