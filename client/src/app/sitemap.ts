@@ -4,6 +4,13 @@ import { getCategories } from "@/lib/api/services/categoryService";
 import { ROUTES } from "@/constants";
 import { getSiteUrl } from "@/lib/seo";
 
+// No dynamic API is read below, so without this Next.js treats this route as
+// static — generated once at build time and frozen on the CDN until the next
+// deploy. A recipe published through Strapi between deploys would then never
+// appear in the sitemap until a redeploy happened. Regenerating hourly bounds
+// that staleness to a reasonable window without needing a Strapi-side webhook.
+export const revalidate = 3600;
+
 // Walks all pages of getRecipes so every published recipe appears in the sitemap.
 async function fetchAllRecipes() {
   const pageSize = 100;
