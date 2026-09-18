@@ -34,4 +34,9 @@ describe("RecipeMeta", () => {
     render(<RecipeMeta prepTime={45} servings={4} difficulty="easy" />);
     expect(screen.getByText("4 מנות")).toBeInTheDocument();
   });
+
+  it("abbreviated prop swaps 'דקות' for 'דק׳' (RecipeCard's compact usage)", () => {
+    render(<RecipeMeta prepTime={45} servings={null} difficulty={null} abbreviated />);
+    expect(screen.getByText("45 דק׳ עבודה")).toBeInTheDocument();
+  });
 });

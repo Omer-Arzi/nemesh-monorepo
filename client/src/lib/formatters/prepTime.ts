@@ -5,6 +5,12 @@
  * is a generic minutes formatter — used for both `prepTime` (work time) and
  * `totalTime` (total elapsed time), which share the same display format.
  *
+ * `options.abbreviated` swaps "דקות" for "דק׳" wherever it appears (both the
+ * plain-minutes case and the verbose hour-plus-remainder fallback) — used
+ * only by `RecipeCard`'s compact metadata, never the default. Every other
+ * caller (`RecipeHero`, `RecipePrintDocument`) omits the option and keeps
+ * the full word.
+ *
  * Under 60 minutes:
  *   formatPrepTime(15)  → "15 דקות"
  *   formatPrepTime(45)  → "45 דקות"
@@ -55,9 +61,14 @@ const QUARTER_WORDS: Record<number, string> = {
   45: "ושלושת רבעי",
 };
 
-export function formatPrepTime(minutes: number): string {
+export function formatPrepTime(
+  minutes: number,
+  options?: { abbreviated?: boolean },
+): string {
+  const minutesWord = options?.abbreviated ? "דק׳" : "דקות";
+
   if (minutes < 60) {
-    return `${minutes} דקות`;
+    return `${minutes} ${minutesWord}`;
   }
 
   const hours = Math.floor(minutes / 60);
@@ -79,5 +90,5 @@ export function formatPrepTime(minutes: number): string {
 
   // Fallback: verbose minutes
   const hoursPart = hours === 1 ? "שעה" : hours === 2 ? "שעתיים" : `${hours} שעות`;
-  return `${hoursPart} ו-${remainder} דקות`;
+  return `${hoursPart} ו-${remainder} ${minutesWord}`;
 }
