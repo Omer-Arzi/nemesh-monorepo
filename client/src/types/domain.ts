@@ -134,6 +134,14 @@ export type Recipe = BaseEntity & {
   specialEquipment: SpecialEquipmentItem[];
   createdAt: string; // ISO 8601
   updatedAt: string;
+  /**
+   * ISO 8601 publish timestamp, or null if unpublished. `getRecipeBySlug`
+   * and the recipe list already filter `status=published`, so this should
+   * always be set for anything reaching a page component — still typed as
+   * nullable to match the wire shape defensively (see JSON-LD
+   * `datePublished`, which falls back to `createdAt` when null).
+   */
+  publishedAt: string | null;
 };
 
 /**

@@ -6,6 +6,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type { PreparationSection } from "@/types/domain";
 import type { CookingModeStepProps } from "@/features/cooking-mode";
 import { SectionHeader } from "@/components/shared";
+import { computeSectionStepOffsets } from "@/lib/formatters/stepAnchors";
 import PreparationSteps from "../PreparationSteps";
 import { PreparationStepsSectionStyle } from "./styles/PreparationStepsSectionStyle";
 import { PreparationStepsSectionText } from "./PreparationStepsSection.consts";
@@ -23,6 +24,8 @@ export default function PreparationStepsSection({
   sx,
   cookingMode,
 }: Props) {
+  const stepOffsets = computeSectionStepOffsets(preparationSections);
+
   return (
     <section>
       <SectionHeader title={PreparationStepsSectionText.sectionTitle} sx={sx} />
@@ -40,6 +43,7 @@ export default function PreparationStepsSection({
           )}
           <PreparationSteps
             steps={section.steps}
+            stepNumberOffset={stepOffsets[i]}
             cookingMode={
               cookingMode
                 ? {

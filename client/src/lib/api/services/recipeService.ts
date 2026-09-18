@@ -226,6 +226,7 @@ function mapRecipe(raw: StrapiData<StrapiRecipeAttrs>): Recipe {
       .filter((item): item is SpecialEquipmentItem => item !== null),
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
+    publishedAt: raw.publishedAt ?? null,
   };
 }
 
