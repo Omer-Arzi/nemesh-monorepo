@@ -3,7 +3,16 @@ import type { Metadata } from "next";
 import { getRecipeBySlug, getRelatedRecipes } from "@/lib/api/services/recipeService";
 import RecipePageClient from "./RecipePageClient";
 import StructuredData from "@/components/seo/StructuredData";
-import { buildRecipeSchema, buildBreadcrumbSchema, getSiteUrl, SITE_NAME, DEFAULT_OG_IMAGE } from "@/lib/seo";
+import {
+  buildRecipeSchema,
+  buildBreadcrumbSchema,
+  getSiteUrl,
+  SITE_NAME,
+  DEFAULT_OG_IMAGE,
+  META_DESCRIPTION_MAX_LENGTH,
+  stripMarkdownToPlainText,
+  truncateAtWordBoundary,
+} from "@/lib/seo";
 import { ROUTES } from "@/constants";
 
 type Props = {
@@ -23,7 +32,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const base = getSiteUrl();
   const canonicalUrl = `${base}${ROUTES.RECIPE(slug)}`;
   const title = recipe.title;
-  const description = recipe.description?.trim().replace(/\n+/g, " ") || undefined;
+  const cleanedDescription = stripMarkdownToPlainText(recipe.description ?? "");
+  const description = cleanedDescription
+    ? truncateAtWordBoundary(cleanedDescription, META_DESCRIPTION_MAX_LENGTH)
+    : undefined;
 
   const ogImages = recipe.image?.url
     ? [
@@ -79,9 +91,15 @@ export default async function RecipePage({ params }: Props) {
   // case, same as it always has when there are genuinely no related recipes.
   const relatedRecipes = await getRelatedRecipes(slug).catch(() => []);
 
+  // `buildRecipeSchema` returns null when the recipe has no real image —
+  // the Recipe JSON-LD block is withheld entirely in that case (not emitted
+  // with a missing `image`). BreadcrumbList always renders regardless; the
+  // page itself remains a normal indexable page either way.
+  const recipeSchema = buildRecipeSchema(recipe);
+
   return (
     <>
-      <StructuredData data={buildRecipeSchema(recipe)} />
+      {recipeSchema && <StructuredData data={recipeSchema} />}
       <StructuredData data={buildBreadcrumbSchema(recipe)} />
       <RecipePageClient
         slug={slug}

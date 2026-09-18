@@ -84,6 +84,7 @@ The canonical `Recipe` type lives in [client/src/types/domain.ts](../client/src/
 | `specialEquipment`     | `SpecialEquipmentItem[]` | Recipe-specific tools (see §6a)            |
 | `createdAt`            | `string`                 | ISO 8601                                   |
 | `updatedAt`            | `string`                 | ISO 8601                                   |
+| `publishedAt`          | `string \| null`         | ISO 8601. Additive field (Sep 2026) — the wire type already carried this, `mapRecipe` just wasn't mapping it through. Used as Recipe JSON-LD `datePublished` (falls back to `createdAt` if ever null); `getRecipeBySlug`/list queries already filter `status=published`, so this should always be set in practice. |
 
 > **Deprecated / backward-compatibility:** The original flat `ingredients` and `steps` fields still exist in the Strapi schema for backward compatibility but are not part of the canonical model. Do not use them in new code.
 

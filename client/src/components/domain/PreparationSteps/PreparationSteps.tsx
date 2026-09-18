@@ -7,15 +7,24 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type { PreparationStep } from "@/types/domain";
 import type { CookingModeStepProps } from "@/features/cooking-mode";
 import { NemeshImage } from "@/components/shared";
+import { stepAnchorId } from "@/lib/formatters/stepAnchors";
 import { PreparationStepsStyle } from "./styles/PreparationStepsStyle";
 
 type Props = {
   steps: PreparationStep[];
   sx?: SxProps<Theme>;
   cookingMode?: CookingModeStepProps;
+  /**
+   * Total step count across all preceding sections in the recipe, used to
+   * compute a global (cross-section) `id="step-N"` anchor on each step —
+   * see `stepAnchors.ts`. Independent of the visible step-number badge
+   * below, which always restarts at 1 per section. Defaults to 0 (single
+   * unnamed section, or standalone usage).
+   */
+  stepNumberOffset?: number;
 };
 
-export default function PreparationSteps({ steps, sx, cookingMode }: Props) {
+export default function PreparationSteps({ steps, sx, cookingMode, stepNumberOffset = 0 }: Props) {
   if (steps.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary">
@@ -34,6 +43,7 @@ export default function PreparationSteps({ steps, sx, cookingMode }: Props) {
           <Box
             key={index}
             component="li"
+            id={stepAnchorId(stepNumberOffset + index + 1)}
             onClick={
               cookingMode?.isActive && itemKey
                 ? () => cookingMode.onToggle(itemKey)
