@@ -16,6 +16,11 @@ import { StickyIngredientsSidebarText } from "./StickyIngredientsSidebar.consts"
 
 type CookingModeBase = Omit<CookingModeIngredientProps, "sectionIndex">;
 
+// Gates the one-time settle-bounce (see `isStickyVisible` effect below) to the
+// bar's first reveal per browser session — re-nudges on a new visit without
+// repeating mid-session.
+const STICKY_BAR_SEEN_SESSION_KEY = "nemesh:ingredientsStickyBarSeen";
+
 type Props = {
   ingredientSections?: IngredientSection[];
   sx?: SxProps<Theme>;
@@ -52,6 +57,7 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
   const [sheetOpen, setSheetOpen] = useState(false);
   const [tabletDrawerOpen, setTabletDrawerOpen] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [firstRevealBounce, setFirstRevealBounce] = useState(false);
 
   const count = totalIngredientCount(ingredientSections);
 
@@ -104,6 +110,37 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
   // drawer overlay. It reappears automatically once the sheet closes (if the
   // inline trigger is still off screen).
   const isStickyVisible = showStickyBar && !sheetOpen;
+
+  // One-time settle bounce on the bar's first reveal per session (see
+  // StickyIngredientsSidebarStyle.stickyBarFirstRevealBounce) — a small extra
+  // nudge so a first-time visitor is more likely to notice the bar appearing
+  // mid-scroll. sessionStorage (not localStorage) so it re-nudges on a new
+  // visit but doesn't repeat every time the bar re-shows within one session.
+  useEffect(() => {
+    if (!isStickyVisible) return;
+
+    let alreadySeenThisSession = true;
+    try {
+      alreadySeenThisSession = sessionStorage.getItem(STICKY_BAR_SEEN_SESSION_KEY) === "1";
+      if (!alreadySeenThisSession) {
+        sessionStorage.setItem(STICKY_BAR_SEEN_SESSION_KEY, "1");
+      }
+    } catch {
+      // sessionStorage unavailable (private browsing, etc.) — skip the bounce,
+      // the bar itself still appears normally.
+      return;
+    }
+    if (alreadySeenThisSession) return;
+
+    // Deferred, not called synchronously in the effect body (project convention —
+    // see useMobileRecipePrint.tsx — avoids the cascading-render lint rule).
+    const startTimer = setTimeout(() => setFirstRevealBounce(true), 0);
+    const endTimer = setTimeout(() => setFirstRevealBounce(false), 400);
+    return () => {
+      clearTimeout(startTimer);
+      clearTimeout(endTimer);
+    };
+  }, [isStickyVisible]);
 
   const cookingModeForSheet = cookingMode
     ? {
@@ -208,7 +245,10 @@ export default function StickyIngredientsSidebar({ ingredientSections, sx, cooki
           paddingBottom uses env(safe-area-inset-bottom) via inline style to
           avoid the TypeScript literal-type limitation in MUI's sx padding prop. */}
       <Box
-        sx={StickyIngredientsSidebarStyle.stickyBar}
+        sx={[
+          StickyIngredientsSidebarStyle.stickyBar,
+          firstRevealBounce && StickyIngredientsSidebarStyle.stickyBarFirstRevealBounce,
+        ]}
         style={{
           opacity: isStickyVisible ? 1 : 0,
           transform: isStickyVisible ? "translateY(0)" : "translateY(100%)",
