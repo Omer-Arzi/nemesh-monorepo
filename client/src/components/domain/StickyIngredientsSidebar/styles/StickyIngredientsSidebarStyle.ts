@@ -4,6 +4,10 @@ import { HEADER_HEIGHT } from "../../RecipeDetailLayout/styles/RecipeDetailLayou
 
 const FADE_HEIGHT = 48;
 
+// Mirrors TabletIngredientsDrawerStyle's own entrance easing (`springEasing.enter`) —
+// same motion signature, not shared as an import since each component owns its style file.
+const STICKY_BAR_ENTER_EASING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+
 export const StickyIngredientsSidebarStyle = {
   outer: {
     height: "100%",
@@ -101,7 +105,20 @@ export const StickyIngredientsSidebarStyle = {
     boxShadow: "0 -4px 20px rgba(26, 18, 8, 0.12), 0 -1px 6px rgba(26, 18, 8, 0.07)",
     // zIndex: below MUI AppBar (1100) and Drawer modal (1300), above page content.
     zIndex: 1050,
-    transition: "opacity 220ms ease, transform 220ms ease",
+    // Spring easing on the way in (matches the tablet drawer's entrance feel) —
+    // eases out linearly on the way back out, no bounce needed for a dismissal.
+    transition: `opacity 220ms ease, transform 320ms ${STICKY_BAR_ENTER_EASING}`,
+  },
+  // Applied only on the bar's first reveal per session, on top of `stickyBar`.
+  // A one-time settle "knock" after arrival so a mid-scroll appearance registers
+  // in peripheral vision, without looping or repeating on later reveals.
+  stickyBarFirstRevealBounce: {
+    "@keyframes stickyBarSettle": {
+      "0%": { transform: "translateY(0)" },
+      "40%": { transform: "translateY(-4px)" },
+      "100%": { transform: "translateY(0)" },
+    },
+    animation: "stickyBarSettle 180ms ease-out",
   },
   stickyBarInner: {
     display: "flex",
