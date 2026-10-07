@@ -37,6 +37,13 @@ if (imageHost) {
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // Headless Chromium for the recipe PDF endpoint. These must stay external
+  // (not bundled), and the serverless Chromium binary — which is read from disk
+  // at runtime, so file tracing cannot discover it — has to ship with the route.
+  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
+  outputFileTracingIncludes: {
+    "/api/recipes/*/pdf": ["./node_modules/@sparticuz/chromium/bin/**/*"],
+  },
   // Lets the dev server accept requests (including HMR) from a tunnel host
   // (e.g. ngrok) when testing this dev server from another device. Server-only
   // config value — no NEXT_PUBLIC_ prefix needed, it's never sent to the browser.

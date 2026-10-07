@@ -313,6 +313,32 @@ Rendered via `src/components/seo/StructuredData/` — a server component that in
 
 ---
 
+## Recipe PDF (mobile "Share" button)
+
+On phones that support the Web Share API, the recipe page's hero control is **Share** instead of **Print**: it shares the recipe as a PDF through the native share sheet (which offers Print / Save to Files / WhatsApp…). Desktop keeps the Print button.
+
+### How it works
+
+- `GET /api/recipes/[slug]/pdf` (`src/app/api/recipes/[slug]/pdf/route.ts`) launches headless Chromium (`puppeteer-core` + `@sparticuz/chromium` on Vercel; a local Chrome in development), loads the bare print page `/recipes/[slug]/print`, and returns `page.pdf()`.
+- The print page renders the same `RecipePrintDocument` and `@page` rules as the Print button, so the PDF is the printed format — only Chromium supports the `@page` footer margin boxes, which is why a browser renders it rather than a JS PDF library.
+- The response is cached at the Vercel CDN (`s-maxage=600`); a recipe edit reaches the PDF within ~10 minutes. At most 2 renders run at once per instance (503 + `Retry-After` beyond that).
+- `next.config.ts` keeps the two packages external and traces `@sparticuz/chromium/bin` into the route (the binary is read from disk at runtime, so tracing cannot find it by itself).
+
+### Environment
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `CHROME_EXECUTABLE_PATH` | local dev only | Chrome/Chromium binary. Defaults to the standard macOS/Linux install paths. |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Vercel (Preview) | Optional. With Deployment Protection on for previews, the render loads the deployment's own URL; it forwards the caller's own `_vercel_jwt` session cookie, so testing while logged in to Vercel needs nothing. Set this secret (Project Settings → Deployment Protection → Protection Bypass for Automation) only for unauthenticated callers. |
+
+### Verifying after deploy
+
+```bash
+curl -s -o /tmp/r.pdf -w "%{http_code} %{content_type}\n" https://www.nemesh-food.com/api/recipes/<slug>/pdf
+```
+
+Expect `200 application/pdf` and a multi-page A4 file with the footer. A `500` with `[recipe-pdf] render failed` in the function logs means Chromium did not launch — check that the `.br` files under `@sparticuz/chromium/bin` are in the function bundle.
+
 ## Next manual steps before data export/import
 
 These are for a future session — do not do them yet:
