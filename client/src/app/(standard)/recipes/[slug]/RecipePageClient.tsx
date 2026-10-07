@@ -15,6 +15,7 @@ import {
   RelatedRecipes,
   CookingModeToolbar,
   PrintRecipeButton,
+  ShareRecipeButton,
   RecipePrintDocument,
   buildRecipePrintPageStyle,
   useMobileRecipePrint,
@@ -23,6 +24,7 @@ import {
 import { useRecipe, useRelatedRecipes } from "@/features/recipe/hooks";
 import { useCookingMode } from "@/features/cooking-mode";
 import { useIsMobileBrowser } from "@/hooks/useIsMobileBrowser";
+import { useCanNativeShare } from "@/hooks/useCanNativeShare";
 import { analytics } from "@/lib/analytics";
 import { getSiteUrl } from "@/lib/seo/seoConfig";
 import { ROUTES } from "@/constants";
@@ -77,6 +79,13 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
 
   const handlePrint = isMobileBrowser ? handleMobilePrint : handleDesktopPrint;
 
+  // On a phone, printing needs a printer on the network, so the hero control
+  // shares the recipe as a PDF through the native share sheet instead (which
+  // itself offers Print / Save to Files). Phones without the Web Share API keep
+  // the print control above.
+  const canNativeShare = useCanNativeShare();
+  const recipeUrl = `${getSiteUrl()}${ROUTES.RECIPE(recipe.slug)}`;
+
   // Ambient print path — Ctrl+P / File>Print / a mobile browser's own Print
   // menu item, none of which run `handlePrint` at all. See the hook's own
   // doc comment for why this can never affect the button paths above.
@@ -116,7 +125,13 @@ function RecipeContent({ recipe, relatedRecipes }: ContentProps) {
         totalTime={recipe.totalTime}
         servings={recipe.servings}
         difficulty={recipe.difficulty}
-        action={<PrintRecipeButton onClick={handlePrint} />}
+        action={
+          isMobileBrowser && canNativeShare ? (
+            <ShareRecipeButton slug={recipe.slug} title={recipe.title} recipeUrl={recipeUrl} />
+          ) : (
+            <PrintRecipeButton onClick={handlePrint} />
+          )
+        }
       />
 
       {/* `@page` size/margin/footer rules — needed by the ambient path too

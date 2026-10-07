@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import type { ReactNode } from "react";
 import { screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,6 +6,8 @@ import { renderWithTheme as render } from "@/test/renderWithTheme";
 import type { Recipe, RecipeSummary } from "@/types/domain";
 import RecipePageClient from "./RecipePageClient";
 import { RecipePageText } from "./consts";
+import { PrintRecipeButtonText } from "@/components/domain/PrintRecipeButton/PrintRecipeButton.consts";
+import { ShareRecipeButtonText } from "@/components/domain/ShareRecipeButton/ShareRecipeButton.consts";
 
 // jsdom implements none of these — RecipeHero/StickyIngredientsSidebar use
 // them for layout measurement, irrelevant to what these tests assert.
@@ -172,5 +174,51 @@ describe("RecipePageClient", () => {
       { wrapper: makeWrapper() },
     );
     expect(screen.getByRole("heading", { level: 1, name: "טארט לימון" })).toBeInTheDocument();
+  });
+});
+
+// The hero control: Print everywhere, except phones that can share — there it is
+// "share as PDF" (printing from a phone needs a printer on the network).
+describe("RecipePageClient hero action", () => {
+  const IPHONE_UA =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
+  const DESKTOP_UA = navigator.userAgent;
+
+  function renderPage() {
+    getRecipeBySlug.mockReturnValue(new Promise(() => {}));
+    getRelatedRecipes.mockReturnValue(new Promise(() => {}));
+    render(
+      <RecipePageClient slug="chocolate-cake" initialRecipe={makeRecipe()} initialRelatedRecipes={[]} />,
+      { wrapper: makeWrapper() },
+    );
+  }
+
+  afterEach(() => {
+    vi.spyOn(navigator, "userAgent", "get").mockRestore();
+    // @ts-expect-error — remove the stub
+    delete navigator.share;
+  });
+
+  it("shows Print on desktop", () => {
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue(DESKTOP_UA);
+    Object.defineProperty(navigator, "share", { value: vi.fn(), configurable: true });
+    renderPage();
+    expect(screen.getByRole("button", { name: PrintRecipeButtonText.label })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: ShareRecipeButtonText.label })).not.toBeInTheDocument();
+  });
+
+  it("shows Share instead of Print on a phone that supports the Web Share API", () => {
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue(IPHONE_UA);
+    Object.defineProperty(navigator, "share", { value: vi.fn(), configurable: true });
+    renderPage();
+    expect(screen.getByRole("button", { name: ShareRecipeButtonText.label })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: PrintRecipeButtonText.label })).not.toBeInTheDocument();
+  });
+
+  it("keeps Print on a phone without the Web Share API", () => {
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue(IPHONE_UA);
+    renderPage();
+    expect(screen.getByRole("button", { name: PrintRecipeButtonText.label })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: ShareRecipeButtonText.label })).not.toBeInTheDocument();
   });
 });
