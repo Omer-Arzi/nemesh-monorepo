@@ -69,13 +69,19 @@ export async function GET(
 
   activeRenders += 1;
   try {
-    // Preview deployments sit behind Vercel Deployment Protection; the render
-    // loads this deployment's own URL, so it presents the automation bypass
-    // secret when one is configured.
+    // Preview deployments sit behind Vercel Deployment Protection, and the
+    // render loads this deployment's own URL. Pass through the caller's own
+    // Vercel session cookie (it already authorised this very request), or the
+    // automation bypass secret when one is configured. Neither exists on
+    // production, which is public.
+    const jwt = request.cookies.get("_vercel_jwt")?.value;
     const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
     const pdf = await renderUrlToPdf(
       `${resolveRenderOrigin(request)}${ROUTES.RECIPE(encodeURIComponent(slug))}/print`,
-      bypassSecret ? { extraHeaders: { "x-vercel-protection-bypass": bypassSecret } } : {},
+      {
+        cookies: jwt ? [{ name: "_vercel_jwt", value: jwt }] : undefined,
+        sameOriginHeaders: bypassSecret ? { "x-vercel-protection-bypass": bypassSecret } : undefined,
+      },
     );
 
     return new Response(Buffer.from(pdf), {

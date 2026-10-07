@@ -329,7 +329,7 @@ On phones that support the Web Share API, the recipe page's hero control is **Sh
 | Variable | Where | Purpose |
 |---|---|---|
 | `CHROME_EXECUTABLE_PATH` | local dev only | Chrome/Chromium binary. Defaults to the standard macOS/Linux install paths. |
-| `VERCEL_AUTOMATION_BYPASS_SECRET` | Vercel (Preview) | Only if Deployment Protection is on for previews: the render loads the deployment's own URL, so it needs the bypass secret (Project Settings → Deployment Protection → Protection Bypass for Automation; Vercel then exposes it automatically). |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Vercel (Preview) | Optional. With Deployment Protection on for previews, the render loads the deployment's own URL; it forwards the caller's own `_vercel_jwt` session cookie, so testing while logged in to Vercel needs nothing. Set this secret (Project Settings → Deployment Protection → Protection Bypass for Automation) only for unauthenticated callers. |
 
 ### Verifying after deploy
 

@@ -47,16 +47,25 @@ async function launchBrowser(): Promise<Browser> {
   return puppeteer.launch({ executablePath, headless: true });
 }
 
-export async function renderUrlToPdf(
-  url: string,
-  options: { extraHeaders?: Record<string, string> } = {},
-): Promise<Uint8Array> {
+export type RenderOptions = {
+  /** Sent on same-origin requests only — never to third-party hosts such as the image CDN. */
+  sameOriginHeaders?: Record<string, string>;
+  /** Cookies set for the target origin only. */
+  cookies?: { name: string; value: string }[];
+};
+
+/** Present only on the real print document — see `RecipePrintDocument`. */
+const PRINT_DOCUMENT_SELECTOR = '[data-nemesh-recipe-print="document"]';
+
+export async function renderUrlToPdf(url: string, options: RenderOptions = {}): Promise<Uint8Array> {
   const targetOrigin = new URL(url).origin;
   const browser = await launchBrowser();
 
   try {
     const page = await browser.newPage();
-    if (options.extraHeaders) await page.setExtraHTTPHeaders(options.extraHeaders);
+    if (options.cookies?.length) {
+      await page.setCookie(...options.cookies.map((c) => ({ ...c, url: targetOrigin })));
+    }
 
     // The root layout carries analytics and speed-insights scripts. A render
     // is not a visit, so refuse anything that could report one: every
@@ -71,6 +80,8 @@ export async function renderUrlToPdf(
         type === "script" || type === "xhr" || type === "fetch" || type === "ping" || type === "other";
       if (requestUrl.includes("/_vercel/") || (!sameOrigin && blockedType)) {
         void request.abort();
+      } else if (sameOrigin && options.sameOriginHeaders) {
+        void request.continue({ headers: { ...request.headers(), ...options.sameOriginHeaders } });
       } else {
         void request.continue();
       }
@@ -82,6 +93,11 @@ export async function renderUrlToPdf(
     });
     if (!response || !response.ok()) {
       throw new Error(`Print page responded with ${response?.status() ?? "no response"}`);
+    }
+    // A protected deployment redirects to a login page that is itself a 200 —
+    // check we really landed on the print document rather than printing that.
+    if (new URL(page.url()).origin !== targetOrigin || !(await page.$(PRINT_DOCUMENT_SELECTOR))) {
+      throw new Error(`Print document not found at ${page.url()} (redirected or blocked)`);
     }
 
     await page.evaluate(() => document.fonts.ready);
