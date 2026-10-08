@@ -58,7 +58,8 @@ describe("ShareRecipeButton", () => {
     expect(data.files).toHaveLength(1);
     expect(data.files![0].type).toBe("application/pdf");
     expect(data.files![0].name).toBe("עוגת שוקולד.pdf");
-    expect(data.title).toBe(props.title);
+    // Only the file — no title/text, so the message carries no added wording.
+    expect(Object.keys(data)).toEqual(["files"]);
     await waitFor(() => expect(screen.getByRole("button", { name: T.label })).toBeEnabled());
   });
 
@@ -108,7 +109,7 @@ describe("ShareRecipeButton", () => {
 
     await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(share).toHaveBeenCalledWith({ title: props.title, url: props.recipeUrl });
+    expect(share).toHaveBeenCalledWith({ url: props.recipeUrl });
   });
 
   it("shows an error message when the PDF request fails", async () => {

@@ -50,6 +50,10 @@ async function runShare(data: ShareData): Promise<ShareOutcome> {
  * arrives, the status becomes `"ready"` and the UI offers a second tap
  * (`confirm`), which carries the fresh user activation the share needs.
  *
+ * Only the file (or, as a fallback, the bare link) is handed to the share sheet
+ * — deliberately no `title` / `text`, so the message in WhatsApp, Mail etc. is
+ * just the PDF with no added wording.
+ *
  * Browsers that cannot share files still get the recipe's link shared, which
  * needs no fetch and so runs straight inside the tap.
  */
@@ -71,12 +75,12 @@ export function useShareRecipePdf({ slug, title, recipeUrl }: Options) {
 
     // Already fetched on this page view: share straight away, inside the tap.
     if (fileRef.current) {
-      settle(await runShare({ files: [fileRef.current], title }));
+      settle(await runShare({ files: [fileRef.current] }));
       return;
     }
 
     if (!canShareFiles()) {
-      settle(await runShare({ title, url: recipeUrl }));
+      settle(await runShare({ url: recipeUrl }));
       return;
     }
 
@@ -97,16 +101,16 @@ export function useShareRecipePdf({ slug, title, recipeUrl }: Options) {
     }
 
     fileRef.current = file;
-    settle(await runShare({ files: [file], title }));
+    settle(await runShare({ files: [file] }));
   }, [status, slug, title, recipeUrl, settle]);
 
   /** Second tap after `status` became `"ready"`. */
   const confirm = useCallback(async () => {
     const file = fileRef.current;
     if (!file) return setStatus("idle");
-    const outcome = await runShare({ files: [file], title });
+    const outcome = await runShare({ files: [file] });
     setStatus(outcome === "failed" || outcome === "blocked" ? "error" : "idle");
-  }, [title]);
+  }, []);
 
   const dismiss = useCallback(() => setStatus("idle"), []);
 
