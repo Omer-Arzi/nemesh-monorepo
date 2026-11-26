@@ -10,7 +10,11 @@ import SoupKitchenIcon from "@mui/icons-material/SoupKitchen";
 import NextLink from "next/link";
 import { ROUTES } from "@/constants";
 import type { ShirChallengeMonth } from "@/types/domain";
-import { SHIR_CHALLENGE_SLUG } from "@/features/shir-challenge/ShirChallenge.consts";
+import {
+  SHIR_CHALLENGE_SLUG,
+  PROGRESS_STATUS_LABELS,
+  MONTHLY_CHALLENGE_STATUS_LABELS,
+} from "@/features/shir-challenge/ShirChallenge.consts";
 import { formatHebrewMonthLabel } from "@/features/shir-challenge/shirChallengeUtils";
 import { NemeshImage } from "@/components/shared";
 import { ShirChallengeMonthCardStyle } from "./ShirChallengeMonthCard.style";
@@ -30,6 +34,18 @@ const noImageFallback = (
     </Typography>
   </Box>
 );
+
+// Placeholder caption, driven by the admin's data: a pending/skipped month
+// reads as such; an active month shows Shir's progress, falling back to the
+// generic "recipe on its way" copy when no progress status is set.
+function getPlaceholderStatusText(month: ShirChallengeMonth): string {
+  if (month.monthlyChallengeStatus !== "active") {
+    return MONTHLY_CHALLENGE_STATUS_LABELS[month.monthlyChallengeStatus];
+  }
+  return month.myProgressStatus
+    ? PROGRESS_STATUS_LABELS[month.myProgressStatus]
+    : ShirChallengeMonthCardText.comingSoonBodyCaption;
+}
 
 export default function ShirChallengeMonthCard({ month }: Props) {
   const monthLabel = formatHebrewMonthLabel(month.monthStart);
@@ -72,12 +88,16 @@ export default function ShirChallengeMonthCard({ month }: Props) {
 
   // Current-month, unmatched: placeholder card, same shell and interactive
   // affordance, linking to the existing challenge page instead of a recipe.
+  const statusText = getPlaceholderStatusText(month);
+  const showIngredient =
+    month.monthlyChallengeStatus !== "skipped" && Boolean(month.monthlyIngredientName);
+
   return (
     <Card sx={ShirChallengeMonthCardStyle.card}>
       <CardActionArea
         component={NextLink}
         href={ROUTES.TAG(SHIR_CHALLENGE_SLUG)}
-        aria-label={ShirChallengeMonthCardText.placeholderAriaLabel(monthLabel)}
+        aria-label={ShirChallengeMonthCardText.placeholderAriaLabel(monthLabel, statusText)}
         sx={ShirChallengeMonthCardStyle.actionArea}
       >
         <Box sx={ShirChallengeMonthCardStyle.imageZone}>
@@ -93,9 +113,12 @@ export default function ShirChallengeMonthCard({ month }: Props) {
           <Typography variant="subtitle1" component="h3" sx={ShirChallengeMonthCardStyle.title}>
             {monthLabel}
           </Typography>
-          <Typography sx={ShirChallengeMonthCardStyle.caption}>
-            {ShirChallengeMonthCardText.comingSoonBodyCaption}
-          </Typography>
+          <Typography sx={ShirChallengeMonthCardStyle.caption}>{statusText}</Typography>
+          {showIngredient && (
+            <Typography sx={ShirChallengeMonthCardStyle.ingredientMeta}>
+              {month.monthlyIngredientName}
+            </Typography>
+          )}
         </CardContent>
       </CardActionArea>
     </Card>

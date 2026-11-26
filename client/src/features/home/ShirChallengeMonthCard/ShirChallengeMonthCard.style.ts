@@ -87,7 +87,7 @@ export const ShirChallengeMonthCardStyle = {
     overflow: "hidden" as const,
   },
 
-  // Caption slot: month dateline (matched) or "המתכון בדרך" (placeholder) —
+  // Caption slot: month dateline (matched) or the month's status (placeholder) —
   // typographic register matches ChallengeStatusCardStyle.rowLabel.
   caption: {
     fontSize: "0.78rem",
@@ -96,7 +96,7 @@ export const ShirChallengeMonthCardStyle = {
     letterSpacing: "0.02em",
   },
 
-  // Meta slot (matched card only): the month's challenge ingredient, in
+  // Meta slot (matched and placeholder): the month's challenge ingredient, in
   // place of RecipeCard's usual prep-time stat — same body2/text.secondary
   // weight as RecipeMeta's stat text, single line with ellipsis overflow.
   ingredientMeta: {
